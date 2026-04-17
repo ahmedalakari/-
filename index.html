@@ -290,22 +290,24 @@
                 let allTransactions = [];
                 let finalInitialBalance = 0;
 
-                // معالجة الصفحات دفعة 3 بالتوازي لسرعة أعلى
-                const batchSize = 3;
+                // صفحة واحدة في كل طلب لتجنب تجاوز حدود API المجاني
+                const batchSize = 1;
                 for (let i = 1; i <= totalPages; i += batchSize) {
                     const batchEnd = Math.min(i + batchSize - 1, totalPages);
-                    setLoadText(`تحويل الصفحات ${i}–${batchEnd} من ${totalPages} إلى صور...`);
+                    setLoadText(`تحويل الصفحة ${i} من ${totalPages} إلى صورة...`);
                     const imagePromises = [];
                     for (let p = i; p <= batchEnd; p++) imagePromises.push(getPageBase64(pdf, p));
                     const images = await Promise.all(imagePromises);
                     const imageParts = images.map(b64 => ({ inlineData: { mimeType: "image/jpeg", data: b64 } }));
-                    setLoadText(`Gemini يستخرج البيانات... (صفحة ${i}–${batchEnd} / ${totalPages})`);
+                    setLoadText(`Gemini يستخرج البيانات... (صفحة ${i} / ${totalPages})`);
                     const chunkData = await extractDataWithGemini(imageParts, apiKey, i === 1);
                     if (chunkData) {
                         if (i === 1 && chunkData.initialBalance) finalInitialBalance = chunkData.initialBalance;
                         if (chunkData.transactions && Array.isArray(chunkData.transactions))
                             allTransactions = allTransactions.concat(chunkData.transactions);
                     }
+                    // انتظار بسيط بين الصفحات لتجنب تجاوز حد الطلبات
+                    if (i < totalPages) await new Promise(r => setTimeout(r, 1500));
                 }
                 setLoadText("جاري بناء الجدول...");
                 populateData({ initialBalance: finalInitialBalance, transactions: allTransactions });
@@ -319,7 +321,8 @@
 
         // --- Gemini API Call ---
         async function extractDataWithGemini(imageParts, apiKey, isFirstPage) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            // gemini-1.5-flash أكثر توفراً مع المفاتيح المجانية
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             let prompt = `أنت محاسب مالي خبير. استخرج جميع حركات كشف الحساب من هذه الصور بدقة تامة.
 قواعد: المبالغ في عمود المدين أو بعلامة (-) هي debit. الأخرى في عمود الدائن هي credit.
 استخرج الأرقام بدون فواصل الآلاف. الخانات الفارغة = 0. لا تفوّت أي صف.`;
@@ -351,7 +354,7 @@
                 }
             };
 
-            const delays = [2000, 4000, 8000, 16000, 30000];
+            const delays = [5000, 10000, 20000, 40000, 60000];
             for (let attempt = 0; attempt <= 5; attempt++) {
                 try {
                     const response = await fetch(url, {
