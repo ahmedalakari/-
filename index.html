@@ -329,7 +329,13 @@
 
         // --- Gemini API Call ---
         async function extractDataWithGemini(imageParts, apiKey, isFirstPage) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+            // قائمة نماذج للتجربة بالترتيب
+            const models = [
+                'gemini-1.5-flash',
+                'gemini-1.5-pro',
+                'gemini-pro-vision'
+            ];
+
             let prompt = `أنت محاسب مالي خبير. استخرج جميع حركات كشف الحساب من هذه الصور بدقة تامة.
 قواعد: المبالغ في عمود المدين أو بعلامة (-) هي debit. الأخرى في عمود الدائن هي credit.
 استخرج الأرقام بدون فواصل الآلاف. الخانات الفارغة = 0. لا تفوّت أي صف.`;
@@ -361,36 +367,42 @@
                 }
             };
 
-            const delays = [5000, 10000, 20000, 40000, 60000];
-            for (let attempt = 0; attempt <= 5; attempt++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) {
-                        const errText = await response.text();
-                        let errMsg = errText;
-                        try { errMsg = JSON.parse(errText)?.error?.message || errText; } catch(e){}
-                        if (response.status === 400) throw new Error(`مفتاح API غير صحيح أو الطلب غير صالح: ${errMsg}`);
-                        if (response.status === 401 || response.status === 403) throw new Error(`مفتاح API غير مصرح (${response.status}). تحقق من صحة المفتاح.`);
-                        if (response.status === 429) {
-                            if (attempt < 5) { setLoadText(`تجاوز حد الطلبات، انتظار ${delays[attempt]/1000}ث...`); await new Promise(r=>setTimeout(r,delays[attempt])); continue; }
-                            throw new Error('تجاوزت الحد المسموح. حاول لاحقاً.');
+            for (const model of models) {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                const delays = [5000, 10000, 20000, 40000, 60000];
+                for (let attempt = 0; attempt <= 3; attempt++) {
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (!response.ok) {
+                            const errText = await response.text();
+                            let errMsg = errText;
+                            try { errMsg = JSON.parse(errText)?.error?.message || errText; } catch(e){}
+                            if (response.status === 404) break; // جرب النموذج التالي
+                            if (response.status === 400) throw new Error(`مفتاح API غير صحيح: ${errMsg}`);
+                            if (response.status === 401 || response.status === 403) throw new Error(`مفتاح API غير مصرح (${response.status}).`);
+                            if (response.status === 429) {
+                                if (attempt < 3) { setLoadText(`تجاوز حد الطلبات، انتظار ${delays[attempt]/1000}ث...`); await new Promise(r=>setTimeout(r,delays[attempt])); continue; }
+                                throw new Error('تجاوزت الحد المسموح. حاول لاحقاً.');
+                            }
+                            throw new Error(`HTTP ${response.status}: ${errMsg}`);
                         }
-                        throw new Error(`HTTP ${response.status}: ${errMsg}`);
+                        const result = await response.json();
+                        let text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+                        text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+                        return JSON.parse(text);
+                    } catch(e) {
+                        if (e.message.includes('401') || e.message.includes('403') || e.message.includes('مفتاح')) throw e;
+                        if (attempt < 3) { setLoadText(`إعادة المحاولة (${attempt+1}/3)...`); await new Promise(r=>setTimeout(r,delays[attempt]||5000)); }
+                        else break; // جرب النموذج التالي
                     }
-                    const result = await response.json();
-                    let text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-                    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
-                    return JSON.parse(text);
-                } catch(e) {
-                    if (e.message.includes('401') || e.message.includes('403') || e.message.includes('400') || e.message.includes('مفتاح')) throw e;
-                    if (attempt < 5) { setLoadText(`إعادة المحاولة (${attempt+1}/5)...`); await new Promise(r=>setTimeout(r,delays[attempt]||4000)); }
-                    else throw new Error('فشل الاتصال بـ Gemini بعد عدة محاولات: ' + e.message);
                 }
+                setLoadText(`جاري تجربة نموذج آخر...`);
             }
+            throw new Error('جميع نماذج Gemini غير متاحة. تأكد من صحة المفتاح.');
         }
 
         // --- Populate & Audit ---
