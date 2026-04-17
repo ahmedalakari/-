@@ -207,15 +207,20 @@ tfoot td{padding:12px 10px;background:linear-gradient(135deg,#EEF3FA,#E6EDF8);fo
 
 <!-- LOCAL LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 <script src="xlsx.full.min.js"></script>
 <script>var _base = window.location.href.replace(/\/[^/]*$/, '/');</script>
 
 <script>
 'use strict';
 
-// ── Configure PDF.js worker (local file) ──
-// _base already set above; pdfjsLib init deferred to first use
+// ── Configure PDF.js worker ──
+window.addEventListener('load', function() {
+  if (window.pdfjsLib) {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+  }
+});
 
 // ── State ──
 let pdfFile   = null;
@@ -288,9 +293,7 @@ async function run() {
     log('تحميل PDF...', 'inf');
     const arrayBuf = await pdfFile.arrayBuffer();
     // Try every possible export name
-    var _pdfjs = window.pdfjsLib;
-    _pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-    const pdf = await _pdfjs.getDocument({ data: arrayBuf }).promise;
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuf }).promise;
     const numPages = pdf.numPages;
     log(`عدد الصفحات: ${numPages}`, 'ok');
     setStep(2, 12, 'تحويل الصفحات إلى صور...');
@@ -316,11 +319,11 @@ async function run() {
     setStep(3, 28, 'قراءة النصوص بتقنية OCR...');
 
     // ── Step 3: OCR each page with Tesseract.js ──
-    const worker = await Tesseract.createWorker(['ara', 'eng'], 1, {
-      corePath:    'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core-lstm.wasm.js',
+    const worker = await Tesseract.createWorker('ara+eng', 1, {
+      workerPath:  'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/worker.min.js',
+      corePath:    'https://cdn.jsdelivr.net/npm/tesseract.js-core@4.0.4/tesseract-core-lstm.wasm.js',
       langPath:    'https://tessdata.projectnaptha.com/4.0.0',
-      cacheMethod: 'none',
-      workerBlobURL: false,
+      cacheMethod:   'none',
       logger: m => {
         if (m.status === 'recognizing text') {
           const pct = Math.round(m.progress * 100);
