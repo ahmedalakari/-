@@ -1,653 +1,522 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محلل كشف الحساب — بدون انترنت</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700&display=swap');
-/* fallback if no internet for fonts */
-* { font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; }
-
-:root {
-  --navy:#0D1B2A; --blue:#1A3A5C; --accent:#C8942A; --accent2:#E8B84B;
-  --light:#F4F7FC; --border:#D0DBE8; --credit:#1A6B3C; --debit:#8B1A1A;
-  --credit-bg:#EBF7F0; --debit-bg:#FAEAEA; --white:#FFFFFF;
-  --shadow:0 4px 24px rgba(13,27,42,0.12); --radius:12px;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--light);color:var(--navy);min-height:100vh;direction:rtl}
-
-header{background:linear-gradient(135deg,var(--navy),var(--blue));position:relative;overflow:hidden}
-header::before{content:'';position:absolute;top:-60px;left:-60px;width:220px;height:220px;border-radius:50%;background:rgba(200,148,42,0.12)}
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;position:relative;z-index:1}
-.logo{display:flex;align-items:center;gap:14px}
-.logo-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px rgba(200,148,42,0.35)}
-.logo h1{font-size:19px;font-weight:700;color:#fff;line-height:1.2}
-.logo p{font-size:12px;color:rgba(255,255,255,0.6)}
-.offline-badge{background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.4);border-radius:20px;padding:6px 14px;font-size:12px;color:#2ECC71;display:flex;align-items:center;gap:6px}
-
-main{max-width:1360px;margin:0 auto;padding:28px 20px}
-
-/* UPLOAD */
-.upload-zone{border:2.5px dashed var(--border);border-radius:var(--radius);background:var(--white);padding:44px 28px;text-align:center;cursor:pointer;transition:all .25s;position:relative;margin-bottom:14px}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:#FFFBF2;box-shadow:0 0 0 4px rgba(200,148,42,0.08)}
-.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.uico{font-size:48px;display:block;margin-bottom:12px;animation:fl 3s ease-in-out infinite}
-@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-.upload-zone h3{font-size:17px;font-weight:600;margin-bottom:7px}
-.upload-zone p{font-size:13px;color:#6B7A8D}
-.fname{display:none;margin-top:14px;font-size:13px;font-weight:600;color:var(--accent);background:rgba(200,148,42,0.1);display:inline-block;padding:5px 16px;border-radius:20px}
-
-.btn-run{display:block;width:100%;padding:15px;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;font-size:15px;font-weight:700;border:none;border-radius:var(--radius);cursor:pointer;transition:all .2s;box-shadow:var(--shadow);margin-bottom:16px}
-.btn-run:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(13,27,42,0.22)}
-.btn-run:disabled{opacity:.5;cursor:not-allowed;transform:none}
-
-/* PROGRESS */
-.prog{display:none;background:var(--white);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:16px}
-.prog.on{display:block}
-.plbl{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:9px}
-.spin{width:16px;height:16px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
-@keyframes sp{to{transform:rotate(360deg)}}
-.pbar-bg{height:7px;background:var(--border);border-radius:99px;overflow:hidden}
-.pbar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .4s}
-.chips{margin-top:12px;display:flex;gap:7px;flex-wrap:wrap}
-.chip{font-size:11px;padding:3px 11px;border-radius:20px;background:var(--border);color:#6B7A8D;transition:all .3s}
-.chip.act{background:var(--accent);color:#fff}
-.chip.done{background:var(--credit);color:#fff}
-
-/* LOG */
-.log-box{background:#0D1B2A;color:#A8D8E8;border-radius:var(--radius);padding:14px 18px;font-family:monospace;font-size:11.5px;line-height:1.9;margin-bottom:16px;max-height:180px;overflow-y:auto;display:none}
-.log-box.on{display:block}
-.ll{margin:0}.ll.ok{color:#2ECC71}.ll.er{color:#E74C3C}.ll.inf{color:#F39C12}
-
-/* SUMMARY CARDS */
-.cards{display:none;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin-bottom:20px}
-.cards.on{display:grid}
-.card{background:var(--white);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border-top:4px solid transparent;opacity:0;transform:translateY(14px);transition:all .4s}
-.card.in{opacity:1;transform:translateY(0)}
-.card.cn{border-top-color:var(--navy)}.card.cg{border-top-color:var(--accent)}
-.card.cc{border-top-color:var(--credit)}.card.cr{border-top-color:var(--debit)}
-.clbl{font-size:11px;color:#6B7A8D;font-weight:500;margin-bottom:5px}
-.cval{font-size:20px;font-weight:700;font-family:'Tajawal',Tahoma,sans-serif}
-.cval.navy{color:var(--navy)}.cval.gold{color:var(--accent)}.cval.green{color:var(--credit)}.cval.red{color:var(--debit)}
-.csub{font-size:10px;color:#9AABB8;margin-top:3px}
-
-/* BANNER */
-.vban{display:none;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:13px;font-weight:600;align-items:center;gap:9px}
-.vban.on{display:flex}
-.vban.ok{background:#EBF7F0;color:var(--credit);border:1px solid #A8D8BC}
-.vban.er{background:#FFF3F3;color:var(--debit);border:1px solid #F5C6C6}
-
-/* TOOLBAR */
-.tbar{display:none;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
-.tbar.on{display:flex}
-.tleft{display:flex;gap:9px;align-items:center}
-.ttitle{font-size:15px;font-weight:700}
-.rcnt{background:var(--navy);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px}
-.btn-xl{padding:9px 20px;background:linear-gradient(135deg,var(--credit),#2E8B57);color:#fff;font-size:13px;font-weight:600;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;box-shadow:0 2px 10px rgba(26,107,60,0.3)}
-.btn-xl:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,107,60,0.4)}
-
-/* TABLE */
-.twrap{display:none;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-.twrap.on{display:block}
-.tscroll{overflow-x:auto;max-height:65vh;overflow-y:auto}
-table{width:100%;border-collapse:collapse;font-size:12.5px;direction:rtl}
-thead{background:linear-gradient(135deg,var(--navy),var(--blue));position:sticky;top:0;z-index:10}
-thead th{padding:12px 10px;color:#fff;font-weight:600;text-align:right;font-size:11.5px;white-space:nowrap;border-left:1px solid rgba(255,255,255,0.1)}
-thead th:last-child{border-left:none}
-tbody tr{border-bottom:1px solid #EEF2F7;transition:background .15s}
-tbody tr:hover{background:#F8FAFD}
-tbody tr:nth-child(even){background:#FAFBFD}
-tbody tr.erow{background:#FFF8F0 !important}
-td{padding:9px 10px;vertical-align:middle;text-align:right}
-.seq{color:#9AABB8;font-size:11px;text-align:center;width:38px}
-.dt{white-space:nowrap;font-size:11px;color:#5A6A7A;font-family:'Tajawal',Tahoma,sans-serif}
-.desc{max-width:340px;font-size:12px;color:#3A4A5A;line-height:1.5}
-.amt{font-family:'Tajawal',Tahoma,sans-serif;font-weight:600;white-space:nowrap;text-align:left;direction:ltr}
-.amt.cr{color:var(--credit)}.amt.dr{color:var(--debit)}
-.bal{font-family:'Tajawal',Tahoma,sans-serif;font-weight:700;white-space:nowrap;color:var(--navy);text-align:left;direction:ltr}
-tfoot td{padding:12px 10px;background:linear-gradient(135deg,#EEF3FA,#E6EDF8);font-weight:700;border-top:2px solid var(--border)}
-.tf-lbl{color:var(--navy);font-size:13px}
-.tf-cr{color:var(--credit);font-family:'Tajawal',Tahoma,sans-serif;font-size:13px;direction:ltr;text-align:left}
-.tf-dr{color:var(--debit);font-family:'Tajawal',Tahoma,sans-serif;font-size:13px;direction:ltr;text-align:left}
-.tf-bl{color:var(--navy);font-family:'Tajawal',Tahoma,sans-serif;font-size:14px;font-weight:700;direction:ltr;text-align:left}
-
-.errbox{display:none;background:#FFF3F3;border:1px solid #F5C6C6;border-radius:var(--radius);padding:16px 20px;margin:14px 0;color:var(--debit);font-size:13px}
-.errbox.on{display:block}
-
-/* NOTE BOX */
-.note{background:#EBF7F0;border:1px solid #A8D8BC;border-radius:8px;padding:12px 16px;font-size:12px;color:#1A6B3C;margin-bottom:16px;line-height:1.8}
-
-@media(max-width:768px){.hdr{padding:14px 16px}main{padding:18px 12px}.desc{max-width:160px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام استخراج وتدقيق كشوفات الحساب (AI Vision)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF.js لقراءة ملفات الـ PDF كصور -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';</script>
+    <!-- SheetJS لتصدير الإكسل -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+        .editable { 
+            cursor: text; 
+            transition: all 0.2s; 
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 2px 6px;
+        }
+        .editable:hover { background-color: #fef3c7; border-color: #fcd34d; }
+        .editable:focus { 
+            background-color: #ffffff; 
+            border-color: #3b82f6; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); 
+        }
+        .error-row { background-color: #fef2f2 !important; }
+        .error-cell { color: #dc2626; font-weight: bold; }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
-<body>
+<body class="h-screen flex flex-col overflow-hidden text-gray-800">
 
-<header>
-  <div class="hdr">
-    <div class="logo">
-      <div class="logo-icon">🏦</div>
-      <div>
-        <h1>محلل كشف الحساب البنكي</h1>
-        <p>يعمل 100% محلياً بدون انترنت</p>
-      </div>
+    <!-- Header -->
+    <header class="bg-slate-800 text-white shadow-lg flex-shrink-0">
+        <div class="max-w-screen-2xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-500 p-2 rounded-lg">
+                    <i class="ph ph-brain text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold">مستخرج كشوفات الحساب الذكي (AI OCR)</h1>
+                    <p class="text-xs text-slate-300">يقرأ الكشوفات المسحوبة بالهاتف (صور) ويجهزها للمطابقة اليدوية 100%</p>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="document.getElementById('pdfInput').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-md">
+                    <i class="ph ph-upload-simple text-xl"></i> رفع كشف سكانر (PDF)
+                </button>
+                <input type="file" id="pdfInput" accept=".pdf" class="hidden" onchange="processPDF(event)">
+                
+                <button id="exportBtn" onclick="exportToExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-md opacity-50 cursor-not-allowed" disabled>
+                    <i class="ph ph-microsoft-excel-logo text-xl"></i> تصدير (XLSX)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard/Stats Bar -->
+    <div id="dashboard" class="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0 hidden shadow-sm z-10">
+        <div class="max-w-screen-2xl mx-auto flex flex-wrap gap-6 items-center justify-between">
+            <div class="flex gap-4">
+                <div class="bg-slate-50 px-4 py-2 rounded-lg border border-slate-200 flex items-center gap-3">
+                    <i class="ph ph-list-numbers text-2xl text-slate-400"></i>
+                    <div>
+                        <span class="text-xs text-slate-500 block">إجمالي الحركات</span>
+                        <span id="statTotal" class="text-lg font-bold text-slate-800">0</span>
+                    </div>
+                </div>
+                <div class="bg-red-50 px-4 py-2 rounded-lg border border-red-200 flex items-center gap-3 transition-colors" id="errorStatBox">
+                    <i class="ph ph-warning-circle text-2xl text-red-500"></i>
+                    <div>
+                        <span class="text-xs text-red-600 block">أخطاء تحتاج تدخل (قراءة)</span>
+                        <span id="statErrors" class="text-lg font-bold text-red-700">0</span>
+                    </div>
+                </div>
+                <div class="bg-green-50 px-4 py-2 rounded-lg border border-green-200 flex items-center gap-3">
+                    <i class="ph ph-check-circle text-2xl text-green-500"></i>
+                    <div>
+                        <span class="text-xs text-green-600 block">حركات مطابقة رياضياً</span>
+                        <span id="statValid" class="text-lg font-bold text-green-700">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-200">
+                <label for="initialBalance" class="text-sm font-semibold text-indigo-800">الرصيد الافتتاحي:</label>
+                <input type="number" id="initialBalance" value="0" step="0.001" onchange="runAudit()" class="border border-indigo-300 rounded px-2 py-1 text-left bg-white focus:outline-none focus:border-indigo-500 w-36 font-mono font-bold text-indigo-900">
+                <span class="text-xs text-indigo-600 font-bold">د.ل</span>
+            </div>
+        </div>
     </div>
-    <div class="offline-badge">🔒 Offline — PDF.js + Tesseract.js</div>
-  </div>
-</header>
 
-<main>
+    <!-- Main Content -->
+    <main class="flex-1 overflow-auto relative bg-slate-50">
+        <!-- Upload Prompt -->
+        <div id="uploadPrompt" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-6">
+            <div class="bg-white p-12 rounded-2xl shadow-sm text-center max-w-xl border border-slate-200 border-dashed">
+                <div class="flex justify-center mb-6">
+                    <div class="relative">
+                        <i class="ph ph-file-image text-8xl text-indigo-400"></i>
+                        <i class="ph-fill ph-magic-wand text-3xl text-yellow-500 absolute bottom-0 -right-2 bg-white rounded-full"></i>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-3">ارفع كشف الحساب المصور (سكانر/هاتف)</h2>
+                <p class="text-slate-500 mb-8 leading-relaxed">بفضل الذكاء الاصطناعي المدمج، يستطيع النظام الآن قراءة الجداول من الصور والملفات الممسوحة ضوئياً بدقة عالية.<br>انقر على أي خلية حمراء لتصحيحها يدوياً وضمان مطابقة 100%.</p>
+                <button onclick="document.getElementById('pdfInput').click()" class="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition-all inline-flex items-center gap-2">
+                    <i class="ph ph-upload-simple text-xl"></i> تصفح واختيار الكشف
+                </button>
+            </div>
+        </div>
 
-  <div class="note">
-    ℹ️ <strong>ملاحظة:</strong> يستخدم هذا التطبيق تقنية OCR (التعرف الضوئي على النصوص) لقراءة ملفات PDF الممسوحة ضوئياً.
-    المعالجة تتم بالكامل داخل المتصفح بدون إرسال أي بيانات للانترنت.
-    قد تستغرق معالجة كل صفحة 5–15 ثانية حسب قوة الجهاز.
-  </div>
+        <!-- Loading State -->
+        <div id="loadingState" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 bg-opacity-95 z-20 hidden text-center">
+            <i class="ph ph-spinner-gap animate-spin text-6xl text-indigo-600 mb-4"></i>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">جاري تحليل الصور بالذكاء الاصطناعي...</h3>
+            <p id="loadingText" class="text-indigo-600 font-semibold mb-1">يتم استخراج الصفحات...</p>
+            <p class="text-slate-500 text-sm">هذه العملية قد تستغرق 15-30 ثانية حسب عدد صفحات الكشف.</p>
+        </div>
 
-  <div class="upload-zone" id="dz">
-    <input type="file" id="fi" accept=".pdf">
-    <span class="uico">📄</span>
-    <h3>أرفق ملف كشف الحساب PDF</h3>
-    <p>اسحب وأفلت الملف هنا، أو انقر للاختيار</p>
-    <div class="fname" id="fn"></div>
-  </div>
+        <!-- Table Container -->
+        <div id="tableContainer" class="hidden p-6 pb-32">
+            <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
+                <table class="w-full text-sm text-right">
+                    <thead class="bg-slate-100 border-b border-slate-200 text-slate-700 font-semibold sticky top-0 shadow-sm z-10">
+                        <tr>
+                            <th class="px-4 py-3 w-12 text-center">الحالة</th>
+                            <th class="px-3 py-3 w-12">م</th>
+                            <th class="px-4 py-3 w-28">التاريخ</th>
+                            <th class="px-4 py-3 min-w-[250px]">البيان / الوصف (اضغط للتعديل)</th>
+                            <th class="px-4 py-3 text-red-600 bg-red-50 w-32 border-r border-slate-200">مدين (-)</th>
+                            <th class="px-4 py-3 text-green-600 bg-green-50 w-32">دائن (+)</th>
+                            <th class="px-4 py-3 text-indigo-700 bg-indigo-50 w-36 border-r border-slate-200">رصيد الكشف المكتوب</th>
+                            <th class="px-4 py-3 text-slate-600 w-36 border-r border-slate-200" title="الرصيد المحسوب آلياً للتأكد من صحة القراءة">الرصيد المدقق (رياضياً)</th>
+                            <th class="px-4 py-3 text-center w-28">الفرق</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody" class="divide-y divide-slate-100">
+                        <!-- Rows will be populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
-  <button class="btn-run" id="btnRun" disabled onclick="run()">🔍 استخراج البيانات</button>
-
-  <div class="prog" id="prog">
-    <div class="plbl"><span class="spin"></span><span id="plbl">جاري المعالجة...</span></div>
-    <div class="pbar-bg"><div class="pbar" id="pb"></div></div>
-    <div class="chips">
-      <div class="chip" id="s1">📤 تحميل PDF</div>
-      <div class="chip" id="s2">🔄 تحويل الصفحات</div>
-      <div class="chip" id="s3">👁 OCR القراءة الضوئية</div>
-      <div class="chip" id="s4">📊 تحليل الحركات</div>
-      <div class="chip" id="s5">✅ التحقق</div>
+    <!-- Alert Modal -->
+    <div id="alertModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity opacity-0">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 transform transition-transform scale-95" id="alertModalContent">
+            <div class="flex items-center gap-3 mb-4" id="alertIconContainer">
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2" id="alertTitle">تنبيه</h3>
+            <p class="text-slate-600 mb-8 leading-relaxed" id="alertMessage">رسالة</p>
+            <div class="flex justify-end">
+                <button onclick="closeAlert()" class="bg-slate-800 text-white px-6 py-2.5 rounded-lg hover:bg-slate-700 font-semibold transition-colors">موافق</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="log-box" id="lg"></div>
-  <div class="errbox" id="eb"></div>
+    <script>
+        const apiKey = ""; // API key is injected by the environment
+        let globalData = [];
+        let hasErrors = false;
 
-  <div class="cards" id="cg">
-    <div class="card cn"><div class="clbl">عدد الحركات</div><div class="cval navy" id="cv1">—</div><div class="csub">حركة مالية</div></div>
-    <div class="card cg"><div class="clbl">الرصيد الختامي</div><div class="cval gold" id="cv2">—</div><div class="csub">دينار ليبي</div></div>
-    <div class="card cc"><div class="clbl">إجمالي الدائن</div><div class="cval green" id="cv3">—</div><div class="csub">دينار ليبي</div></div>
-    <div class="card cr"><div class="clbl">إجمالي المدين</div><div class="cval red" id="cv4">—</div><div class="csub">دينار ليبي</div></div>
-    <div class="card cn"><div class="clbl">دقة الأرصدة</div><div class="cval navy" id="cv5">—</div><div class="csub">نسبة التطابق</div></div>
-  </div>
-
-  <div class="vban" id="vb"></div>
-
-  <div class="tbar" id="tb">
-    <div class="tleft"><span class="ttitle">الحركات المالية</span><span class="rcnt" id="rc">0</span></div>
-    <button class="btn-xl" onclick="exportXL()">📥 تصدير Excel</button>
-  </div>
-
-  <div class="twrap" id="tw">
-    <div class="tscroll">
-      <table>
-        <thead><tr>
-          <th style="width:38px">م</th>
-          <th>تاريخ القيد</th>
-          <th>تاريخ الحركة</th>
-          <th>البيان / الوصف</th>
-          <th>المديونية (د.ل)</th>
-          <th>الدائنية (د.ل)</th>
-          <th>الرصيد (د.ل)</th>
-        </tr></thead>
-        <tbody id="tbody"></tbody>
-        <tfoot id="tfoot"></tfoot>
-      </table>
-    </div>
-  </div>
-
-</main>
-
-<!-- LOCAL LIBRARIES -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<script src="https://unpkg.com/tesseract.js@4.1.4/dist/tesseract.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>var _base = window.location.href.replace(/\/[^/]*$/, '/');</script>
-
-<script>
-'use strict';
-
-// ── Configure PDF.js worker ──
-window.addEventListener('load', function() {
-  if (window.pdfjsLib) {
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-  }
-});
-
-// ── State ──
-let pdfFile   = null;
-let finalData = null;
-
-// ── File handling ──
-const fi = document.getElementById('fi');
-const dz = document.getElementById('dz');
-fi.addEventListener('change', e => loadFile(e.target.files[0]));
-dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
-dz.addEventListener('drop', e => {
-  e.preventDefault(); dz.classList.remove('drag');
-  const f = e.dataTransfer.files[0];
-  if (f && f.name.toLowerCase().endsWith('.pdf')) loadFile(f);
-});
-
-function loadFile(f) {
-  pdfFile = f;
-  const fn = document.getElementById('fn');
-  fn.textContent = '📎 ' + f.name;
-  fn.style.display = 'inline-block';
-  document.getElementById('btnRun').disabled = false;
-}
-
-// ── Logging ──
-const lgEl = document.getElementById('lg');
-function log(msg, type = '') {
-  lgEl.classList.add('on');
-  const d = document.createElement('div');
-  d.className = 'll ' + type;
-  d.textContent = '› ' + msg;
-  lgEl.appendChild(d);
-  lgEl.scrollTop = lgEl.scrollHeight;
-}
-
-// ── Steps ──
-function setStep(n, pct, lbl) {
-  for (let i = 1; i <= 5; i++) {
-    const el = document.getElementById('s' + i);
-    el.className = 'chip' + (i < n ? ' done' : i === n ? ' act' : '');
-  }
-  document.getElementById('pb').style.width = pct + '%';
-  document.getElementById('plbl').textContent = lbl;
-}
-
-// ── MAIN ──
-async function run() {
-  if (!pdfFile) return;
-
-  // Reset
-  ['eb','tw','tbar','cg','vb'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.className = el.className.replace(/\bon\b/g,'').trim(); }
-  });
-  document.getElementById('eb').className = 'errbox';
-  document.getElementById('tw').className = 'twrap';
-  document.getElementById('tb').className = 'tbar';
-  document.getElementById('cg').className = 'cards';
-  document.getElementById('vb').className = 'vban';
-  lgEl.innerHTML = ''; lgEl.className = 'log-box';
-  document.querySelectorAll('.card').forEach(c => c.classList.remove('in'));
-
-  document.getElementById('btnRun').disabled = true;
-  document.getElementById('prog').className = 'prog on';
-  setStep(1, 5, 'تحميل ملف PDF...');
-
-  try {
-    // ── Step 1: Load PDF with pdf.js ──
-    log('تحميل PDF...', 'inf');
-    const arrayBuf = await pdfFile.arrayBuffer();
-    // Try every possible export name
-    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuf }).promise;
-    const numPages = pdf.numPages;
-    log(`عدد الصفحات: ${numPages}`, 'ok');
-    setStep(2, 12, 'تحويل الصفحات إلى صور...');
-
-    // ── Step 2: Render each page to canvas, rotate 270° ──
-    const pageImages = [];
-    for (let p = 1; p <= numPages; p++) {
-      const page     = await pdf.getPage(p);
-      const viewport = page.getViewport({ scale: 2.2 }); // high DPI for OCR
-      const canvas   = document.createElement('canvas');
-      canvas.width   = viewport.width;
-      canvas.height  = viewport.height;
-      const ctx = canvas.getContext('2d');
-      await page.render({ canvasContext: ctx, viewport }).promise;
-
-      // Rotate 270° (the PDF is landscape/rotated)
-      const rotated = rotateCanvas(canvas, 270);
-      pageImages.push(rotated);
-      log(`تحويل صفحة ${p}/${numPages}`);
-      setStep(2, 12 + Math.round(p / numPages * 15), `تحويل صفحة ${p}/${numPages}...`);
-    }
-
-    setStep(3, 28, 'قراءة النصوص بتقنية OCR...');
-
-    // ── Step 3: OCR each page with Tesseract.js v4 ──
-    const worker = await Tesseract.createWorker('ara+eng', 1, {
-      workerPath: 'https://unpkg.com/tesseract.js@4.1.4/dist/worker.min.js',
-      corePath:   'https://unpkg.com/tesseract.js-core@4.0.4/tesseract-core-lstm.wasm.js',
-      langPath:   'https://tessdata.projectnaptha.com/4.0.0',
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          const pct = Math.round(m.progress * 100);
-          document.getElementById('pb').style.width =
-            (28 + Math.round(pct * 0.45)) + '%';
+        // --- UI Functions ---
+        function showAlert(title, message, type = 'error') {
+            const modal = document.getElementById('alertModal');
+            const content = document.getElementById('alertModalContent');
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = message;
+            
+            let iconHtml = '';
+            if (type === 'error') iconHtml = '<div class="bg-red-100 p-2 rounded-full"><i class="ph-fill ph-warning-circle text-3xl text-red-500"></i></div>';
+            else if (type === 'success') iconHtml = '<div class="bg-green-100 p-2 rounded-full"><i class="ph-fill ph-check-circle text-3xl text-green-500"></i></div>';
+            else iconHtml = '<div class="bg-indigo-100 p-2 rounded-full"><i class="ph-fill ph-info text-3xl text-indigo-500"></i></div>';
+            
+            document.getElementById('alertIconContainer').innerHTML = iconHtml;
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
         }
-      }
-    });
 
-    const pageTexts = [];
-    for (let p = 0; p < pageImages.length; p++) {
-      log(`OCR صفحة ${p+1}/${pageImages.length}...`, 'inf');
-      setStep(3, 28 + Math.round((p / pageImages.length) * 45),
-              `قراءة ضوئية — صفحة ${p+1} من ${pageImages.length}...`);
-
-      const { data } = await worker.recognize(pageImages[p]);
-      pageTexts.push(data.text);
-      const lines = data.text.split('\n').filter(l => /\d{4}\/\d{2}\/\d{2}/.test(l));
-      log(`  صفحة ${p+1}: ${lines.length} سطر تعاملات`, lines.length > 0 ? 'ok' : '');
-    }
-
-    await worker.terminate();
-
-    setStep(4, 76, 'تحليل وتصنيف الحركات...');
-    log('بدء التحليل...', 'inf');
-
-    // ── Step 4: Parse transactions ──
-    const data = parseAllPages(pageTexts);
-    log(`إجمالي الحركات المستخرجة: ${data.transactions.length}`, 'ok');
-
-    setStep(5, 90, 'التحقق الرياضي من الأرصدة...');
-
-    // ── Step 5: Validate ──
-    validateBalances(data);
-    log(`دقة الأرصدة: ${data._accuracy}%`, data._accuracy >= 95 ? 'ok' : 'er');
-    setStep(5, 100, `اكتمل — ${data.transactions.length} حركة ✓`);
-
-    await sleep(350);
-    document.getElementById('prog').className = 'prog';
-    finalData = data;
-    render(data);
-
-  } catch (err) {
-    document.getElementById('prog').className = 'prog';
-    const eb = document.getElementById('eb');
-    eb.className = 'errbox on';
-    eb.textContent = '⚠️ خطأ: ' + err.message;
-    log('خطأ: ' + err.message, 'er');
-    console.error(err);
-  }
-
-  document.getElementById('btnRun').disabled = false;
-}
-
-// ══════════════════════════════════════
-// CANVAS ROTATION
-// ══════════════════════════════════════
-function rotateCanvas(src, degrees) {
-  const c  = document.createElement('canvas');
-  const r  = degrees * Math.PI / 180;
-  const sw = src.width, sh = src.height;
-  if (degrees === 90 || degrees === 270) {
-    c.width = sh; c.height = sw;
-  } else {
-    c.width = sw; c.height = sh;
-  }
-  const ctx = c.getContext('2d');
-  ctx.translate(c.width / 2, c.height / 2);
-  ctx.rotate(r);
-  ctx.drawImage(src, -sw / 2, -sh / 2);
-  return c;
-}
-
-// ══════════════════════════════════════
-// PDF PARSING ENGINE
-// ══════════════════════════════════════
-const DATE_RE    = /(\d{4}\/\d{2}\/\d{2})/g;
-const BAL_RE     = /\b(\d{1,3}(?:,\d{3})+\.\d{3})\b/g;
-const AMT_RE     = /\b(\d{1,3}(?:,\d{3})*\.\d{3})-?\b/g;
-const SKIP_WORDS = ['الفترة','رقم الح','نوع الح','صفحة','Printed','كشف حساب',
-                    'تاريخ','إجمالي','الوميد السابق','الوصيد','البيان'];
-const DEBIT_KW   = ['رسوم','عمولة','SMS','مكافآت','POS COMM'];
-const CREDIT_KW  = ['Credit','Instant Payment','تحويلة','إيداع','اشق'];
-
-function pn(s) {
-  if (!s) return null;
-  const v = parseFloat(String(s).replace(/,/g, '').replace(/-$/, ''));
-  return isNaN(v) || v <= 0 ? null : v;
-}
-
-function parseAllPages(pageTexts) {
-  let opening_balance = 0;
-  let account_number  = '1009-057104-001';
-  let account_name    = 'شركة راكان المتوسط للمواد الغذائية';
-  let period_from     = '';
-  let period_to       = '';
-  const allTxs = [];
-
-  pageTexts.forEach((text, pi) => {
-    if (pi === 0) {
-      // Extract header info
-      const mOB = text.match(/(?:الوميد|الوصيد)\s+السابق[:\s]+([\d,\.]+)/);
-      if (mOB) opening_balance = pn(mOB[1]) || 0;
-      if (!opening_balance) {
-        const mOB2 = text.match(/(1\d{2},\d{3}\.\d{3})/);
-        if (mOB2) opening_balance = pn(mOB2[1]) || 0;
-      }
-      const per = [...text.matchAll(/\d{4}\/\d{2}\/\d{2}/g)].map(m => m[0]);
-      if (per.length >= 2) { period_from = per[0]; period_to = per[1]; }
-      const mAcc = text.match(/(1009-\d{6}-\d{3})/);
-      if (mAcc) account_number = mAcc[1];
-    }
-
-    const txs = parsePage(text);
-    allTxs.push(...txs);
-  });
-
-  // Renumber
-  allTxs.forEach((tx, i) => tx.seq = i + 1);
-
-  return { account_number, account_name, period_from, period_to, opening_balance, transactions: allTxs };
-}
-
-function parsePage(text) {
-  const txs = [];
-  const lines = text.split('\n');
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    if (SKIP_WORDS.some(w => line.includes(w))) continue;
-
-    // Must have at least one date
-    const dates = [...line.matchAll(DATE_RE)].map(m => m[1]);
-    if (dates.length === 0) continue;
-
-    // Extract all balance-format numbers (with comma grouping)
-    const bals = [...line.matchAll(/\b(\d{1,3}(?:,\d{3})+\.\d{3})\b/g)].map(m => pn(m[1])).filter(Boolean);
-    const amts = [...line.matchAll(/\b(\d{1,3}(?:,\d{3})*\.\d{3})-?\b/g)].map(m => ({
-      val: pn(m[1]),
-      raw: m[0]
-    })).filter(x => x.val);
-
-    if (bals.length === 0 && amts.length === 0) continue;
-
-    // Balance = largest number (or the balance-format one)
-    const balance = bals.length > 0 ? Math.max(...bals) : (amts.length > 0 ? Math.max(...amts.map(a => a.val)) : null);
-    if (!balance || balance < 100) continue;
-
-    // Amount = other numbers (not balance)
-    const otherAmts = amts.filter(a => Math.abs(a.val - balance) > 0.001 && a.val < balance * 0.8 && a.val > 0.01);
-
-    // Determine debit/credit from context
-    let debit = null, credit = null;
-
-    // Explicit minus suffix
-    const minusMatch = line.match(/([\d,]+\.\d{3})-/);
-    if (minusMatch) {
-      debit = pn(minusMatch[1]);
-    } else {
-      // Check keywords
-      const hasDebitKw  = DEBIT_KW.some(k => line.includes(k));
-      const hasCreditKw = CREDIT_KW.some(k => line.includes(k));
-
-      const amt = otherAmts.length > 0 ? otherAmts[0].val : null;
-      if (amt) {
-        if (hasDebitKw && !hasCreditKw) {
-          debit = amt;
-        } else {
-          credit = amt;
+        function closeAlert() {
+            const modal = document.getElementById('alertModal');
+            const content = document.getElementById('alertModalContent');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
-      }
-    }
 
-    // If debit still not set from otherAmts but we have a minus
-    if (!debit && !credit && otherAmts.length > 0) {
-      credit = otherAmts[0].val; // default to credit
-    }
+        function setLoadText(msg) {
+            document.getElementById('loadingText').innerText = msg;
+        }
 
-    // Collect description from this line and next non-tx lines
-    let desc = buildDesc(lines, i, line);
+        // --- PDF to Image Processing ---
+        async function getPageBase64(pdf, pageNum) {
+            const page = await pdf.getPage(pageNum);
+            // استخدام دقة متوازنة (1.2) واستخراج بصيغة JPEG لتقليل حجم البيانات بشكل كبير جداً
+            const viewport = page.getViewport({ scale: 1.2 }); 
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+            return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+        }
 
-    const entry_date = dates[0] || '';
-    const tx_date    = dates[1] || dates[0] || '';
+        async function processPDF(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-    txs.push({ entry_date, tx_date, description: desc, debit, credit, balance });
-  }
+            document.getElementById('uploadPrompt').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
 
-  return txs;
-}
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                
+                let allTransactions = [];
+                let finalInitialBalance = 0;
 
-function buildDesc(lines, idx, currentLine) {
-  // Remove numbers, dates, pipes from current line to get text
-  let desc = currentLine
-    .replace(/\b\d{4}\/\d{2}\/\d{2}\b/g, '')
-    .replace(/\b[\d,]+\.\d{3}-?\b/g, '')
-    .replace(/\b\d{6,}\b/g, '')
-    .replace(/[\|\[\]]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+                // تقسيم صفحات الـ PDF إلى دفعات (كل دفعة صفحتين) لتجنب تجاوز الحد الأقصى لحجم البيانات وإيقاف الخادم
+                const chunkSize = 2;
+                for (let i = 1; i <= pdf.numPages; i += chunkSize) {
+                    let endPage = Math.min(i + chunkSize - 1, pdf.numPages);
+                    setLoadText(`جاري تحويل الصفحات من ${i} إلى ${endPage} (من أصل ${pdf.numPages}) لصور...`);
 
-  // Grab next 1-2 lines if they're description-only
-  for (let j = idx + 1; j <= idx + 2 && j < lines.length; j++) {
-    const next = lines[j].trim();
-    if (!next) continue;
-    if (/\d{4}\/\d{2}\/\d{2}/.test(next)) break;
-    if (/\b\d{1,3}(?:,\d{3})+\.\d{3}\b/.test(next)) break;
-    if (next.length > 3 && !/^[\d\s\.\,\-\|]+$/.test(next)) {
-      desc = (desc + ' ' + next).trim();
-    }
-  }
+                    let imageParts = [];
+                    for (let p = i; p <= endPage; p++) {
+                        const b64 = await getPageBase64(pdf, p);
+                        imageParts.push({
+                            inlineData: { mimeType: "image/jpeg", data: b64 }
+                        });
+                    }
 
-  return desc.substring(0, 200);
-}
+                    setLoadText(`الذكاء الاصطناعي يستخرج البيانات من الصفحات ${i}-${endPage} (يرجى الانتظار)...`);
+                    const chunkData = await extractDataWithGemini(imageParts, i === 1);
+                    
+                    if (chunkData) {
+                        if (i === 1 && chunkData.initialBalance) {
+                            finalInitialBalance = chunkData.initialBalance;
+                        }
+                        if (chunkData.transactions && Array.isArray(chunkData.transactions)) {
+                            allTransactions = allTransactions.concat(chunkData.transactions);
+                        }
+                    }
+                }
 
-// ── VALIDATE ──
-function validateBalances(data) {
-  let prev = parseFloat(data.opening_balance) || 0;
-  let errors = 0;
-  data.transactions.forEach(tx => {
-    const d = parseFloat(tx.debit  || 0);
-    const c = parseFloat(tx.credit || 0);
-    const b = parseFloat(tx.balance);
-    const exp = Math.round((prev - d + c) * 1000) / 1000;
-    tx._valid    = Math.abs(exp - b) <= 0.05;
-    tx._expected = exp;
-    if (!tx._valid) errors++;
-    prev = b;
-  });
-  const n = data.transactions.length;
-  data._errors   = errors;
-  data._accuracy = n > 0 ? Math.round((n - errors) / n * 1000) / 10 : 0;
-}
+                setLoadText("جاري بناء الجدول النهائي...");
+                populateData({ initialBalance: finalInitialBalance, transactions: allTransactions });
 
-// ── RENDER ──
-function render(data) {
-  const txs = data.transactions;
-  const totalCr = txs.reduce((s, t) => s + (parseFloat(t.credit) || 0), 0);
-  const totalDr = txs.reduce((s, t) => s + (parseFloat(t.debit)  || 0), 0);
-  const lastBal = txs.length ? parseFloat(txs[txs.length-1].balance) : 0;
+            } catch (error) {
+                console.error("Processing Error:", error);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('uploadPrompt').classList.remove('hidden');
+                showAlert('فشل المعالجة', 'حدث خطأ: ' + error.message, 'error');
+            }
+        }
 
-  // Cards
-  document.getElementById('cv1').textContent = txs.length.toLocaleString('ar');
-  document.getElementById('cv2').textContent = f3(lastBal);
-  document.getElementById('cv3').textContent = f3(totalCr);
-  document.getElementById('cv4').textContent = f3(totalDr);
-  document.getElementById('cv5').textContent = data._accuracy + '%';
-  document.getElementById('cg').className = 'cards on';
-  document.querySelectorAll('.card').forEach((c, i) => setTimeout(() => c.classList.add('in'), i * 80));
+        // --- Gemini AI Vision Call ---
+        async function extractDataWithGemini(imageParts, isFirstPage) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            let prompt = `أنت محاسب مالي خبير. قم باستخراج جدول كشف الحساب البنكي من هذه الصور الممسوحة ضوئياً (سكانر). 
+            في الحركات المالية: المبالغ التي تحتوي على علامة ناقص (-) بجوارها أو في عمود المدين هي مبالغ مدينة (debit). والمبالغ الأخرى في الحركات هي دائنة (credit). 
+            استخرج الأرقام كأرقام صحيحة (NUMBER) بدون فواصل الآلاف وبدون نصوص إضافية. إذا كانت الخانة فارغة ضع 0.`;
 
-  // Validation banner
-  const vb = document.getElementById('vb');
-  if (data._errors === 0) {
-    vb.className = 'vban on ok';
-    vb.innerHTML = '✅ جميع الأرصدة متطابقة رياضياً — نسبة الدقة 100%';
-  } else {
-    vb.className = 'vban on er';
-    vb.innerHTML = `⚠️ يوجد ${data._errors} حركة بها فارق في الرصيد — الدقة: ${data._accuracy}%`;
-  }
+            if(isFirstPage) {
+                prompt += `\nقم أيضاً باستخراج "الرصيد الافتتاحي" في بداية الكشف ووضعه في initialBalance.`;
+            }
 
-  // Toolbar
-  document.getElementById('rc').textContent = txs.length;
-  document.getElementById('tb').className = 'tbar on';
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }, ...imageParts] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            initialBalance: { type: "NUMBER", description: "الرصيد الافتتاحي (في أول صفحة فقط)" },
+                            transactions: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        date: { type: "STRING", description: "تاريخ الحركة" },
+                                        desc: { type: "STRING", description: "البيان أو الوصف" },
+                                        debit: { type: "NUMBER", description: "المبلغ المدين" },
+                                        credit: { type: "NUMBER", description: "المبلغ الدائن" },
+                                        balance: { type: "NUMBER", description: "رصيد الكشف المتبقي المكتوب في الورقة" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
 
-  // Table
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-  txs.forEach((tx, i) => {
-    const tr = document.createElement('tr');
-    if (!tx._valid) tr.className = 'erow';
-    const d = parseFloat(tx.debit)  || 0;
-    const c = parseFloat(tx.credit) || 0;
-    const b = parseFloat(tx.balance);
-    tr.innerHTML = `
-      <td class="seq">${tx.seq || i+1}</td>
-      <td class="dt">${tx.entry_date || ''}</td>
-      <td class="dt">${tx.tx_date    || ''}</td>
-      <td class="desc">${esc(tx.description || '')}</td>
-      <td class="amt dr">${d > 0 ? f3(d) : ''}</td>
-      <td class="amt cr">${c > 0 ? f3(c) : ''}</td>
-      <td class="bal">${f3(b)}</td>`;
-    tbody.appendChild(tr);
-  });
+            const delays = [1000, 2000, 4000, 8000, 16000];
 
-  // Footer totals
-  document.getElementById('tfoot').innerHTML = `<tr>
-    <td colspan="4" class="tf-lbl">الإجماليات</td>
-    <td class="tf-dr">${f3(totalDr)}</td>
-    <td class="tf-cr">${f3(totalCr)}</td>
-    <td class="tf-bl">${f3(lastBal)}</td>
-  </tr>`;
+            for (let i = 0; i <= 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
-  document.getElementById('tw').className = 'twrap on';
-}
+                    if (!response.ok) {
+                        const errText = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${errText}`);
+                    }
+                    const result = await response.json();
+                    
+                    let textResult = result.candidates[0].content.parts[0].text;
+                    // إزالة علامات الماركداون إذا أضافها النموذج بالخطأ
+                    textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
+                    
+                    return JSON.parse(textResult);
 
-// ── EXPORT EXCEL ──
-function exportXL() {
-  if (!finalData) return;
-  const txs = finalData.transactions;
-  const rows = [['م','تاريخ القيد','تاريخ الحركة','البيان / الوصف','المديونية (د.ل)','الدائنية (د.ل)','الرصيد (د.ل)']];
-  txs.forEach((tx, i) => rows.push([
-    tx.seq || i+1, tx.entry_date || '', tx.tx_date || '', tx.description || '',
-    parseFloat(tx.debit)  || '', parseFloat(tx.credit) || '', parseFloat(tx.balance) || ''
-  ]));
-  const tc = txs.reduce((s,t)=>s+(parseFloat(t.credit)||0),0);
-  const td = txs.reduce((s,t)=>s+(parseFloat(t.debit)||0),0);
-  const lb = txs.length ? parseFloat(txs[txs.length-1].balance) : 0;
-  rows.push(['','','','الإجماليات', td, tc, lb]);
+                } catch (e) {
+                    console.error("API Attempt Error:", e);
+                    if (i < 5) {
+                        setLoadText(`جاري إعادة المحاولة بسبب ضغط الخادم... (${i+1}/5)`);
+                        await new Promise(r => setTimeout(r, delays[i]));
+                    } else {
+                        throw new Error("فشل الاتصال بالذكاء الاصطناعي بعد عدة محاولات.");
+                    }
+                }
+            }
+        }
 
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:14},{wch:14},{wch:60},{wch:16},{wch:16},{wch:18}];
-  XLSX.utils.book_append_sheet(wb, ws, 'كشف الحساب');
-  const name = finalData.account_name || 'راكان';
-  XLSX.writeFile(wb, `كشف_حساب_${name}.xlsx`);
-}
+        // --- Data Binding & Math Audit ---
+        function populateData(jsonData) {
+            globalData = [];
+            document.getElementById('initialBalance').value = jsonData.initialBalance || 0;
 
-// ── HELPERS ──
-function f3(n) {
-  return Number(n).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
-}
-function esc(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-</script>
+            if(jsonData.transactions && Array.isArray(jsonData.transactions)) {
+                jsonData.transactions.forEach((tx, index) => {
+                    globalData.push({
+                        id: index + 1,
+                        date: tx.date || "",
+                        desc: tx.desc || "حركة مالية",
+                        debit: tx.debit || 0,
+                        credit: tx.credit || 0,
+                        statedBalance: tx.balance || 0,
+                        rawDebit: tx.debit ? tx.debit.toString() : "",
+                        rawCredit: tx.credit ? tx.credit.toString() : "",
+                        rawBalance: tx.balance ? tx.balance.toString() : ""
+                    });
+                });
+            }
+
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('tableContainer').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('exportBtn').disabled = false;
+            document.getElementById('exportBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+
+            runAudit();
+        }
+
+        function parseCleanNumber(val) {
+            if (!val) return 0;
+            let str = String(val).replace(/[^\d.-]/g, '');
+            let num = parseFloat(str);
+            return isNaN(num) ? 0 : num;
+        }
+
+        function formatDinar(num) {
+            if (num === 0 || isNaN(num)) return "";
+            return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+        }
+
+        function runAudit() {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+            
+            let runningBalance = parseFloat(document.getElementById('initialBalance').value) || 0;
+            let errorCount = 0;
+            let validCount = 0;
+            hasErrors = false;
+
+            globalData.forEach((row, index) => {
+                let d = parseCleanNumber(row.rawDebit);
+                let c = parseCleanNumber(row.rawCredit);
+                let stated = parseCleanNumber(row.rawBalance);
+
+                // المعادلة المحاسبية: رصيد سابق + دائن - مدين
+                let expectedBalance = runningBalance + c - d;
+                
+                let diff = Math.abs(expectedBalance - stated);
+                let isMatch = diff < 0.02; // السماحية لفروقات التقريب الصغيرة
+
+                if (!isMatch && stated !== 0) {
+                    errorCount++;
+                    hasErrors = true;
+                } else if (stated !== 0 || d !== 0 || c !== 0) {
+                    validCount++;
+                }
+
+                const tr = document.createElement('tr');
+                if (!isMatch && stated !== 0) {
+                    tr.className = 'error-row border-b border-red-200 transition-colors';
+                } else {
+                    tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition-colors';
+                }
+
+                let statusIcon = (isMatch || stated === 0) 
+                    ? '<i class="ph-fill ph-check-circle text-green-500 text-xl" title="مطابق رياضياً"></i>' 
+                    : '<i class="ph-fill ph-warning-circle text-red-600 text-xl animate-pulse" title="يوجد خطأ في القراءة، انقر على الرقم الخاطئ لتعديله"></i>';
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 text-center bg-white">${statusIcon}</td>
+                    <td class="px-3 py-3 text-slate-500 font-mono">${row.id}</td>
+                    <td class="px-4 py-3 text-slate-700 font-mono editable" contenteditable="true" data-field="date" data-idx="${index}">${row.date}</td>
+                    <td class="px-4 py-3 text-slate-700 editable" contenteditable="true" data-field="desc" data-idx="${index}">${row.desc}</td>
+                    
+                    <td class="px-4 py-3 border-r border-slate-200 text-red-600 font-mono font-semibold editable text-left bg-red-50/30 focus-within:bg-white" dir="ltr" contenteditable="true" data-field="rawDebit" data-idx="${index}">${row.rawDebit || ""}</td>
+                    <td class="px-4 py-3 text-green-600 font-mono font-semibold editable text-left bg-green-50/30 focus-within:bg-white" dir="ltr" contenteditable="true" data-field="rawCredit" data-idx="${index}">${row.rawCredit || ""}</td>
+                    
+                    <td class="px-4 py-3 border-r border-slate-200 text-indigo-900 font-mono font-bold editable text-left bg-indigo-50/30 focus-within:bg-white" dir="ltr" contenteditable="true" data-field="rawBalance" data-idx="${index}">${row.rawBalance || ""}</td>
+                    
+                    <td class="px-4 py-3 border-r border-slate-200 font-mono font-bold text-left ${isMatch ? 'text-slate-500' : 'text-slate-800'}" dir="ltr">${formatDinar(expectedBalance)}</td>
+                    <td class="px-4 py-3 text-center font-mono text-left ${!isMatch && stated !== 0 ? 'error-cell bg-red-100/50' : 'text-slate-300'}" dir="ltr">${!isMatch && stated !== 0 ? formatDinar(expectedBalance - stated) : '-'}</td>
+                `;
+
+                tbody.appendChild(tr);
+
+                runningBalance = stated !== 0 ? stated : expectedBalance; 
+            });
+
+            document.getElementById('statTotal').innerText = globalData.length;
+            document.getElementById('statErrors').innerText = errorCount;
+            document.getElementById('statValid').innerText = validCount;
+            
+            const errorBox = document.getElementById('errorStatBox');
+            if (errorCount > 0) {
+                errorBox.classList.add('bg-red-100', 'border-red-300');
+            } else {
+                errorBox.classList.remove('bg-red-100', 'border-red-300');
+            }
+
+            attachEditListeners();
+        }
+
+        // --- Inline Editing Event Listeners ---
+        function attachEditListeners() {
+            const editables = document.querySelectorAll('.editable');
+            editables.forEach(cell => {
+                cell.addEventListener('blur', function() {
+                    const idx = this.getAttribute('data-idx');
+                    const field = this.getAttribute('data-field');
+                    const val = this.innerText.trim();
+
+                    globalData[idx][field] = val;
+                    if (field.startsWith('raw')) {
+                        runAudit(); // Re-run math immediately on number change
+                    }
+                });
+
+                cell.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.blur();
+                    }
+                });
+            });
+        }
+
+        // --- Export to Real Excel (XLSX) ---
+        function exportToExcel() {
+            if (globalData.length === 0) return;
+
+            if (hasErrors) {
+                showAlert('البيانات غير مطابقة!', 'لا يزال هناك أسطر مظللة باللون الأحمر تحتوي على أخطاء في قراءة الأرقام.\n\nيرجى النقر على الرقم الخاطئ وتعديله بناءً على ملف الـ PDF الأصلي لضمان مطابقة رياضية 100% قبل التصدير.', 'error');
+                return;
+            }
+
+            let exportRows = [];
+            exportRows.push(["م", "تاريخ الحركة", "البيان / الوصف", "دائن (+)", "مدين (-)", "الرصيد"]);
+
+            globalData.forEach((r, i) => {
+                exportRows.push([
+                    r.id || (i+1),
+                    r.date,
+                    r.desc,
+                    parseCleanNumber(r.rawCredit) || "",
+                    parseCleanNumber(r.rawDebit) || "",
+                    parseCleanNumber(r.rawBalance) || ""
+                ]);
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(exportRows);
+            const workbook = XLSX.utils.book_new();
+            
+            if(!worksheet['!views']) worksheet['!views'] = [];
+            worksheet['!views'].push({ rightToLeft: true });
+
+            worksheet['!cols'] = [
+                { wch: 5 }, { wch: 15 }, { wch: 50 }, { wch: 15 }, { wch: 15 }, { wch: 20 }
+            ];
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, "كشف الحساب");
+            XLSX.writeFile(workbook, "كشف_حساب_مدقق.xlsx");
+
+            showAlert('تم بنجاح!', 'تم تصدير كشف الحساب بصيغة Excel وهو مطابق رياضياً وجاهز للاستخدام في نظامك المالي.', 'success');
+        }
+    </script>
 </body>
 </html>
