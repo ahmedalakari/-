@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام استخراج وتدقيق كشوفات الحساب (AI Vision)</title>
-    <!-- Tailwind CSS -->
+    <script>
+        /* Suppress Tailwind CDN production warning */
+        const _warn = console.warn.bind(console);
+        console.warn = (...args) => { if (args[0] && String(args[0]).includes('cdn.tailwindcss.com')) return; _warn(...args); };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- PDF.js لقراءة ملفات الـ PDF كصور -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
@@ -56,11 +60,14 @@
                 </div>
             </div>
             <!-- Gemini API Key Input -->
-            <div class="flex items-center gap-2 bg-slate-700 px-3 py-2 rounded-lg border border-slate-600 flex-1 max-w-sm min-w-[220px]">
+            <div id="apiKeyBox" class="flex items-center gap-2 bg-slate-700 px-3 py-2 rounded-lg border-2 border-red-500 flex-1 max-w-sm min-w-[220px]">
                 <i class="ph ph-key text-lg text-yellow-400 flex-shrink-0"></i>
-                <input type="password" id="apiKeyInput" placeholder="أدخل مفتاح Gemini API هنا..."
-                    class="bg-transparent text-white placeholder-slate-400 text-sm outline-none w-full font-mono"
-                    oninput="saveApiKey(this.value)">
+                <div class="flex flex-col flex-1 min-w-0">
+                    <span id="apiKeyLabel" class="text-red-400 text-xs font-bold">⚠ أدخل مفتاح Gemini API أولاً</span>
+                    <input type="password" id="apiKeyInput" placeholder="AIza..."
+                        class="bg-transparent text-white placeholder-slate-500 text-sm outline-none w-full font-mono"
+                        oninput="saveApiKey(this.value)" autocomplete="off">
+                </div>
                 <button onclick="toggleApiKeyVisibility()" class="text-slate-400 hover:text-white transition-colors flex-shrink-0">
                     <i id="eyeIcon" class="ph ph-eye text-lg"></i>
                 </button>
@@ -187,7 +194,21 @@
             return document.getElementById('apiKeyInput').value.trim() || localStorage.getItem('gemini_api_key') || '';
         }
         function saveApiKey(val) {
-            if (val.trim()) localStorage.setItem('gemini_api_key', val.trim());
+            const box = document.getElementById('apiKeyBox');
+            const label = document.getElementById('apiKeyLabel');
+            if (val.trim()) {
+                localStorage.setItem('gemini_api_key', val.trim());
+                box.classList.remove('border-red-500');
+                box.classList.add('border-green-500');
+                label.className = 'text-green-400 text-xs font-bold';
+                label.innerText = '✓ مفتاح Gemini جاهز';
+            } else {
+                localStorage.removeItem('gemini_api_key');
+                box.classList.remove('border-green-500');
+                box.classList.add('border-red-500');
+                label.className = 'text-red-400 text-xs font-bold';
+                label.innerText = '⚠ أدخل مفتاح Gemini API أولاً';
+            }
         }
         function toggleApiKeyVisibility() {
             const input = document.getElementById('apiKeyInput');
@@ -471,7 +492,11 @@
         // تحميل المفتاح المحفوظ
         window.addEventListener('load', () => {
             const saved = localStorage.getItem('gemini_api_key');
-            if (saved) document.getElementById('apiKeyInput').value = saved;
+            if (saved) {
+                document.getElementById('apiKeyInput').value = saved;
+                saveApiKey(saved);
+            }
         });
+    </script>
 </body>
 </html>
