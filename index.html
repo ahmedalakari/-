@@ -207,7 +207,7 @@ tfoot td{padding:12px 10px;background:linear-gradient(135deg,#EEF3FA,#E6EDF8);fo
 
 <!-- LOCAL LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
+<script src="https://unpkg.com/tesseract.js@4.1.4/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>var _base = window.location.href.replace(/\/[^/]*$/, '/');</script>
 
@@ -318,10 +318,11 @@ async function run() {
 
     setStep(3, 28, 'قراءة النصوص بتقنية OCR...');
 
-    // ── Step 3: OCR each page with Tesseract.js v2 ──
-    const worker = await Tesseract.createWorker({
-      langPath:    'https://tessdata.projectnaptha.com/4.0.0',
-      cacheMethod: 'none',
+    // ── Step 3: OCR each page with Tesseract.js v4 ──
+    const worker = await Tesseract.createWorker('ara+eng', 1, {
+      workerPath: 'https://unpkg.com/tesseract.js@4.1.4/dist/worker.min.js',
+      corePath:   'https://unpkg.com/tesseract.js-core@4.0.4/tesseract-core-lstm.wasm.js',
+      langPath:   'https://tessdata.projectnaptha.com/4.0.0',
       logger: m => {
         if (m.status === 'recognizing text') {
           const pct = Math.round(m.progress * 100);
@@ -330,8 +331,6 @@ async function run() {
         }
       }
     });
-    await worker.loadLanguage('ara+eng');
-    await worker.initialize('ara+eng');
 
     const pageTexts = [];
     for (let p = 0; p < pageImages.length; p++) {
