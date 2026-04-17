@@ -71,6 +71,9 @@
                 <button onclick="toggleApiKeyVisibility()" class="text-slate-400 hover:text-white transition-colors flex-shrink-0">
                     <i id="eyeIcon" class="ph ph-eye text-lg"></i>
                 </button>
+                <button onclick="clearApiKey()" title="مسح المفتاح" class="text-slate-400 hover:text-red-400 transition-colors flex-shrink-0">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
             </div>
             <div class="flex gap-3 flex-shrink-0">
                 <button onclick="checkApiKeyAndUpload()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-md">
@@ -210,6 +213,11 @@
                 label.innerText = '⚠ أدخل مفتاح Gemini API أولاً';
             }
         }
+        function clearApiKey() {
+            localStorage.removeItem('gemini_api_key');
+            document.getElementById('apiKeyInput').value = '';
+            saveApiKey('');
+        }
         function toggleApiKeyVisibility() {
             const input = document.getElementById('apiKeyInput');
             const icon = document.getElementById('eyeIcon');
@@ -321,8 +329,7 @@
 
         // --- Gemini API Call ---
         async function extractDataWithGemini(imageParts, apiKey, isFirstPage) {
-            // gemini-1.5-flash أكثر توفراً مع المفاتيح المجانية
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
             let prompt = `أنت محاسب مالي خبير. استخرج جميع حركات كشف الحساب من هذه الصور بدقة تامة.
 قواعد: المبالغ في عمود المدين أو بعلامة (-) هي debit. الأخرى في عمود الدائن هي credit.
 استخرج الأرقام بدون فواصل الآلاف. الخانات الفارغة = 0. لا تفوّت أي صف.`;
