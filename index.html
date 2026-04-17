@@ -209,12 +209,13 @@ tfoot td{padding:12px 10px;background:linear-gradient(135deg,#EEF3FA,#E6EDF8);fo
 <script src="pdf.min.js"></script>
 <script src="tesseract.min.js"></script>
 <script src="xlsx.full.min.js"></script>
+<script>var _base = window.location.href.replace(/\/[^/]*$/, '/');</script>
 
 <script>
 'use strict';
 
 // ── Configure PDF.js worker (local file) ──
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+// _base already set above; pdfjsLib init deferred to first use
 
 // ── State ──
 let pdfFile   = null;
@@ -286,7 +287,17 @@ async function run() {
     // ── Step 1: Load PDF with pdf.js ──
     log('تحميل PDF...', 'inf');
     const arrayBuf = await pdfFile.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+    // Try every possible export name
+    var _pdfjs = globalThis['pdfjs-dist/build/pdf'] 
+              || globalThis.pdfjsLib 
+              || window['pdfjs-dist/build/pdf'] 
+              || window.pdfjsLib;
+    if (!_pdfjs) {
+      const keys = Object.keys(window).filter(k => k.includes('pdf') || k.includes('PDF'));
+      throw new Error('PDF.js not found. Window keys: ' + keys.join(', '));
+    }
+    _pdfjs.GlobalWorkerOptions.workerSrc = _base + 'pdf.worker.min.js';
+    const pdf = await _pdfjs.getDocument({ data: arrayBuf }).promise;
     const numPages = pdf.numPages;
     log(`عدد الصفحات: ${numPages}`, 'ok');
     setStep(2, 12, 'تحويل الصفحات إلى صور...');
@@ -313,9 +324,9 @@ async function run() {
 
     // ── Step 3: OCR each page with Tesseract.js ──
     const worker = await Tesseract.createWorker('ara+eng', 1, {
-      workerPath:   'worker.min.js',
-      corePath:     'tesseract-core-lstm.js',
-      langPath:     './',  // traineddata files in same folder
+      workerPath:   _base + 'worker.min.js',
+      corePath:     _base + 'tesseract-core-lstm.js',
+      langPath:     _base,  // traineddata files in same folder
       cacheMethod:  'none',
       logger: m => {
         if (m.status === 'recognizing text') {
