@@ -206,8 +206,8 @@ tfoot td{padding:12px 10px;background:linear-gradient(135deg,#EEF3FA,#E6EDF8);fo
 </main>
 
 <!-- LOCAL LIBRARIES -->
-<script src="pdf.min.js"></script>
-<script src="tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="xlsx.full.min.js"></script>
 <script>var _base = window.location.href.replace(/\/[^/]*$/, '/');</script>
 
@@ -288,15 +288,8 @@ async function run() {
     log('تحميل PDF...', 'inf');
     const arrayBuf = await pdfFile.arrayBuffer();
     // Try every possible export name
-    var _pdfjs = globalThis['pdfjs-dist/build/pdf'] 
-              || globalThis.pdfjsLib 
-              || window['pdfjs-dist/build/pdf'] 
-              || window.pdfjsLib;
-    if (!_pdfjs) {
-      const keys = Object.keys(window).filter(k => k.includes('pdf') || k.includes('PDF'));
-      throw new Error('PDF.js not found. Window keys: ' + keys.join(', '));
-    }
-    _pdfjs.GlobalWorkerOptions.workerSrc = _base + 'pdf.worker.min.js';
+    var _pdfjs = window.pdfjsLib;
+    _pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
     const pdf = await _pdfjs.getDocument({ data: arrayBuf }).promise;
     const numPages = pdf.numPages;
     log(`عدد الصفحات: ${numPages}`, 'ok');
@@ -323,11 +316,11 @@ async function run() {
     setStep(3, 28, 'قراءة النصوص بتقنية OCR...');
 
     // ── Step 3: OCR each page with Tesseract.js ──
-    const worker = await Tesseract.createWorker('ara+eng', 1, {
-      workerPath:   _base + 'worker.min.js',
-      corePath:     _base + 'tesseract-core-lstm.js',
-      langPath:     _base,  // traineddata files in same folder
-      cacheMethod:  'none',
+    const worker = await Tesseract.createWorker(['ara', 'eng'], 1, {
+      corePath:    'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core-lstm.wasm.js',
+      langPath:    'https://tessdata.projectnaptha.com/4.0.0',
+      cacheMethod: 'none',
+      workerBlobURL: false,
       logger: m => {
         if (m.status === 'recognizing text') {
           const pct = Math.round(m.progress * 100);
