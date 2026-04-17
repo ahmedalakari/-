@@ -45,8 +45,8 @@
 
     <!-- Header -->
     <header class="bg-slate-800 text-white shadow-lg flex-shrink-0">
-        <div class="max-w-screen-2xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
+        <div class="max-w-screen-2xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3 flex-shrink-0">
                 <div class="bg-indigo-500 p-2 rounded-lg">
                     <i class="ph ph-brain text-2xl text-white"></i>
                 </div>
@@ -55,12 +55,22 @@
                     <p class="text-xs text-slate-300">يقرأ الكشوفات المسحوبة بالهاتف (صور) ويجهزها للمطابقة اليدوية 100%</p>
                 </div>
             </div>
-            <div class="flex gap-4">
-                <button onclick="document.getElementById('pdfInput').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-md">
+            <!-- Gemini API Key Input -->
+            <div class="flex items-center gap-2 bg-slate-700 px-3 py-2 rounded-lg border border-slate-600 flex-1 max-w-sm min-w-[220px]">
+                <i class="ph ph-key text-lg text-yellow-400 flex-shrink-0"></i>
+                <input type="password" id="apiKeyInput" placeholder="أدخل مفتاح Gemini API هنا..."
+                    class="bg-transparent text-white placeholder-slate-400 text-sm outline-none w-full font-mono"
+                    oninput="saveApiKey(this.value)">
+                <button onclick="toggleApiKeyVisibility()" class="text-slate-400 hover:text-white transition-colors flex-shrink-0">
+                    <i id="eyeIcon" class="ph ph-eye text-lg"></i>
+                </button>
+            </div>
+            <div class="flex gap-3 flex-shrink-0">
+                <button onclick="checkApiKeyAndUpload()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-md">
                     <i class="ph ph-upload-simple text-xl"></i> رفع كشف سكانر (PDF)
                 </button>
                 <input type="file" id="pdfInput" accept=".pdf" class="hidden" onchange="processPDF(event)">
-                
+
                 <button id="exportBtn" onclick="exportToExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-md opacity-50 cursor-not-allowed" disabled>
                     <i class="ph ph-microsoft-excel-logo text-xl"></i> تصدير (XLSX)
                 </button>
@@ -127,7 +137,7 @@
             <i class="ph ph-spinner-gap animate-spin text-6xl text-indigo-600 mb-4"></i>
             <h3 class="text-xl font-bold text-slate-800 mb-2">جاري تحليل الصور بالذكاء الاصطناعي...</h3>
             <p id="loadingText" class="text-indigo-600 font-semibold mb-1">يتم استخراج الصفحات...</p>
-            <p class="text-slate-500 text-sm">هذه العملية قد تستغرق 15-30 ثانية حسب عدد صفحات الكشف.</p>
+            <p class="text-slate-500 text-sm">هذه العملية قد تستغرق بعض الوقت حسب عدد صفحات الكشف.</p>
         </div>
 
         <!-- Table Container -->
@@ -169,9 +179,36 @@
     </div>
 
     <script>
-        const apiKey = ""; // API key is injected by the environment
         let globalData = [];
         let hasErrors = false;
+
+        // --- API Key Management ---
+        function getApiKey() {
+            return document.getElementById('apiKeyInput').value.trim() || localStorage.getItem('gemini_api_key') || '';
+        }
+        function saveApiKey(val) {
+            if (val.trim()) localStorage.setItem('gemini_api_key', val.trim());
+        }
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('apiKeyInput');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'ph ph-eye-slash text-lg';
+            } else {
+                input.type = 'password';
+                icon.className = 'ph ph-eye text-lg';
+            }
+        }
+        function checkApiKeyAndUpload() {
+            const key = getApiKey();
+            if (!key) {
+                showAlert('مفتاح API مطلوب', 'يرجى إدخال مفتاح Gemini API أولاً.\nيمكنك الحصول عليه مجاناً من: aistudio.google.com', 'error');
+                document.getElementById('apiKeyInput').focus();
+                return;
+            }
+            document.getElementById('pdfInput').click();
+        }
 
         // --- UI Functions ---
         function showAlert(title, message, type = 'error') {
@@ -179,19 +216,16 @@
             const content = document.getElementById('alertModalContent');
             document.getElementById('alertTitle').innerText = title;
             document.getElementById('alertMessage').innerText = message;
-            
             let iconHtml = '';
             if (type === 'error') iconHtml = '<div class="bg-red-100 p-2 rounded-full"><i class="ph-fill ph-warning-circle text-3xl text-red-500"></i></div>';
             else if (type === 'success') iconHtml = '<div class="bg-green-100 p-2 rounded-full"><i class="ph-fill ph-check-circle text-3xl text-green-500"></i></div>';
             else iconHtml = '<div class="bg-indigo-100 p-2 rounded-full"><i class="ph-fill ph-info text-3xl text-indigo-500"></i></div>';
-            
             document.getElementById('alertIconContainer').innerHTML = iconHtml;
             modal.classList.remove('hidden');
             void modal.offsetWidth;
             modal.classList.remove('opacity-0');
             content.classList.remove('scale-95');
         }
-
         function closeAlert() {
             const modal = document.getElementById('alertModal');
             const content = document.getElementById('alertModalContent');
@@ -199,87 +233,76 @@
             content.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
-
         function setLoadText(msg) {
             document.getElementById('loadingText').innerText = msg;
         }
 
-        // --- PDF to Image Processing ---
+        // --- PDF to Image ---
         async function getPageBase64(pdf, pageNum) {
             const page = await pdf.getPage(pageNum);
-            // استخدام دقة متوازنة (1.2) واستخراج بصيغة JPEG لتقليل حجم البيانات بشكل كبير جداً
-            const viewport = page.getViewport({ scale: 1.2 }); 
+            const viewport = page.getViewport({ scale: 2.0 });
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.height = viewport.height;
             canvas.width = viewport.width;
             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-            return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+            return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
         }
 
         async function processPDF(event) {
             const file = event.target.files[0];
+            event.target.value = '';
             if (!file) return;
-
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                showAlert('مفتاح API مطلوب', 'يرجى إدخال مفتاح Gemini API أولاً.', 'error');
+                return;
+            }
+            globalData = [];
             document.getElementById('uploadPrompt').classList.add('hidden');
+            document.getElementById('tableContainer').classList.add('hidden');
             document.getElementById('loadingState').classList.remove('hidden');
-
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                
+                const totalPages = pdf.numPages;
                 let allTransactions = [];
                 let finalInitialBalance = 0;
 
-                // تقسيم صفحات الـ PDF إلى دفعات (كل دفعة صفحتين) لتجنب تجاوز الحد الأقصى لحجم البيانات وإيقاف الخادم
-                const chunkSize = 2;
-                for (let i = 1; i <= pdf.numPages; i += chunkSize) {
-                    let endPage = Math.min(i + chunkSize - 1, pdf.numPages);
-                    setLoadText(`جاري تحويل الصفحات من ${i} إلى ${endPage} (من أصل ${pdf.numPages}) لصور...`);
-
-                    let imageParts = [];
-                    for (let p = i; p <= endPage; p++) {
-                        const b64 = await getPageBase64(pdf, p);
-                        imageParts.push({
-                            inlineData: { mimeType: "image/jpeg", data: b64 }
-                        });
-                    }
-
-                    setLoadText(`الذكاء الاصطناعي يستخرج البيانات من الصفحات ${i}-${endPage} (يرجى الانتظار)...`);
-                    const chunkData = await extractDataWithGemini(imageParts, i === 1);
-                    
+                // معالجة الصفحات دفعة 3 بالتوازي لسرعة أعلى
+                const batchSize = 3;
+                for (let i = 1; i <= totalPages; i += batchSize) {
+                    const batchEnd = Math.min(i + batchSize - 1, totalPages);
+                    setLoadText(`تحويل الصفحات ${i}–${batchEnd} من ${totalPages} إلى صور...`);
+                    const imagePromises = [];
+                    for (let p = i; p <= batchEnd; p++) imagePromises.push(getPageBase64(pdf, p));
+                    const images = await Promise.all(imagePromises);
+                    const imageParts = images.map(b64 => ({ inlineData: { mimeType: "image/jpeg", data: b64 } }));
+                    setLoadText(`Gemini يستخرج البيانات... (صفحة ${i}–${batchEnd} / ${totalPages})`);
+                    const chunkData = await extractDataWithGemini(imageParts, apiKey, i === 1);
                     if (chunkData) {
-                        if (i === 1 && chunkData.initialBalance) {
-                            finalInitialBalance = chunkData.initialBalance;
-                        }
-                        if (chunkData.transactions && Array.isArray(chunkData.transactions)) {
+                        if (i === 1 && chunkData.initialBalance) finalInitialBalance = chunkData.initialBalance;
+                        if (chunkData.transactions && Array.isArray(chunkData.transactions))
                             allTransactions = allTransactions.concat(chunkData.transactions);
-                        }
                     }
                 }
-
-                setLoadText("جاري بناء الجدول النهائي...");
+                setLoadText("جاري بناء الجدول...");
                 populateData({ initialBalance: finalInitialBalance, transactions: allTransactions });
-
             } catch (error) {
-                console.error("Processing Error:", error);
+                console.error(error);
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('uploadPrompt').classList.remove('hidden');
-                showAlert('فشل المعالجة', 'حدث خطأ: ' + error.message, 'error');
+                showAlert('فشل المعالجة', error.message, 'error');
             }
         }
 
-        // --- Gemini AI Vision Call ---
-        async function extractDataWithGemini(imageParts, isFirstPage) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            
-            let prompt = `أنت محاسب مالي خبير. قم باستخراج جدول كشف الحساب البنكي من هذه الصور الممسوحة ضوئياً (سكانر). 
-            في الحركات المالية: المبالغ التي تحتوي على علامة ناقص (-) بجوارها أو في عمود المدين هي مبالغ مدينة (debit). والمبالغ الأخرى في الحركات هي دائنة (credit). 
-            استخرج الأرقام كأرقام صحيحة (NUMBER) بدون فواصل الآلاف وبدون نصوص إضافية. إذا كانت الخانة فارغة ضع 0.`;
-
-            if(isFirstPage) {
-                prompt += `\nقم أيضاً باستخراج "الرصيد الافتتاحي" في بداية الكشف ووضعه في initialBalance.`;
-            }
+        // --- Gemini API Call ---
+        async function extractDataWithGemini(imageParts, apiKey, isFirstPage) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            let prompt = `أنت محاسب مالي خبير. استخرج جميع حركات كشف الحساب من هذه الصور بدقة تامة.
+قواعد: المبالغ في عمود المدين أو بعلامة (-) هي debit. الأخرى في عمود الدائن هي credit.
+استخرج الأرقام بدون فواصل الآلاف. الخانات الفارغة = 0. لا تفوّت أي صف.`;
+            if (isFirstPage) prompt += `\nاستخرج الرصيد الافتتاحي في initialBalance. إذا لم يوجد ضع 0.`;
 
             const payload = {
                 contents: [{ role: "user", parts: [{ text: prompt }, ...imageParts] }],
@@ -288,17 +311,17 @@
                     responseSchema: {
                         type: "OBJECT",
                         properties: {
-                            initialBalance: { type: "NUMBER", description: "الرصيد الافتتاحي (في أول صفحة فقط)" },
+                            initialBalance: { type: "NUMBER" },
                             transactions: {
                                 type: "ARRAY",
                                 items: {
                                     type: "OBJECT",
                                     properties: {
-                                        date: { type: "STRING", description: "تاريخ الحركة" },
-                                        desc: { type: "STRING", description: "البيان أو الوصف" },
-                                        debit: { type: "NUMBER", description: "المبلغ المدين" },
-                                        credit: { type: "NUMBER", description: "المبلغ الدائن" },
-                                        balance: { type: "NUMBER", description: "رصيد الكشف المتبقي المكتوب في الورقة" }
+                                        date:    { type: "STRING" },
+                                        desc:    { type: "STRING" },
+                                        debit:   { type: "NUMBER" },
+                                        credit:  { type: "NUMBER" },
+                                        balance: { type: "NUMBER" }
                                     }
                                 }
                             }
@@ -307,77 +330,65 @@
                 }
             };
 
-            const delays = [1000, 2000, 4000, 8000, 16000];
-
-            for (let i = 0; i <= 5; i++) {
+            const delays = [2000, 4000, 8000, 16000, 30000];
+            for (let attempt = 0; attempt <= 5; attempt++) {
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-
                     if (!response.ok) {
                         const errText = await response.text();
-                        throw new Error(`HTTP ${response.status}: ${errText}`);
+                        let errMsg = errText;
+                        try { errMsg = JSON.parse(errText)?.error?.message || errText; } catch(e){}
+                        if (response.status === 400) throw new Error(`مفتاح API غير صحيح أو الطلب غير صالح: ${errMsg}`);
+                        if (response.status === 401 || response.status === 403) throw new Error(`مفتاح API غير مصرح (${response.status}). تحقق من صحة المفتاح.`);
+                        if (response.status === 429) {
+                            if (attempt < 5) { setLoadText(`تجاوز حد الطلبات، انتظار ${delays[attempt]/1000}ث...`); await new Promise(r=>setTimeout(r,delays[attempt])); continue; }
+                            throw new Error('تجاوزت الحد المسموح. حاول لاحقاً.');
+                        }
+                        throw new Error(`HTTP ${response.status}: ${errMsg}`);
                     }
                     const result = await response.json();
-                    
-                    let textResult = result.candidates[0].content.parts[0].text;
-                    // إزالة علامات الماركداون إذا أضافها النموذج بالخطأ
-                    textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
-                    
-                    return JSON.parse(textResult);
-
-                } catch (e) {
-                    console.error("API Attempt Error:", e);
-                    if (i < 5) {
-                        setLoadText(`جاري إعادة المحاولة بسبب ضغط الخادم... (${i+1}/5)`);
-                        await new Promise(r => setTimeout(r, delays[i]));
-                    } else {
-                        throw new Error("فشل الاتصال بالذكاء الاصطناعي بعد عدة محاولات.");
-                    }
+                    let text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+                    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+                    return JSON.parse(text);
+                } catch(e) {
+                    if (e.message.includes('401') || e.message.includes('403') || e.message.includes('400') || e.message.includes('مفتاح')) throw e;
+                    if (attempt < 5) { setLoadText(`إعادة المحاولة (${attempt+1}/5)...`); await new Promise(r=>setTimeout(r,delays[attempt]||4000)); }
+                    else throw new Error('فشل الاتصال بـ Gemini بعد عدة محاولات: ' + e.message);
                 }
             }
         }
 
-        // --- Data Binding & Math Audit ---
+        // --- Populate & Audit ---
         function populateData(jsonData) {
-            globalData = [];
-            document.getElementById('initialBalance').value = jsonData.initialBalance || 0;
-
-            if(jsonData.transactions && Array.isArray(jsonData.transactions)) {
-                jsonData.transactions.forEach((tx, index) => {
+            if (jsonData.initialBalance) document.getElementById('initialBalance').value = jsonData.initialBalance;
+            if (jsonData.transactions && Array.isArray(jsonData.transactions)) {
+                jsonData.transactions.forEach(tx => {
                     globalData.push({
-                        id: index + 1,
-                        date: tx.date || "",
-                        desc: tx.desc || "حركة مالية",
-                        debit: tx.debit || 0,
-                        credit: tx.credit || 0,
-                        statedBalance: tx.balance || 0,
+                        id: globalData.length + 1,
+                        date: tx.date || "", desc: tx.desc || "حركة مالية",
                         rawDebit: tx.debit ? tx.debit.toString() : "",
                         rawCredit: tx.credit ? tx.credit.toString() : "",
                         rawBalance: tx.balance ? tx.balance.toString() : ""
                     });
                 });
             }
-
             document.getElementById('loadingState').classList.add('hidden');
             document.getElementById('tableContainer').classList.remove('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             document.getElementById('exportBtn').disabled = false;
             document.getElementById('exportBtn').classList.remove('opacity-50', 'cursor-not-allowed');
-
             runAudit();
         }
 
         function parseCleanNumber(val) {
             if (!val) return 0;
-            let str = String(val).replace(/[^\d.-]/g, '');
-            let num = parseFloat(str);
+            let num = parseFloat(String(val).replace(/[^\d.-]/g, ''));
             return isNaN(num) ? 0 : num;
         }
-
         function formatDinar(num) {
             if (num === 0 || isNaN(num)) return "";
             return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
@@ -386,137 +397,81 @@
         function runAudit() {
             const tbody = document.getElementById('dataTableBody');
             tbody.innerHTML = '';
-            
             let runningBalance = parseFloat(document.getElementById('initialBalance').value) || 0;
-            let errorCount = 0;
-            let validCount = 0;
+            let errorCount = 0, validCount = 0;
             hasErrors = false;
 
             globalData.forEach((row, index) => {
                 let d = parseCleanNumber(row.rawDebit);
                 let c = parseCleanNumber(row.rawCredit);
                 let stated = parseCleanNumber(row.rawBalance);
+                let expected = runningBalance + c - d;
+                let isMatch = Math.abs(expected - stated) < 0.02;
 
-                // المعادلة المحاسبية: رصيد سابق + دائن - مدين
-                let expectedBalance = runningBalance + c - d;
-                
-                let diff = Math.abs(expectedBalance - stated);
-                let isMatch = diff < 0.02; // السماحية لفروقات التقريب الصغيرة
-
-                if (!isMatch && stated !== 0) {
-                    errorCount++;
-                    hasErrors = true;
-                } else if (stated !== 0 || d !== 0 || c !== 0) {
-                    validCount++;
-                }
+                if (!isMatch && stated !== 0) { errorCount++; hasErrors = true; }
+                else if (stated !== 0 || d !== 0 || c !== 0) validCount++;
 
                 const tr = document.createElement('tr');
-                if (!isMatch && stated !== 0) {
-                    tr.className = 'error-row border-b border-red-200 transition-colors';
-                } else {
-                    tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition-colors';
-                }
+                tr.className = (!isMatch && stated !== 0) ? 'error-row border-b border-red-200' : 'hover:bg-slate-50 border-b border-slate-100';
 
-                let statusIcon = (isMatch || stated === 0) 
-                    ? '<i class="ph-fill ph-check-circle text-green-500 text-xl" title="مطابق رياضياً"></i>' 
-                    : '<i class="ph-fill ph-warning-circle text-red-600 text-xl animate-pulse" title="يوجد خطأ في القراءة، انقر على الرقم الخاطئ لتعديله"></i>';
+                const icon = (isMatch || stated === 0)
+                    ? '<i class="ph-fill ph-check-circle text-green-500 text-xl"></i>'
+                    : '<i class="ph-fill ph-warning-circle text-red-600 text-xl animate-pulse"></i>';
 
                 tr.innerHTML = `
-                    <td class="px-4 py-3 text-center bg-white">${statusIcon}</td>
+                    <td class="px-4 py-3 text-center bg-white">${icon}</td>
                     <td class="px-3 py-3 text-slate-500 font-mono">${row.id}</td>
                     <td class="px-4 py-3 text-slate-700 font-mono editable" contenteditable="true" data-field="date" data-idx="${index}">${row.date}</td>
                     <td class="px-4 py-3 text-slate-700 editable" contenteditable="true" data-field="desc" data-idx="${index}">${row.desc}</td>
-                    
-                    <td class="px-4 py-3 border-r border-slate-200 text-red-600 font-mono font-semibold editable text-left bg-red-50/30 focus-within:bg-white" dir="ltr" contenteditable="true" data-field="rawDebit" data-idx="${index}">${row.rawDebit || ""}</td>
-                    <td class="px-4 py-3 text-green-600 font-mono font-semibold editable text-left bg-green-50/30 focus-within:bg-white" dir="ltr" contenteditable="true" data-field="rawCredit" data-idx="${index}">${row.rawCredit || ""}</td>
-                    
-                    <td class="px-4 py-3 border-r border-slate-200 text-indigo-900 font-mono font-bold editable text-left bg-indigo-50/30 focus-within:bg-white" dir="ltr" contenteditable="true" data-field="rawBalance" data-idx="${index}">${row.rawBalance || ""}</td>
-                    
-                    <td class="px-4 py-3 border-r border-slate-200 font-mono font-bold text-left ${isMatch ? 'text-slate-500' : 'text-slate-800'}" dir="ltr">${formatDinar(expectedBalance)}</td>
-                    <td class="px-4 py-3 text-center font-mono text-left ${!isMatch && stated !== 0 ? 'error-cell bg-red-100/50' : 'text-slate-300'}" dir="ltr">${!isMatch && stated !== 0 ? formatDinar(expectedBalance - stated) : '-'}</td>
+                    <td class="px-4 py-3 border-r border-slate-200 text-red-600 font-mono font-semibold editable text-left bg-red-50/30" dir="ltr" contenteditable="true" data-field="rawDebit" data-idx="${index}">${row.rawDebit||""}</td>
+                    <td class="px-4 py-3 text-green-600 font-mono font-semibold editable text-left bg-green-50/30" dir="ltr" contenteditable="true" data-field="rawCredit" data-idx="${index}">${row.rawCredit||""}</td>
+                    <td class="px-4 py-3 border-r border-slate-200 text-indigo-900 font-mono font-bold editable text-left bg-indigo-50/30" dir="ltr" contenteditable="true" data-field="rawBalance" data-idx="${index}">${row.rawBalance||""}</td>
+                    <td class="px-4 py-3 border-r border-slate-200 font-mono font-bold text-left ${isMatch?'text-slate-500':'text-slate-800'}" dir="ltr">${formatDinar(expected)}</td>
+                    <td class="px-4 py-3 text-center font-mono text-left ${!isMatch&&stated!==0?'error-cell bg-red-100/50':'text-slate-300'}" dir="ltr">${!isMatch&&stated!==0?formatDinar(expected-stated):'-'}</td>
                 `;
-
                 tbody.appendChild(tr);
-
-                runningBalance = stated !== 0 ? stated : expectedBalance; 
+                runningBalance = stated !== 0 ? stated : expected;
             });
 
             document.getElementById('statTotal').innerText = globalData.length;
             document.getElementById('statErrors').innerText = errorCount;
             document.getElementById('statValid').innerText = validCount;
-            
-            const errorBox = document.getElementById('errorStatBox');
-            if (errorCount > 0) {
-                errorBox.classList.add('bg-red-100', 'border-red-300');
-            } else {
-                errorBox.classList.remove('bg-red-100', 'border-red-300');
-            }
-
+            const eb = document.getElementById('errorStatBox');
+            errorCount > 0 ? eb.classList.add('bg-red-100','border-red-300') : eb.classList.remove('bg-red-100','border-red-300');
             attachEditListeners();
         }
 
-        // --- Inline Editing Event Listeners ---
         function attachEditListeners() {
-            const editables = document.querySelectorAll('.editable');
-            editables.forEach(cell => {
+            document.querySelectorAll('.editable').forEach(cell => {
                 cell.addEventListener('blur', function() {
-                    const idx = this.getAttribute('data-idx');
-                    const field = this.getAttribute('data-field');
-                    const val = this.innerText.trim();
-
-                    globalData[idx][field] = val;
-                    if (field.startsWith('raw')) {
-                        runAudit(); // Re-run math immediately on number change
-                    }
+                    globalData[this.getAttribute('data-idx')][this.getAttribute('data-field')] = this.innerText.trim();
+                    if (this.getAttribute('data-field').startsWith('raw')) runAudit();
                 });
-
                 cell.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        this.blur();
-                    }
+                    if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
                 });
             });
         }
 
-        // --- Export to Real Excel (XLSX) ---
         function exportToExcel() {
             if (globalData.length === 0) return;
-
-            if (hasErrors) {
-                showAlert('البيانات غير مطابقة!', 'لا يزال هناك أسطر مظللة باللون الأحمر تحتوي على أخطاء في قراءة الأرقام.\n\nيرجى النقر على الرقم الخاطئ وتعديله بناءً على ملف الـ PDF الأصلي لضمان مطابقة رياضية 100% قبل التصدير.', 'error');
-                return;
-            }
-
-            let exportRows = [];
-            exportRows.push(["م", "تاريخ الحركة", "البيان / الوصف", "دائن (+)", "مدين (-)", "الرصيد"]);
-
-            globalData.forEach((r, i) => {
-                exportRows.push([
-                    r.id || (i+1),
-                    r.date,
-                    r.desc,
-                    parseCleanNumber(r.rawCredit) || "",
-                    parseCleanNumber(r.rawDebit) || "",
-                    parseCleanNumber(r.rawBalance) || ""
-                ]);
-            });
-
-            const worksheet = XLSX.utils.aoa_to_sheet(exportRows);
-            const workbook = XLSX.utils.book_new();
-            
-            if(!worksheet['!views']) worksheet['!views'] = [];
-            worksheet['!views'].push({ rightToLeft: true });
-
-            worksheet['!cols'] = [
-                { wch: 5 }, { wch: 15 }, { wch: 50 }, { wch: 15 }, { wch: 15 }, { wch: 20 }
-            ];
-
-            XLSX.utils.book_append_sheet(workbook, worksheet, "كشف الحساب");
-            XLSX.writeFile(workbook, "كشف_حساب_مدقق.xlsx");
-
-            showAlert('تم بنجاح!', 'تم تصدير كشف الحساب بصيغة Excel وهو مطابق رياضياً وجاهز للاستخدام في نظامك المالي.', 'success');
+            if (hasErrors) { showAlert('البيانات غير مطابقة!', 'يوجد أسطر حمراء. صحّحها أولاً.', 'error'); return; }
+            let rows = [["م","تاريخ الحركة","البيان / الوصف","دائن (+)","مدين (-)","الرصيد"]];
+            globalData.forEach((r,i) => rows.push([r.id||(i+1),r.date,r.desc,parseCleanNumber(r.rawCredit)||"",parseCleanNumber(r.rawDebit)||"",parseCleanNumber(r.rawBalance)||""]));
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            if (!ws['!views']) ws['!views'] = [];
+            ws['!views'].push({ rightToLeft: true });
+            ws['!cols'] = [{wch:5},{wch:15},{wch:50},{wch:15},{wch:15},{wch:20}];
+            XLSX.utils.book_append_sheet(wb, ws, "كشف الحساب");
+            XLSX.writeFile(wb, "كشف_حساب_مدقق.xlsx");
+            showAlert('تم بنجاح!', 'تم تصدير الكشف بصيغة Excel.', 'success');
         }
-    </script>
+
+        // تحميل المفتاح المحفوظ
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('gemini_api_key');
+            if (saved) document.getElementById('apiKeyInput').value = saved;
+        });
 </body>
 </html>
