@@ -1,524 +1,1353 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام استخراج وتدقيق كشوفات الحساب (AI Vision)</title>
-    <script>
-        /* Suppress Tailwind CDN production warning */
-        const _warn = console.warn.bind(console);
-        console.warn = (...args) => { if (args[0] && String(args[0]).includes('cdn.tailwindcss.com')) return; _warn(...args); };
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PDF.js لقراءة ملفات الـ PDF كصور -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';</script>
-    <!-- SheetJS لتصدير الإكسل -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
-        .editable { 
-            cursor: text; 
-            transition: all 0.2s; 
-            border: 1px solid transparent;
-            border-radius: 4px;
-            padding: 2px 6px;
-        }
-        .editable:hover { background-color: #fef3c7; border-color: #fcd34d; }
-        .editable:focus { 
-            background-color: #ffffff; 
-            border-color: #3b82f6; 
-            outline: none; 
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); 
-        }
-        .error-row { background-color: #fef2f2 !important; }
-        .error-cell { color: #dc2626; font-weight: bold; }
-        /* Scrollbar styling */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كَشْف · مستخرج كشوفات الحساب البنكية الليبية</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<style>
+  :root{
+    --ink:#0b1220;
+    --ink-2:#1a2332;
+    --paper:#fafaf7;
+    --paper-2:#f3f1ea;
+    --line:#d9d4c3;
+    --line-2:#e7e3d4;
+    --accent:#8b6914;      /* muted gold / brass */
+    --accent-2:#c89b3c;
+    --red:#a02b2b;
+    --red-soft:#f5e6e6;
+    --green:#1f6f43;
+    --green-soft:#e4efe6;
+    --blue:#1e4d6b;
+    --blue-soft:#e3ecf1;
+    --warn:#8b6914;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --body:'Readex Pro','IBM Plex Sans Arabic',sans-serif;
+    --display:'IBM Plex Sans Arabic','Readex Pro',serif;
+  }
+  html.dark{
+    --ink:#e8e3d4;
+    --ink-2:#c8c3b4;
+    --paper:#0e1117;
+    --paper-2:#161b22;
+    --line:#2a2f3a;
+    --line-2:#1f2430;
+    --accent:#d4a94a;
+    --accent-2:#e8c878;
+    --red:#e06060;
+    --red-soft:#3a1f1f;
+    --green:#5db383;
+    --green-soft:#1a2e22;
+    --blue:#6ba3c4;
+    --blue-soft:#1a2830;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    font-family:var(--body);
+    background:var(--paper);
+    color:var(--ink);
+    font-feature-settings:"kern","liga","tnum";
+    -webkit-font-smoothing:antialiased;
+    transition:background .3s,color .3s;
+  }
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .display{font-family:var(--display);letter-spacing:-.01em}
+
+  /* Subtle paper grain */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;
+    background-image:
+      radial-gradient(circle at 1px 1px,rgba(0,0,0,.04) 1px,transparent 0);
+    background-size:24px 24px;
+  }
+  html.dark body::before{opacity:.15;background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.04) 1px,transparent 0)}
+
+  .shell{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+
+  /* Top brand bar */
+  .brandbar{
+    border-bottom:1px solid var(--line);
+    background:var(--paper);
+    position:sticky;top:0;z-index:40;
+    backdrop-filter:blur(8px);
+    background:color-mix(in srgb,var(--paper) 92%,transparent);
+  }
+  .logo-mark{
+    width:40px;height:40px;display:grid;place-items:center;
+    background:var(--ink);color:var(--paper);
+    border-radius:6px;font-weight:700;font-family:var(--display);
+    font-size:20px;position:relative;
+  }
+  .logo-mark::after{
+    content:'';position:absolute;inset:-3px;border:1px solid var(--accent);border-radius:8px;opacity:.4;
+  }
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.625rem 1rem;border-radius:6px;
+    font-weight:500;font-size:.875rem;
+    transition:all .15s;cursor:pointer;border:1px solid transparent;
+    font-family:var(--body);
+  }
+  .btn-primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .btn-primary:hover{background:var(--ink-2)}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn-ghost:hover{background:var(--paper-2);border-color:var(--ink)}
+  .btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn-accent:hover{filter:brightness(1.08)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn-icon{padding:.5rem;width:36px;height:36px;justify-content:center}
+
+  /* Chip / pill */
+  .chip{
+    display:inline-flex;align-items:center;gap:.375rem;
+    padding:.25rem .625rem;border-radius:999px;
+    font-size:.75rem;font-weight:500;
+    border:1px solid var(--line);
+    background:var(--paper-2);color:var(--ink-2);
+  }
+
+  /* Card */
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+  }
+  .card-inset{background:var(--paper-2);border:1px solid var(--line-2)}
+
+  /* Hero / dropzone */
+  .hero{
+    min-height:calc(100vh - 73px);
+    display:grid;place-items:center;padding:2rem;
+  }
+  .hero-inner{max-width:960px;width:100%}
+  .hero-title{
+    font-family:var(--display);
+    font-size:clamp(2rem,5vw,3.5rem);
+    font-weight:700;line-height:1.1;letter-spacing:-.02em;
+    margin-bottom:1rem;
+  }
+  .hero-sub{color:var(--ink-2);font-size:1.0625rem;line-height:1.7;max-width:640px;margin-bottom:2.5rem}
+
+  .dropzone{
+    border:2px dashed var(--line);
+    border-radius:12px;
+    padding:3.5rem 2rem;
+    text-align:center;
+    background:var(--paper-2);
+    transition:all .2s;
+    cursor:pointer;position:relative;overflow:hidden;
+  }
+  .dropzone:hover,.dropzone.drag{
+    border-color:var(--accent);
+    background:color-mix(in srgb,var(--accent) 6%,var(--paper-2));
+  }
+  .dropzone.drag{transform:scale(1.005)}
+  .dropzone-icon{
+    width:64px;height:64px;margin:0 auto 1rem;
+    border-radius:50%;background:var(--paper);
+    border:1px solid var(--line);
+    display:grid;place-items:center;
+    font-size:28px;color:var(--accent);
+  }
+
+  /* Feature grid on hero */
+  .features{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:1rem;margin-top:3rem;
+  }
+  .feat{
+    padding:1.25rem;border:1px solid var(--line);border-radius:8px;
+    background:var(--paper);
+  }
+  .feat-num{font-family:var(--mono);font-size:.75rem;color:var(--accent);margin-bottom:.5rem;letter-spacing:.1em}
+  .feat-title{font-weight:600;margin-bottom:.25rem;font-size:.9375rem}
+  .feat-desc{font-size:.8125rem;color:var(--ink-2);line-height:1.6}
+
+  /* Stats strip */
+  .stats{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:1px;background:var(--line);border-radius:8px;overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .stat{
+    background:var(--paper);padding:1rem 1.25rem;
+    display:flex;flex-direction:column;gap:.25rem;
+  }
+  .stat-label{font-size:.6875rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
+  .stat-value{font-family:var(--display);font-size:1.75rem;font-weight:700;letter-spacing:-.02em}
+  .stat-sub{font-size:.75rem;color:var(--ink-2)}
+  .stat.err .stat-value{color:var(--red)}
+  .stat.ok .stat-value{color:var(--green)}
+
+  /* Table */
+  .tbl-wrap{
+    border:1px solid var(--line);border-radius:8px;overflow:hidden;
+    background:var(--paper);
+  }
+  table.ledger{
+    width:100%;border-collapse:collapse;font-size:.875rem;
+  }
+  table.ledger thead th{
+    background:var(--paper-2);color:var(--ink-2);
+    font-weight:600;font-size:.75rem;
+    text-transform:uppercase;letter-spacing:.06em;
+    padding:.75rem .75rem;text-align:right;
+    border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:5;white-space:nowrap;
+  }
+  table.ledger thead th.num{text-align:left;direction:ltr}
+  table.ledger tbody td{
+    padding:.625rem .75rem;
+    border-bottom:1px solid var(--line-2);
+    vertical-align:middle;
+  }
+  table.ledger tbody tr:last-child td{border-bottom:none}
+  table.ledger tbody tr{transition:background .12s}
+  table.ledger tbody tr:hover{background:var(--paper-2)}
+  table.ledger tr.err-row{background:var(--red-soft)}
+  html.dark table.ledger tr.err-row{background:color-mix(in srgb,var(--red) 12%,var(--paper))}
+  table.ledger tr.err-row:hover{background:color-mix(in srgb,var(--red) 14%,var(--paper))}
+
+  .num-cell{font-family:var(--mono);text-align:left;direction:ltr;font-variant-numeric:tabular-nums}
+  .debit{color:var(--red)}
+  .credit{color:var(--green)}
+  .balance{color:var(--blue);font-weight:600}
+  .diff{color:var(--red);font-weight:600}
+
+  .editable{
+    cursor:text;padding:.25rem .5rem;border-radius:4px;
+    border:1px solid transparent;transition:all .12s;
+    min-width:40px;display:inline-block;
+  }
+  .editable:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+  .editable:focus{background:var(--paper);border-color:var(--accent);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+
+  .status-badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:24px;height:24px;border-radius:50%;font-size:14px;
+  }
+  .status-badge.ok{background:var(--green-soft);color:var(--green)}
+  .status-badge.err{background:var(--red-soft);color:var(--red)}
+
+  /* Progress */
+  .progress-track{
+    height:4px;background:var(--line-2);border-radius:2px;overflow:hidden;
+  }
+  .progress-bar{
+    height:100%;background:var(--accent);
+    transition:width .3s ease;
+  }
+
+  /* Toolbar */
+  .toolbar{
+    display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;
+    padding:.875rem 1rem;background:var(--paper);
+    border:1px solid var(--line);border-radius:8px;
+  }
+  .search-input{
+    flex:1;min-width:220px;
+    padding:.5rem .75rem;border:1px solid var(--line);border-radius:6px;
+    background:var(--paper);color:var(--ink);font-family:var(--body);
+    font-size:.875rem;transition:border-color .15s;
+  }
+  .search-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+
+  .select-ctrl{
+    padding:.5rem .75rem;border:1px solid var(--line);border-radius:6px;
+    background:var(--paper);color:var(--ink);font-family:var(--body);
+    font-size:.875rem;cursor:pointer;
+  }
+
+  /* Modal */
+  .modal-bg{
+    position:fixed;inset:0;z-index:100;
+    background:color-mix(in srgb,var(--ink) 50%,transparent);
+    backdrop-filter:blur(4px);
+    display:grid;place-items:center;padding:1rem;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .modal-bg.open{opacity:1;pointer-events:auto}
+  .modal{
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;
+    max-width:480px;width:100%;padding:1.75rem;
+    transform:scale(.96);transition:transform .2s;
+  }
+  .modal-bg.open .modal{transform:scale(1)}
+
+  /* Loading */
+  .loading-overlay{
+    position:fixed;inset:0;z-index:60;background:color-mix(in srgb,var(--paper) 85%,transparent);
+    backdrop-filter:blur(6px);display:none;place-items:center;padding:2rem;
+  }
+  .loading-overlay.on{display:grid}
+  .loading-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;
+    padding:2rem;max-width:480px;width:100%;text-align:center;
+  }
+  .spinner{
+    width:40px;height:40px;border-radius:50%;
+    border:3px solid var(--line);border-top-color:var(--accent);
+    animation:spin .8s linear infinite;margin:0 auto 1rem;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Stagger reveal */
+  .fade-up{animation:fadeUp .5s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:var(--paper-2)}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid var(--paper-2)}
+  ::-webkit-scrollbar-thumb:hover{background:var(--ink-2)}
+
+  /* Bank detection pill */
+  .bank-pill{
+    display:inline-flex;align-items:center;gap:.375rem;
+    padding:.25rem .625rem;border-radius:4px;
+    font-size:.75rem;font-weight:500;
+    background:var(--blue-soft);color:var(--blue);
+    border:1px solid color-mix(in srgb,var(--blue) 20%,transparent);
+  }
+
+  /* Keyboard hint */
+  kbd{
+    font-family:var(--mono);font-size:.6875rem;
+    padding:.125rem .375rem;border-radius:3px;
+    background:var(--paper-2);border:1px solid var(--line);
+    color:var(--ink-2);
+  }
+
+  /* Responsive */
+  @media(max-width:720px){
+    .hero{padding:1rem;min-height:auto;padding-top:2rem}
+    .hero-title{font-size:2rem}
+    .dropzone{padding:2rem 1rem}
+    table.ledger{font-size:.8125rem}
+    table.ledger thead th,table.ledger tbody td{padding:.5rem .5rem}
+    .hide-mobile{display:none}
+  }
+
+  /* Print */
+  @media print{
+    body::before,.brandbar,.toolbar,.hero,.loading-overlay,.modal-bg,.no-print{display:none!important}
+    .tbl-wrap{border:none}
+    table.ledger thead th{background:#f0f0f0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+
+  .section-label{
+    font-family:var(--mono);font-size:.6875rem;letter-spacing:.12em;
+    color:var(--ink-2);text-transform:uppercase;font-weight:500;
+  }
+</style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden text-gray-800">
+<body>
 
-    <!-- Header -->
-    <header class="bg-slate-800 text-white shadow-lg flex-shrink-0">
-        <div class="max-w-screen-2xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
-            <div class="flex items-center gap-3 flex-shrink-0">
-                <div class="bg-indigo-500 p-2 rounded-lg">
-                    <i class="ph ph-brain text-2xl text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold">مستخرج كشوفات الحساب الذكي (AI OCR)</h1>
-                    <p class="text-xs text-slate-300">يقرأ الكشوفات المسحوبة بالهاتف (صور) ويجهزها للمطابقة اليدوية 100%</p>
-                </div>
-            </div>
-            <!-- Gemini API Key Input -->
-            <div id="apiKeyBox" class="flex items-center gap-2 bg-slate-700 px-3 py-2 rounded-lg border-2 border-red-500 flex-1 max-w-sm min-w-[220px]">
-                <i class="ph ph-key text-lg text-yellow-400 flex-shrink-0"></i>
-                <div class="flex flex-col flex-1 min-w-0">
-                    <span id="apiKeyLabel" class="text-red-400 text-xs font-bold">⚠ أدخل مفتاح Gemini API أولاً</span>
-                    <input type="password" id="apiKeyInput" placeholder="AIza..."
-                        class="bg-transparent text-white placeholder-slate-500 text-sm outline-none w-full font-mono"
-                        oninput="saveApiKey(this.value)" autocomplete="off">
-                </div>
-                <button onclick="toggleApiKeyVisibility()" class="text-slate-400 hover:text-white transition-colors flex-shrink-0">
-                    <i id="eyeIcon" class="ph ph-eye text-lg"></i>
-                </button>
-                <button onclick="clearApiKey()" title="مسح المفتاح" class="text-slate-400 hover:text-red-400 transition-colors flex-shrink-0">
-                    <i class="ph ph-x text-lg"></i>
-                </button>
-            </div>
-            <div class="flex gap-3 flex-shrink-0">
-                <button onclick="checkApiKeyAndUpload()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-md">
-                    <i class="ph ph-upload-simple text-xl"></i> رفع كشف سكانر (PDF)
-                </button>
-                <input type="file" id="pdfInput" accept=".pdf" class="hidden" onchange="processPDF(event)">
+<div class="shell">
 
-                <button id="exportBtn" onclick="exportToExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-md opacity-50 cursor-not-allowed" disabled>
-                    <i class="ph ph-microsoft-excel-logo text-xl"></i> تصدير (XLSX)
-                </button>
-            </div>
+  <!-- Brand bar -->
+  <header class="brandbar">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="logo-mark">ك</div>
+        <div>
+          <div class="display font-bold text-base leading-tight">كَشْف</div>
+          <div class="text-xs" style="color:var(--ink-2)">مستخرج كشوفات الحساب البنكية</div>
         </div>
-    </header>
+      </div>
 
-    <!-- Dashboard/Stats Bar -->
-    <div id="dashboard" class="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0 hidden shadow-sm z-10">
-        <div class="max-w-screen-2xl mx-auto flex flex-wrap gap-6 items-center justify-between">
-            <div class="flex gap-4">
-                <div class="bg-slate-50 px-4 py-2 rounded-lg border border-slate-200 flex items-center gap-3">
-                    <i class="ph ph-list-numbers text-2xl text-slate-400"></i>
-                    <div>
-                        <span class="text-xs text-slate-500 block">إجمالي الحركات</span>
-                        <span id="statTotal" class="text-lg font-bold text-slate-800">0</span>
-                    </div>
-                </div>
-                <div class="bg-red-50 px-4 py-2 rounded-lg border border-red-200 flex items-center gap-3 transition-colors" id="errorStatBox">
-                    <i class="ph ph-warning-circle text-2xl text-red-500"></i>
-                    <div>
-                        <span class="text-xs text-red-600 block">أخطاء تحتاج تدخل (قراءة)</span>
-                        <span id="statErrors" class="text-lg font-bold text-red-700">0</span>
-                    </div>
-                </div>
-                <div class="bg-green-50 px-4 py-2 rounded-lg border border-green-200 flex items-center gap-3">
-                    <i class="ph ph-check-circle text-2xl text-green-500"></i>
-                    <div>
-                        <span class="text-xs text-green-600 block">حركات مطابقة رياضياً</span>
-                        <span id="statValid" class="text-lg font-bold text-green-700">0</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-3 bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-200">
-                <label for="initialBalance" class="text-sm font-semibold text-indigo-800">الرصيد الافتتاحي:</label>
-                <input type="number" id="initialBalance" value="0" step="0.001" onchange="runAudit()" class="border border-indigo-300 rounded px-2 py-1 text-left bg-white focus:outline-none focus:border-indigo-500 w-36 font-mono font-bold text-indigo-900">
-                <span class="text-xs text-indigo-600 font-bold">د.ل</span>
-            </div>
+      <div class="flex items-center gap-2">
+        <span id="engineChip" class="chip hide-mobile">
+          <i class="ph ph-brain"></i>
+          <span id="engineName">Gemini 2.5</span>
+        </span>
+        <button id="themeBtn" class="btn btn-ghost btn-icon" title="تبديل الوضع">
+          <i class="ph ph-moon" id="themeIcon"></i>
+        </button>
+        <button id="settingsBtn" class="btn btn-ghost btn-icon" title="الإعدادات">
+          <i class="ph ph-gear-six"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero (upload state) -->
+  <section id="heroSection" class="hero">
+    <div class="hero-inner fade-up">
+
+      <div class="flex items-center gap-2 mb-6">
+        <span class="section-label">نظام محاسبي احترافي</span>
+        <span class="h-px flex-1" style="background:var(--line)"></span>
+        <span class="chip">
+          <span class="w-1.5 h-1.5 rounded-full" style="background:var(--green)"></span>
+          جاهز
+        </span>
+      </div>
+
+      <h1 class="hero-title">
+        استخرج، دقّق، وصدّر<br>
+        كشوفات الحساب البنكية
+        <span style="color:var(--accent)">.</span>
+      </h1>
+      <p class="hero-sub">
+        نظام مخصص للمصارف الليبية (الجمهورية، المتحد، الوحدة، التجاري، الصحاري، شمال أفريقيا، المصرف الليبي الخارجي، وغيرها). يقرأ ملف PDF أو مجموعة صور، ويستخرج الحركات بدقة، ويتحقق رياضياً من كل سطر قبل التصدير إلى Excel.
+      </p>
+
+      <div id="dropzone" class="dropzone">
+        <input type="file" id="fileInput" accept=".pdf,image/jpeg,image/png,image/webp" multiple class="hidden">
+        <div class="dropzone-icon"><i class="ph ph-file-arrow-up"></i></div>
+        <div class="display font-semibold text-lg mb-1">اسحب الملفات هنا أو انقر للاختيار</div>
+        <div class="text-sm mb-4" style="color:var(--ink-2)">PDF أو صور (JPG/PNG/WebP) — متعدد الملفات مدعوم</div>
+        <div class="flex items-center justify-center gap-2 flex-wrap">
+          <button id="browseBtn" class="btn btn-primary">
+            <i class="ph ph-upload-simple"></i>
+            تصفح الملفات
+          </button>
+          <button id="demoBtn" class="btn btn-ghost">
+            <i class="ph ph-eye"></i>
+            بيانات تجريبية
+          </button>
         </div>
+      </div>
+
+      <div class="features">
+        <div class="feat">
+          <div class="feat-num">01 · السرعة</div>
+          <div class="feat-title">معالجة متوازية</div>
+          <div class="feat-desc">6 صفحات في نفس الوقت — أسرع 3× من المعالجة التسلسلية</div>
+        </div>
+        <div class="feat">
+          <div class="feat-num">02 · الدقة</div>
+          <div class="feat-title">تحقق رياضي مزدوج</div>
+          <div class="feat-desc">كل سطر يُدقق بمعادلة الرصيد، والأخطاء تُرسل للمراجعة تلقائياً</div>
+        </div>
+        <div class="feat">
+          <div class="feat-num">03 · المرونة</div>
+          <div class="feat-title">محركان للذكاء</div>
+          <div class="feat-desc">اختر بين Gemini أو Claude حسب نوع الكشف</div>
+        </div>
+        <div class="feat">
+          <div class="feat-num">04 · الأمان</div>
+          <div class="feat-title">حفظ محلي</div>
+          <div class="feat-desc">مفاتيح الـ API تبقى في متصفحك فقط — لا سيرفر، لا تتبع</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Work area (results) -->
+  <section id="workArea" class="hidden max-w-7xl mx-auto px-4 pb-12 w-full">
+
+    <!-- Summary row -->
+    <div class="my-6 space-y-3">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="section-label">النتائج</span>
+          <span id="bankTag" class="bank-pill hidden">
+            <i class="ph ph-bank"></i>
+            <span id="bankName">—</span>
+          </span>
+          <span id="pageCount" class="chip"><i class="ph ph-files"></i> <span>0 صفحة</span></span>
+          <span id="timeChip" class="chip"><i class="ph ph-timer"></i> <span>—</span></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="newBtn" class="btn btn-ghost btn-sm">
+            <i class="ph ph-plus"></i> كشف جديد
+          </button>
+          <button id="reverifyBtn" class="btn btn-ghost">
+            <i class="ph ph-shield-check"></i>
+            إعادة تحقق
+          </button>
+          <button id="exportBtn" class="btn btn-accent">
+            <i class="ph ph-microsoft-excel-logo"></i>
+            تصدير Excel
+          </button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">إجمالي الحركات</span>
+          <span class="stat-value mono" id="statTotal">0</span>
+        </div>
+        <div class="stat ok">
+          <span class="stat-label">مطابقة رياضياً</span>
+          <span class="stat-value mono" id="statOk">0</span>
+        </div>
+        <div class="stat err">
+          <span class="stat-label">تحتاج مراجعة</span>
+          <span class="stat-value mono" id="statErr">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">مجموع المدين</span>
+          <span class="stat-value mono" id="statDebit">—</span>
+          <span class="stat-sub">د.ل</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">مجموع الدائن</span>
+          <span class="stat-value mono" id="statCredit">—</span>
+          <span class="stat-sub">د.ل</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">الرصيد الختامي</span>
+          <span class="stat-value mono" id="statFinal">—</span>
+          <span class="stat-sub">د.ل</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-auto relative bg-slate-50">
-        <!-- Upload Prompt -->
-        <div id="uploadPrompt" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-6">
-            <div class="bg-white p-12 rounded-2xl shadow-sm text-center max-w-xl border border-slate-200 border-dashed">
-                <div class="flex justify-center mb-6">
-                    <div class="relative">
-                        <i class="ph ph-file-image text-8xl text-indigo-400"></i>
-                        <i class="ph-fill ph-magic-wand text-3xl text-yellow-500 absolute bottom-0 -right-2 bg-white rounded-full"></i>
-                    </div>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-3">ارفع كشف الحساب المصور (سكانر/هاتف)</h2>
-                <p class="text-slate-500 mb-8 leading-relaxed">بفضل الذكاء الاصطناعي المدمج، يستطيع النظام الآن قراءة الجداول من الصور والملفات الممسوحة ضوئياً بدقة عالية.<br>انقر على أي خلية حمراء لتصحيحها يدوياً وضمان مطابقة 100%.</p>
-                <button onclick="document.getElementById('pdfInput').click()" class="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition-all inline-flex items-center gap-2">
-                    <i class="ph ph-upload-simple text-xl"></i> تصفح واختيار الكشف
-                </button>
-            </div>
+    <!-- Toolbar -->
+    <div class="toolbar my-4">
+      <div class="flex items-center gap-2 flex-1 min-w-0">
+        <i class="ph ph-magnifying-glass" style="color:var(--ink-2)"></i>
+        <input id="searchInput" type="text" class="search-input" placeholder="ابحث في البيان أو الرقم المرجعي…">
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <select id="filterSelect" class="select-ctrl">
+          <option value="all">كل الحركات</option>
+          <option value="err">الأخطاء فقط</option>
+          <option value="debit">المدين فقط</option>
+          <option value="credit">الدائن فقط</option>
+        </select>
+        <div class="flex items-center gap-2 chip">
+          <label for="initialBalance" class="text-xs" style="color:var(--ink-2)">رصيد افتتاحي:</label>
+          <input id="initialBalance" type="number" step="0.001" value="0"
+                 class="mono w-32 text-left bg-transparent border-none outline-none font-semibold" dir="ltr">
+          <span class="text-xs">د.ل</span>
         </div>
-
-        <!-- Loading State -->
-        <div id="loadingState" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 bg-opacity-95 z-20 hidden text-center">
-            <i class="ph ph-spinner-gap animate-spin text-6xl text-indigo-600 mb-4"></i>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">جاري تحليل الصور بالذكاء الاصطناعي...</h3>
-            <p id="loadingText" class="text-indigo-600 font-semibold mb-1">يتم استخراج الصفحات...</p>
-            <p class="text-slate-500 text-sm">هذه العملية قد تستغرق بعض الوقت حسب عدد صفحات الكشف.</p>
-        </div>
-
-        <!-- Table Container -->
-        <div id="tableContainer" class="hidden p-6 pb-32">
-            <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
-                <table class="w-full text-sm text-right">
-                    <thead class="bg-slate-100 border-b border-slate-200 text-slate-700 font-semibold sticky top-0 shadow-sm z-10">
-                        <tr>
-                            <th class="px-4 py-3 w-12 text-center">الحالة</th>
-                            <th class="px-3 py-3 w-12">م</th>
-                            <th class="px-4 py-3 w-28">التاريخ</th>
-                            <th class="px-4 py-3 min-w-[250px]">البيان / الوصف (اضغط للتعديل)</th>
-                            <th class="px-4 py-3 text-red-600 bg-red-50 w-32 border-r border-slate-200">مدين (-)</th>
-                            <th class="px-4 py-3 text-green-600 bg-green-50 w-32">دائن (+)</th>
-                            <th class="px-4 py-3 text-indigo-700 bg-indigo-50 w-36 border-r border-slate-200">رصيد الكشف المكتوب</th>
-                            <th class="px-4 py-3 text-slate-600 w-36 border-r border-slate-200" title="الرصيد المحسوب آلياً للتأكد من صحة القراءة">الرصيد المدقق (رياضياً)</th>
-                            <th class="px-4 py-3 text-center w-28">الفرق</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dataTableBody" class="divide-y divide-slate-100">
-                        <!-- Rows will be populated by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <!-- Alert Modal -->
-    <div id="alertModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity opacity-0">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 transform transition-transform scale-95" id="alertModalContent">
-            <div class="flex items-center gap-3 mb-4" id="alertIconContainer">
-            </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2" id="alertTitle">تنبيه</h3>
-            <p class="text-slate-600 mb-8 leading-relaxed" id="alertMessage">رسالة</p>
-            <div class="flex justify-end">
-                <button onclick="closeAlert()" class="bg-slate-800 text-white px-6 py-2.5 rounded-lg hover:bg-slate-700 font-semibold transition-colors">موافق</button>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <script>
-        let globalData = [];
-        let hasErrors = false;
+    <!-- Table -->
+    <div class="tbl-wrap">
+      <table class="ledger">
+        <thead>
+          <tr>
+            <th style="width:48px">الحالة</th>
+            <th style="width:44px">م</th>
+            <th style="width:110px">التاريخ</th>
+            <th style="width:130px">المرجع</th>
+            <th>البيان</th>
+            <th class="num" style="width:130px">مدين</th>
+            <th class="num" style="width:130px">دائن</th>
+            <th class="num" style="width:140px">رصيد الكشف</th>
+            <th class="num" style="width:140px">رصيد محسوب</th>
+            <th class="num" style="width:100px">الفرق</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
 
-        // --- API Key Management ---
-        function getApiKey() {
-            return document.getElementById('apiKeyInput').value.trim() || localStorage.getItem('gemini_api_key') || '';
+    <!-- Footer hint -->
+    <div class="mt-4 flex items-center justify-between text-xs flex-wrap gap-2" style="color:var(--ink-2)">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span>نصيحة: انقر على أي خانة لتعديلها يدوياً.</span>
+        <span>اضغط <kbd>Enter</kbd> للحفظ، <kbd>Esc</kbd> للإلغاء.</span>
+      </div>
+      <div>
+        نُحفظ تلقائياً · آخر حفظ: <span id="lastSave">الآن</span>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<!-- Loading overlay -->
+<div id="loadOverlay" class="loading-overlay">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <div class="display font-semibold text-lg mb-2" id="loadTitle">جاري المعالجة</div>
+    <div class="text-sm mb-4" style="color:var(--ink-2)" id="loadMsg">يتم تحضير الصور...</div>
+    <div class="progress-track mb-2"><div class="progress-bar" id="loadBar" style="width:0"></div></div>
+    <div class="mono text-xs" id="loadPct" style="color:var(--ink-2)">0%</div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div id="settingsModal" class="modal-bg">
+  <div class="modal">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="display font-bold text-lg">الإعدادات</h3>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('settingsModal')"><i class="ph ph-x"></i></button>
+    </div>
+
+    <div class="space-y-5">
+      <div>
+        <label class="block text-sm font-semibold mb-2">محرك الذكاء الاصطناعي</label>
+        <div class="flex gap-2">
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="engine" value="gemini" class="sr-only peer" checked>
+            <div class="card p-3 text-center peer-checked:border-2" style="border-color:var(--line)" data-engine-card="gemini">
+              <i class="ph ph-google-logo text-2xl mb-1 block"></i>
+              <div class="font-semibold text-sm">Gemini 2.5</div>
+              <div class="text-xs" style="color:var(--ink-2)">سريع · مجاني</div>
+            </div>
+          </label>
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="engine" value="claude" class="sr-only peer">
+            <div class="card p-3 text-center peer-checked:border-2" style="border-color:var(--line)" data-engine-card="claude">
+              <i class="ph ph-sparkle text-2xl mb-1 block"></i>
+              <div class="font-semibold text-sm">Claude 4</div>
+              <div class="text-xs" style="color:var(--ink-2)">دقة أعلى</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-2" id="apiKeyLabel">مفتاح Gemini API</label>
+        <input id="apiKeyInput" type="password" placeholder="AIza..."
+               class="w-full p-2.5 border rounded text-sm mono" dir="ltr"
+               style="border-color:var(--line);background:var(--paper-2);color:var(--ink)">
+        <div class="text-xs mt-1" style="color:var(--ink-2)">يُحفظ محلياً في متصفحك فقط.</div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-2">عدد الصفحات المتوازية</label>
+        <select id="concurrencySelect" class="select-ctrl w-full">
+          <option value="2">2 (آمن للشبكات البطيئة)</option>
+          <option value="4" selected>4 (موصى به)</option>
+          <option value="6">6 (أسرع — شبكة قوية)</option>
+          <option value="8">8 (تجريبي)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-2">جودة الصورة</label>
+        <select id="qualitySelect" class="select-ctrl w-full">
+          <option value="1.0">عادية (أسرع)</option>
+          <option value="1.3" selected>عالية (موصى به)</option>
+          <option value="1.6">فائقة (للنصوص الصغيرة)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-6">
+      <button class="btn btn-ghost" onclick="closeModal('settingsModal')">إلغاء</button>
+      <button class="btn btn-primary" id="saveSettingsBtn">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Alert modal -->
+<div id="alertModal" class="modal-bg">
+  <div class="modal">
+    <div class="flex items-start gap-3 mb-3">
+      <div id="alertIcon" class="status-badge err" style="width:36px;height:36px;font-size:20px;flex-shrink:0">
+        <i class="ph ph-warning"></i>
+      </div>
+      <div class="flex-1">
+        <h3 id="alertTitle" class="display font-bold text-base mb-1">تنبيه</h3>
+        <p id="alertMsg" class="text-sm leading-relaxed" style="color:var(--ink-2)">رسالة</p>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="btn btn-primary" onclick="closeModal('alertModal')">موافق</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =============================================================
+   كَشْف — Bank Statement Extractor (Enhanced)
+   Single-file HTML app. No build step required.
+   ============================================================= */
+
+const STORE = {
+  get(k, d){ try{ const v = localStorage.getItem('kashf_'+k); return v===null?d:JSON.parse(v); }catch{return d} },
+  set(k, v){ try{ localStorage.setItem('kashf_'+k, JSON.stringify(v)); }catch{} },
+};
+
+const state = {
+  engine: STORE.get('engine', 'gemini'),
+  apiKey: STORE.get('apiKey', ''),
+  concurrency: STORE.get('concurrency', 4),
+  quality: STORE.get('quality', 1.3),
+  rows: [],
+  filter: 'all',
+  search: '',
+  bank: '',
+  pageCount: 0,
+  startTime: 0,
+  elapsedMs: 0,
+};
+
+/* ---------- Theme ---------- */
+function applyTheme(){
+  const dark = STORE.get('theme','light') === 'dark';
+  document.documentElement.classList.toggle('dark', dark);
+  const icon = document.getElementById('themeIcon');
+  icon.className = dark ? 'ph ph-sun' : 'ph ph-moon';
+}
+document.getElementById('themeBtn').onclick = ()=>{
+  STORE.set('theme', STORE.get('theme','light')==='dark'?'light':'dark');
+  applyTheme();
+};
+applyTheme();
+
+/* ---------- Engine chip ---------- */
+function refreshEngineUI(){
+  document.getElementById('engineName').textContent = state.engine==='claude'?'Claude 4':'Gemini 2.5';
+  document.getElementById('apiKeyLabel').textContent = state.engine==='claude'?'مفتاح Anthropic API':'مفتاح Gemini API';
+  document.querySelectorAll('[data-engine-card]').forEach(el=>{
+    el.style.borderColor = el.dataset.engineCard===state.engine?'var(--accent)':'var(--line)';
+  });
+}
+refreshEngineUI();
+
+/* ---------- Settings modal ---------- */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+document.getElementById('settingsBtn').onclick = ()=>{
+  document.getElementById('apiKeyInput').value = state.apiKey;
+  document.getElementById('concurrencySelect').value = state.concurrency;
+  document.getElementById('qualitySelect').value = state.quality;
+  document.querySelector(`input[name="engine"][value="${state.engine}"]`).checked = true;
+  openModal('settingsModal');
+};
+document.querySelectorAll('input[name="engine"]').forEach(r=>{
+  r.onchange = ()=>{
+    state.engine = r.value;
+    refreshEngineUI();
+  };
+});
+document.getElementById('saveSettingsBtn').onclick = ()=>{
+  state.apiKey = document.getElementById('apiKeyInput').value.trim();
+  state.concurrency = parseInt(document.getElementById('concurrencySelect').value,10);
+  state.quality = parseFloat(document.getElementById('qualitySelect').value);
+  STORE.set('engine', state.engine);
+  STORE.set('apiKey', state.apiKey);
+  STORE.set('concurrency', state.concurrency);
+  STORE.set('quality', state.quality);
+  closeModal('settingsModal');
+  showAlert('تم الحفظ','سيتم تطبيق الإعدادات في المعالجة التالية.','success');
+};
+
+/* ---------- Alerts ---------- */
+function showAlert(title, msg, type='error'){
+  document.getElementById('alertTitle').textContent = title;
+  document.getElementById('alertMsg').textContent = msg;
+  const ic = document.getElementById('alertIcon');
+  if(type==='success'){
+    ic.className='status-badge ok';
+    ic.innerHTML='<i class="ph ph-check"></i>';
+  } else if(type==='info'){
+    ic.className='status-badge';
+    ic.style.background='var(--blue-soft)';
+    ic.style.color='var(--blue)';
+    ic.innerHTML='<i class="ph ph-info"></i>';
+  } else {
+    ic.className='status-badge err';
+    ic.innerHTML='<i class="ph ph-warning"></i>';
+  }
+  openModal('alertModal');
+}
+
+/* ---------- File upload wiring ---------- */
+const dz = document.getElementById('dropzone');
+const fi = document.getElementById('fileInput');
+document.getElementById('browseBtn').onclick = (e)=>{ e.stopPropagation(); fi.click(); };
+dz.onclick = ()=> fi.click();
+fi.onchange = (e)=> handleFiles(Array.from(e.target.files));
+
+['dragenter','dragover'].forEach(ev=>{
+  dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.add('drag'); });
+});
+['dragleave','drop'].forEach(ev=>{
+  dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.remove('drag'); });
+});
+dz.addEventListener('drop', e=>{
+  const files = Array.from(e.dataTransfer.files).filter(f=>/pdf|image\//.test(f.type));
+  if(files.length) handleFiles(files);
+});
+
+document.getElementById('demoBtn').onclick = ()=> loadDemo();
+document.getElementById('newBtn').onclick = ()=> location.reload();
+document.getElementById('reverifyBtn').onclick = ()=> reverifyErrors();
+document.getElementById('exportBtn').onclick = ()=> exportExcel();
+document.getElementById('initialBalance').onchange = ()=> runAudit();
+document.getElementById('searchInput').oninput = (e)=>{ state.search = e.target.value.trim().toLowerCase(); renderRows(); };
+document.getElementById('filterSelect').onchange = (e)=>{ state.filter = e.target.value; renderRows(); };
+
+/* ---------- Loading ---------- */
+function showLoading(title, msg, pct){
+  document.getElementById('loadOverlay').classList.add('on');
+  document.getElementById('loadTitle').textContent = title || 'جاري المعالجة';
+  document.getElementById('loadMsg').textContent = msg || '';
+  if(pct!=null){
+    document.getElementById('loadBar').style.width = pct+'%';
+    document.getElementById('loadPct').textContent = Math.round(pct)+'%';
+  }
+}
+function hideLoading(){ document.getElementById('loadOverlay').classList.remove('on'); }
+function updateLoading(msg, pct){
+  document.getElementById('loadMsg').textContent = msg;
+  if(pct!=null){
+    document.getElementById('loadBar').style.width = pct+'%';
+    document.getElementById('loadPct').textContent = Math.round(pct)+'%';
+  }
+}
+
+/* ---------- Image prep ---------- */
+async function pdfPageToPNG(pdf, pageNum, scale){
+  const page = await pdf.getPage(pageNum);
+  const viewport = page.getViewport({scale});
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d',{alpha:false});
+  canvas.width = viewport.width; canvas.height = viewport.height;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  await page.render({canvasContext:ctx, viewport}).promise;
+  return canvas.toDataURL('image/png').split(',')[1];
+}
+
+function fileToPNG(file, maxDim=1800){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      let w = img.width, h = img.height;
+      if(w>maxDim || h>maxDim){
+        const r = Math.min(maxDim/w, maxDim/h);
+        w=Math.round(w*r); h=Math.round(h*r);
+      }
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      const cx = cv.getContext('2d',{alpha:false});
+      cx.fillStyle='#fff'; cx.fillRect(0,0,w,h);
+      cx.drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      resolve(cv.toDataURL('image/png').split(',')[1]);
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('فشل قراءة الصورة')); };
+    img.src = url;
+  });
+}
+
+/* ---------- Parallel processor with concurrency limit ---------- */
+async function runParallel(tasks, limit, onProgress){
+  const results = new Array(tasks.length);
+  let idx = 0, done = 0;
+  const workers = Array.from({length:Math.min(limit, tasks.length)}, async ()=>{
+    while(true){
+      const i = idx++;
+      if(i >= tasks.length) break;
+      try{
+        results[i] = await tasks[i]();
+      }catch(e){
+        results[i] = {error: e.message};
+      }
+      done++;
+      onProgress && onProgress(done, tasks.length);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
+/* ---------- AI calls ---------- */
+const LIBYAN_BANKS_PROMPT = `الكشف قد يكون لأحد المصارف الليبية التالية:
+- مصرف الجمهورية (Jumhouria Bank) — يحتوي عمود "رقم المعاملة" أو "Reference No"
+- المصرف المتحد (United Bank) — الرقم المرجعي غالباً مدمج في البيان
+- مصرف الوحدة (Wahda Bank)
+- المصرف التجاري الوطني (National Commercial Bank)
+- مصرف الصحاري (Sahara Bank)
+- مصرف شمال أفريقيا (North Africa Bank)
+- المصرف الليبي الخارجي (Libyan Foreign Bank)
+- مصرف التجارة والتنمية (Trade & Development Bank)
+- مصرف اليقين (Al Yaqeen Bank)
+- مصرف الواحة (Waha Bank)`;
+
+function buildPrompt(isFirst, isRetry){
+  let p = `أنت محاسب مالي خبير متخصص في كشوفات الحسابات الليبية. مهمتك استخراج جميع الحركات من الصور المرفقة بدقة 100%.
+
+${LIBYAN_BANKS_PROMPT}
+
+قواعد حرجة:
+1. الأعمدة: استخرج التاريخ، الرقم المرجعي (إن وُجد)، البيان الكامل، المدين (Debit)، الدائن (Credit)، الرصيد.
+2. المبالغ: أرقام فقط (NUMBER) مع الفواصل العشرية (مثال: 15234.750). الخانات الفارغة = 0.
+3. علامة الناقص (-) أو عمود "مدين/Debit" → debit. عمود "دائن/Credit" → credit.
+4. التاريخ: استخرجه كما هو (DD/MM/YYYY أو YYYY/MM/DD).
+5. لا تخترع بيانات. إذا كانت خانة غير واضحة، اتركها 0 وضع "؟" في البيان.
+6. رتّب الحركات بنفس ترتيب ظهورها في الصفحة (من الأعلى للأسفل).
+7. حدد اسم المصرف من الصور وضعه في الحقل bank.`;
+
+  if(isFirst){
+    p += `\n8. استخرج "الرصيد الافتتاحي" (الرصيد السابق / Previous Balance) من أعلى أول صفحة وضعه في initialBalance.`;
+  }
+  if(isRetry){
+    p += `\n\n⚠️ ملاحظة: هذه محاولة إعادة تحقق. ركّز بشكل خاص على قراءة الأرقام بدقة متناهية — التحقق من كل خانة رقمية مرتين.`;
+  }
+  return p;
+}
+
+const RESPONSE_SCHEMA = {
+  type:"OBJECT",
+  properties:{
+    bank:{type:"STRING", description:"اسم المصرف المكتشف"},
+    initialBalance:{type:"NUMBER", description:"الرصيد الافتتاحي (للدفعة الأولى فقط)"},
+    transactions:{
+      type:"ARRAY",
+      items:{
+        type:"OBJECT",
+        properties:{
+          date:{type:"STRING"},
+          referenceNo:{type:"STRING"},
+          desc:{type:"STRING"},
+          debit:{type:"NUMBER"},
+          credit:{type:"NUMBER"},
+          balance:{type:"NUMBER"}
         }
-        function saveApiKey(val) {
-            const box = document.getElementById('apiKeyBox');
-            const label = document.getElementById('apiKeyLabel');
-            if (val.trim()) {
-                localStorage.setItem('gemini_api_key', val.trim());
-                box.classList.remove('border-red-500');
-                box.classList.add('border-green-500');
-                label.className = 'text-green-400 text-xs font-bold';
-                label.innerText = '✓ مفتاح Gemini جاهز';
-            } else {
-                localStorage.removeItem('gemini_api_key');
-                box.classList.remove('border-green-500');
-                box.classList.add('border-red-500');
-                label.className = 'text-red-400 text-xs font-bold';
-                label.innerText = '⚠ أدخل مفتاح Gemini API أولاً';
-            }
-        }
-        function clearApiKey() {
-            localStorage.removeItem('gemini_api_key');
-            document.getElementById('apiKeyInput').value = '';
-            saveApiKey('');
-        }
-        function toggleApiKeyVisibility() {
-            const input = document.getElementById('apiKeyInput');
-            const icon = document.getElementById('eyeIcon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'ph ph-eye-slash text-lg';
-            } else {
-                input.type = 'password';
-                icon.className = 'ph ph-eye text-lg';
-            }
-        }
-        function checkApiKeyAndUpload() {
-            const key = getApiKey();
-            if (!key) {
-                showAlert('مفتاح API مطلوب', 'يرجى إدخال مفتاح Gemini API أولاً.\nيمكنك الحصول عليه مجاناً من: aistudio.google.com', 'error');
-                document.getElementById('apiKeyInput').focus();
-                return;
-            }
-            document.getElementById('pdfInput').click();
-        }
+      }
+    }
+  }
+};
 
-        // --- UI Functions ---
-        function showAlert(title, message, type = 'error') {
-            const modal = document.getElementById('alertModal');
-            const content = document.getElementById('alertModalContent');
-            document.getElementById('alertTitle').innerText = title;
-            document.getElementById('alertMessage').innerText = message;
-            let iconHtml = '';
-            if (type === 'error') iconHtml = '<div class="bg-red-100 p-2 rounded-full"><i class="ph-fill ph-warning-circle text-3xl text-red-500"></i></div>';
-            else if (type === 'success') iconHtml = '<div class="bg-green-100 p-2 rounded-full"><i class="ph-fill ph-check-circle text-3xl text-green-500"></i></div>';
-            else iconHtml = '<div class="bg-indigo-100 p-2 rounded-full"><i class="ph-fill ph-info text-3xl text-indigo-500"></i></div>';
-            document.getElementById('alertIconContainer').innerHTML = iconHtml;
-            modal.classList.remove('hidden');
-            void modal.offsetWidth;
-            modal.classList.remove('opacity-0');
-            content.classList.remove('scale-95');
-        }
-        function closeAlert() {
-            const modal = document.getElementById('alertModal');
-            const content = document.getElementById('alertModalContent');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
-            setTimeout(() => { modal.classList.add('hidden'); }, 300);
-        }
-        function setLoadText(msg) {
-            document.getElementById('loadingText').innerText = msg;
-        }
+async function callGemini(imageB64s, isFirst, isRetry=false){
+  if(!state.apiKey) throw new Error('يلزم إضافة مفتاح Gemini API من الإعدادات.');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`;
+  const parts = [{text: buildPrompt(isFirst, isRetry)}];
+  imageB64s.forEach(b=> parts.push({inlineData:{mimeType:"image/png", data:b}}));
 
-        // --- PDF to Image ---
-        async function getPageBase64(pdf, pageNum) {
-            const page = await pdf.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 2.0 });
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-            return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-        }
+  const payload = {
+    contents:[{role:"user", parts}],
+    generationConfig:{
+      responseMimeType:"application/json",
+      responseSchema: RESPONSE_SCHEMA,
+      temperature: isRetry?0.0:0.1,
+    }
+  };
 
-        async function processPDF(event) {
-            const file = event.target.files[0];
-            event.target.value = '';
-            if (!file) return;
-            const apiKey = getApiKey();
-            if (!apiKey) {
-                showAlert('مفتاح API مطلوب', 'يرجى إدخال مفتاح Gemini API أولاً.', 'error');
-                return;
-            }
-            globalData = [];
-            document.getElementById('uploadPrompt').classList.add('hidden');
-            document.getElementById('tableContainer').classList.add('hidden');
-            document.getElementById('loadingState').classList.remove('hidden');
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                const totalPages = pdf.numPages;
-                let allTransactions = [];
-                let finalInitialBalance = 0;
+  const delays = [800, 1600, 3200, 6400, 12800];
+  for(let attempt=0; attempt<=5; attempt++){
+    try{
+      const res = await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok){
+        const t = await res.text();
+        if(res.status===401 || res.status===403) throw new Error('مفتاح API غير صحيح.');
+        if(res.status===429 && attempt<5){ await new Promise(r=>setTimeout(r, delays[attempt])); continue; }
+        throw new Error(`خطأ ${res.status}: ${t.slice(0,200)}`);
+      }
+      const j = await res.json();
+      let txt = j.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+      txt = txt.replace(/```json|```/g,'').trim();
+      return JSON.parse(txt);
+    }catch(e){
+      if(attempt>=5) throw e;
+      if(String(e.message).includes('غير صحيح')) throw e;
+      await new Promise(r=>setTimeout(r, delays[attempt]));
+    }
+  }
+}
 
-                // صفحة واحدة في كل طلب لتجنب تجاوز حدود API المجاني
-                const batchSize = 1;
-                for (let i = 1; i <= totalPages; i += batchSize) {
-                    const batchEnd = Math.min(i + batchSize - 1, totalPages);
-                    setLoadText(`تحويل الصفحة ${i} من ${totalPages} إلى صورة...`);
-                    const imagePromises = [];
-                    for (let p = i; p <= batchEnd; p++) imagePromises.push(getPageBase64(pdf, p));
-                    const images = await Promise.all(imagePromises);
-                    const imageParts = images.map(b64 => ({ inlineData: { mimeType: "image/jpeg", data: b64 } }));
-                    setLoadText(`Gemini يستخرج البيانات... (صفحة ${i} / ${totalPages})`);
-                    const chunkData = await extractDataWithGemini(imageParts, apiKey, i === 1);
-                    if (chunkData) {
-                        if (i === 1 && chunkData.initialBalance) finalInitialBalance = chunkData.initialBalance;
-                        if (chunkData.transactions && Array.isArray(chunkData.transactions))
-                            allTransactions = allTransactions.concat(chunkData.transactions);
-                    }
-                    // انتظار بسيط بين الصفحات لتجنب تجاوز حد الطلبات
-                    if (i < totalPages) await new Promise(r => setTimeout(r, 1500));
-                }
-                setLoadText("جاري بناء الجدول...");
-                populateData({ initialBalance: finalInitialBalance, transactions: allTransactions });
-            } catch (error) {
-                console.error(error);
-                document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('uploadPrompt').classList.remove('hidden');
-                showAlert('فشل المعالجة', error.message, 'error');
-            }
-        }
+async function callClaude(imageB64s, isFirst, isRetry=false){
+  if(!state.apiKey) throw new Error('يلزم إضافة مفتاح Claude (Anthropic) API من الإعدادات.');
+  const content = [{type:"text", text: buildPrompt(isFirst, isRetry) + `\n\nأجب بـ JSON فقط (بدون أي نص إضافي) وفق هذا الشكل:
+{"bank":"...", "initialBalance": 0, "transactions":[{"date":"","referenceNo":"","desc":"","debit":0,"credit":0,"balance":0}]}`}];
+  imageB64s.forEach(b=> content.push({type:"image", source:{type:"base64", media_type:"image/png", data:b}}));
 
-        // --- Gemini API Call ---
-        async function extractDataWithGemini(imageParts, apiKey, isFirstPage) {
-            // قائمة نماذج للتجربة بالترتيب
-            const models = [
-                'gemini-1.5-flash',
-                'gemini-1.5-pro',
-                'gemini-pro-vision'
-            ];
+  const payload = {
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 8000,
+    messages: [{role:"user", content}]
+  };
 
-            let prompt = `أنت محاسب مالي خبير. استخرج جميع حركات كشف الحساب من هذه الصور بدقة تامة.
-قواعد: المبالغ في عمود المدين أو بعلامة (-) هي debit. الأخرى في عمود الدائن هي credit.
-استخرج الأرقام بدون فواصل الآلاف. الخانات الفارغة = 0. لا تفوّت أي صف.`;
-            if (isFirstPage) prompt += `\nاستخرج الرصيد الافتتاحي في initialBalance. إذا لم يوجد ضع 0.`;
+  const delays = [800, 1600, 3200, 6400, 12800];
+  for(let attempt=0; attempt<=5; attempt++){
+    try{
+      const res = await fetch("https://api.anthropic.com/v1/messages",{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-api-key': state.apiKey,
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok){
+        const t = await res.text();
+        if(res.status===401 || res.status===403) throw new Error('مفتاح Claude API غير صحيح.');
+        if(res.status===429 && attempt<5){ await new Promise(r=>setTimeout(r, delays[attempt])); continue; }
+        throw new Error(`خطأ ${res.status}: ${t.slice(0,200)}`);
+      }
+      const j = await res.json();
+      let txt = (j.content?.[0]?.text || '{}').replace(/```json|```/g,'').trim();
+      // Strip any leading/trailing prose
+      const first = txt.indexOf('{'); const last = txt.lastIndexOf('}');
+      if(first>=0 && last>first) txt = txt.slice(first, last+1);
+      return JSON.parse(txt);
+    }catch(e){
+      if(attempt>=5) throw e;
+      if(String(e.message).includes('غير صحيح')) throw e;
+      await new Promise(r=>setTimeout(r, delays[attempt]));
+    }
+  }
+}
 
-            const payload = {
-                contents: [{ role: "user", parts: [{ text: prompt }, ...imageParts] }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            initialBalance: { type: "NUMBER" },
-                            transactions: {
-                                type: "ARRAY",
-                                items: {
-                                    type: "OBJECT",
-                                    properties: {
-                                        date:    { type: "STRING" },
-                                        desc:    { type: "STRING" },
-                                        debit:   { type: "NUMBER" },
-                                        credit:  { type: "NUMBER" },
-                                        balance: { type: "NUMBER" }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
+async function callAI(imageB64s, isFirst, isRetry=false){
+  return state.engine==='claude'
+    ? callClaude(imageB64s, isFirst, isRetry)
+    : callGemini(imageB64s, isFirst, isRetry);
+}
 
-            for (const model of models) {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                const delays = [5000, 10000, 20000, 40000, 60000];
-                for (let attempt = 0; attempt <= 3; attempt++) {
-                    try {
-                        const response = await fetch(url, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                        if (!response.ok) {
-                            const errText = await response.text();
-                            let errMsg = errText;
-                            try { errMsg = JSON.parse(errText)?.error?.message || errText; } catch(e){}
-                            if (response.status === 404) break; // جرب النموذج التالي
-                            if (response.status === 400) throw new Error(`مفتاح API غير صحيح: ${errMsg}`);
-                            if (response.status === 401 || response.status === 403) throw new Error(`مفتاح API غير مصرح (${response.status}).`);
-                            if (response.status === 429) {
-                                if (attempt < 3) { setLoadText(`تجاوز حد الطلبات، انتظار ${delays[attempt]/1000}ث...`); await new Promise(r=>setTimeout(r,delays[attempt])); continue; }
-                                throw new Error('تجاوزت الحد المسموح. حاول لاحقاً.');
-                            }
-                            throw new Error(`HTTP ${response.status}: ${errMsg}`);
-                        }
-                        const result = await response.json();
-                        let text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-                        text = text.replace(/```json/g,'').replace(/```/g,'').trim();
-                        return JSON.parse(text);
-                    } catch(e) {
-                        if (e.message.includes('401') || e.message.includes('403') || e.message.includes('مفتاح')) throw e;
-                        if (attempt < 3) { setLoadText(`إعادة المحاولة (${attempt+1}/3)...`); await new Promise(r=>setTimeout(r,delays[attempt]||5000)); }
-                        else break; // جرب النموذج التالي
-                    }
-                }
-                setLoadText(`جاري تجربة نموذج آخر...`);
-            }
-            throw new Error('جميع نماذج Gemini غير متاحة. تأكد من صحة المفتاح.');
-        }
+/* ---------- Main pipeline ---------- */
+async function handleFiles(files){
+  if(!files.length) return;
+  if(!state.apiKey){
+    showAlert('مفتاح API مطلوب',`يلزم إضافة مفتاح ${state.engine==='claude'?'Claude':'Gemini'} أولاً من الإعدادات (الترس أعلى اليسار).`,'info');
+    return;
+  }
+  state.startTime = performance.now();
+  showLoading('جاري التحضير','قراءة الملفات...', 2);
 
-        // --- Populate & Audit ---
-        function populateData(jsonData) {
-            if (jsonData.initialBalance) document.getElementById('initialBalance').value = jsonData.initialBalance;
-            if (jsonData.transactions && Array.isArray(jsonData.transactions)) {
-                jsonData.transactions.forEach(tx => {
-                    globalData.push({
-                        id: globalData.length + 1,
-                        date: tx.date || "", desc: tx.desc || "حركة مالية",
-                        rawDebit: tx.debit ? tx.debit.toString() : "",
-                        rawCredit: tx.credit ? tx.credit.toString() : "",
-                        rawBalance: tx.balance ? tx.balance.toString() : ""
-                    });
-                });
-            }
-            document.getElementById('loadingState').classList.add('hidden');
-            document.getElementById('tableContainer').classList.remove('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('exportBtn').disabled = false;
-            document.getElementById('exportBtn').classList.remove('opacity-50', 'cursor-not-allowed');
-            runAudit();
-        }
+  try{
+    // 1) Convert all sources to PNG base64
+    let images = [];
+    if(files.length===1 && files[0].type==='application/pdf'){
+      const buf = await files[0].arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+      updateLoading(`تحويل ${pdf.numPages} صفحة إلى صور...`, 8);
+      const tasks = [];
+      for(let i=1; i<=pdf.numPages; i++){
+        tasks.push(()=> pdfPageToPNG(pdf, i, state.quality));
+      }
+      const arr = await runParallel(tasks, Math.min(state.concurrency, 6),
+        (done,total)=> updateLoading(`تحويل الصفحات (${done}/${total})`, 8 + (done/total)*20));
+      images = arr.filter(x=>typeof x==='string');
+    } else {
+      files.sort((a,b)=> a.name.localeCompare(b.name, undefined,{numeric:true, sensitivity:'base'}));
+      const tasks = files.map(f => ()=> fileToPNG(f, 1800));
+      const arr = await runParallel(tasks, Math.min(state.concurrency,6),
+        (done,total)=> updateLoading(`معالجة الصور (${done}/${total})`, 8 + (done/total)*20));
+      images = arr.filter(x=>typeof x==='string');
+    }
+    state.pageCount = images.length;
 
-        function parseCleanNumber(val) {
-            if (!val) return 0;
-            let num = parseFloat(String(val).replace(/[^\d.-]/g, ''));
-            return isNaN(num) ? 0 : num;
-        }
-        function formatDinar(num) {
-            if (num === 0 || isNaN(num)) return "";
-            return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
-        }
+    if(images.length===0) throw new Error('تعذرت قراءة أي صفحة.');
 
-        function runAudit() {
-            const tbody = document.getElementById('dataTableBody');
-            tbody.innerHTML = '';
-            let runningBalance = parseFloat(document.getElementById('initialBalance').value) || 0;
-            let errorCount = 0, validCount = 0;
-            hasErrors = false;
+    // 2) Send in batches of 2 pages each, in PARALLEL with concurrency
+    const BATCH = 2;
+    const batches = [];
+    for(let i=0; i<images.length; i+=BATCH){
+      batches.push({imgs: images.slice(i,i+BATCH), isFirst: i===0, index: Math.floor(i/BATCH)});
+    }
 
-            globalData.forEach((row, index) => {
-                let d = parseCleanNumber(row.rawDebit);
-                let c = parseCleanNumber(row.rawCredit);
-                let stated = parseCleanNumber(row.rawBalance);
-                let expected = runningBalance + c - d;
-                let isMatch = Math.abs(expected - stated) < 0.02;
+    updateLoading(`تشغيل الذكاء الاصطناعي (${batches.length} دفعة · ${state.concurrency} متوازي)`, 30);
 
-                if (!isMatch && stated !== 0) { errorCount++; hasErrors = true; }
-                else if (stated !== 0 || d !== 0 || c !== 0) validCount++;
+    const aiTasks = batches.map(b => async ()=>{
+      const r = await callAI(b.imgs, b.isFirst);
+      return {...r, __batch: b.index, __isFirst: b.isFirst};
+    });
 
-                const tr = document.createElement('tr');
-                tr.className = (!isMatch && stated !== 0) ? 'error-row border-b border-red-200' : 'hover:bg-slate-50 border-b border-slate-100';
+    const aiResults = await runParallel(aiTasks, state.concurrency,
+      (done, total)=> updateLoading(`الذكاء الاصطناعي يقرأ... (${done}/${total})`, 30 + (done/total)*60));
 
-                const icon = (isMatch || stated === 0)
-                    ? '<i class="ph-fill ph-check-circle text-green-500 text-xl"></i>'
-                    : '<i class="ph-fill ph-warning-circle text-red-600 text-xl animate-pulse"></i>';
+    // 3) Merge results
+    aiResults.sort((a,b)=> (a.__batch||0) - (b.__batch||0));
+    let initialBalance = 0;
+    let bankName = '';
+    let allTx = [];
+    let failedBatches = 0;
 
-                tr.innerHTML = `
-                    <td class="px-4 py-3 text-center bg-white">${icon}</td>
-                    <td class="px-3 py-3 text-slate-500 font-mono">${row.id}</td>
-                    <td class="px-4 py-3 text-slate-700 font-mono editable" contenteditable="true" data-field="date" data-idx="${index}">${row.date}</td>
-                    <td class="px-4 py-3 text-slate-700 editable" contenteditable="true" data-field="desc" data-idx="${index}">${row.desc}</td>
-                    <td class="px-4 py-3 border-r border-slate-200 text-red-600 font-mono font-semibold editable text-left bg-red-50/30" dir="ltr" contenteditable="true" data-field="rawDebit" data-idx="${index}">${row.rawDebit||""}</td>
-                    <td class="px-4 py-3 text-green-600 font-mono font-semibold editable text-left bg-green-50/30" dir="ltr" contenteditable="true" data-field="rawCredit" data-idx="${index}">${row.rawCredit||""}</td>
-                    <td class="px-4 py-3 border-r border-slate-200 text-indigo-900 font-mono font-bold editable text-left bg-indigo-50/30" dir="ltr" contenteditable="true" data-field="rawBalance" data-idx="${index}">${row.rawBalance||""}</td>
-                    <td class="px-4 py-3 border-r border-slate-200 font-mono font-bold text-left ${isMatch?'text-slate-500':'text-slate-800'}" dir="ltr">${formatDinar(expected)}</td>
-                    <td class="px-4 py-3 text-center font-mono text-left ${!isMatch&&stated!==0?'error-cell bg-red-100/50':'text-slate-300'}" dir="ltr">${!isMatch&&stated!==0?formatDinar(expected-stated):'-'}</td>
-                `;
-                tbody.appendChild(tr);
-                runningBalance = stated !== 0 ? stated : expected;
-            });
+    for(const r of aiResults){
+      if(r.error){ failedBatches++; continue; }
+      if(r.__isFirst && r.initialBalance) initialBalance = r.initialBalance;
+      if(!bankName && r.bank) bankName = r.bank;
+      if(Array.isArray(r.transactions)) allTx = allTx.concat(r.transactions);
+    }
 
-            document.getElementById('statTotal').innerText = globalData.length;
-            document.getElementById('statErrors').innerText = errorCount;
-            document.getElementById('statValid').innerText = validCount;
-            const eb = document.getElementById('errorStatBox');
-            errorCount > 0 ? eb.classList.add('bg-red-100','border-red-300') : eb.classList.remove('bg-red-100','border-red-300');
-            attachEditListeners();
-        }
+    if(allTx.length===0) throw new Error('لم يتم استخراج أي حركة. جرّب تحسين جودة الصور أو زيادة جودة المعالجة.');
 
-        function attachEditListeners() {
-            document.querySelectorAll('.editable').forEach(cell => {
-                cell.addEventListener('blur', function() {
-                    globalData[this.getAttribute('data-idx')][this.getAttribute('data-field')] = this.innerText.trim();
-                    if (this.getAttribute('data-field').startsWith('raw')) runAudit();
-                });
-                cell.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
-                });
-            });
-        }
+    state.bank = bankName;
+    state.elapsedMs = performance.now() - state.startTime;
 
-        function exportToExcel() {
-            if (globalData.length === 0) return;
-            if (hasErrors) { showAlert('البيانات غير مطابقة!', 'يوجد أسطر حمراء. صحّحها أولاً.', 'error'); return; }
-            let rows = [["م","تاريخ الحركة","البيان / الوصف","دائن (+)","مدين (-)","الرصيد"]];
-            globalData.forEach((r,i) => rows.push([r.id||(i+1),r.date,r.desc,parseCleanNumber(r.rawCredit)||"",parseCleanNumber(r.rawDebit)||"",parseCleanNumber(r.rawBalance)||""]));
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            const wb = XLSX.utils.book_new();
-            if (!ws['!views']) ws['!views'] = [];
-            ws['!views'].push({ rightToLeft: true });
-            ws['!cols'] = [{wch:5},{wch:15},{wch:50},{wch:15},{wch:15},{wch:20}];
-            XLSX.utils.book_append_sheet(wb, ws, "كشف الحساب");
-            XLSX.writeFile(wb, "كشف_حساب_مدقق.xlsx");
-            showAlert('تم بنجاح!', 'تم تصدير الكشف بصيغة Excel.', 'success');
-        }
+    updateLoading('تدقيق وترتيب البيانات...', 95);
+    populateData(initialBalance, allTx);
 
-        // تحميل المفتاح المحفوظ
-        window.addEventListener('load', () => {
-            const saved = localStorage.getItem('gemini_api_key');
-            if (saved) {
-                document.getElementById('apiKeyInput').value = saved;
-                saveApiKey(saved);
-            }
-        });
-    </script>
+    if(failedBatches>0){
+      showAlert('تحذير جزئي', `فشلت ${failedBatches} دفعة من ${batches.length}. راجع الجدول بدقة.`,'error');
+    }
+  }catch(e){
+    hideLoading();
+    console.error(e);
+    showAlert('فشل المعالجة', e.message || String(e), 'error');
+  }
+}
+
+/* ---------- Data handling ---------- */
+function parseDate(s){
+  if(!s) return new Date(0);
+  const p = String(s).split(/[-/.]/);
+  if(p.length===3){
+    let d,m,y;
+    if(p[0].length===4){ y=+p[0]; m=+p[1]-1; d=+p[2]; }
+    else { d=+p[0]; m=+p[1]-1; y=+p[2]; if(y<100) y+=2000; }
+    return new Date(y,m,d);
+  }
+  return new Date(s);
+}
+
+function populateData(initBal, txs){
+  document.getElementById('initialBalance').value = initBal || 0;
+
+  // Sort by date ascending (zero-dates first)
+  txs.sort((a,b)=> parseDate(a.date) - parseDate(b.date));
+
+  state.rows = txs.map((tx,i)=>({
+    id: i+1,
+    date: tx.date || '',
+    referenceNo: tx.referenceNo || '',
+    desc: tx.desc || 'حركة مالية',
+    debit: +tx.debit || 0,
+    credit: +tx.credit || 0,
+    statedBalance: +tx.balance || 0,
+    rawDebit: tx.debit ? String(tx.debit) : '',
+    rawCredit: tx.credit ? String(tx.credit) : '',
+    rawBalance: tx.balance ? String(tx.balance) : '',
+    isError: false,
+  }));
+
+  hideLoading();
+  document.getElementById('heroSection').classList.add('hidden');
+  document.getElementById('workArea').classList.remove('hidden');
+  document.getElementById('workArea').classList.add('fade-up');
+
+  // Show bank tag + chips
+  const bankTag = document.getElementById('bankTag');
+  if(state.bank){
+    bankTag.classList.remove('hidden');
+    document.getElementById('bankName').textContent = state.bank;
+  } else {
+    bankTag.classList.add('hidden');
+  }
+  document.getElementById('pageCount').querySelector('span').textContent = `${state.pageCount} صفحة`;
+  const secs = (state.elapsedMs/1000).toFixed(1);
+  document.getElementById('timeChip').querySelector('span').textContent = `${secs} ثانية`;
+
+  runAudit();
+  autoSave();
+}
+
+function parseNum(v){
+  if(v==null || v==='') return 0;
+  const s = String(v).replace(/[^\d.\-]/g,'');
+  const n = parseFloat(s);
+  return isNaN(n)?0:n;
+}
+
+function fmt(n){
+  if(n===0 || isNaN(n)) return '';
+  return Number(n).toLocaleString('en-US',{minimumFractionDigits:3, maximumFractionDigits:3});
+}
+
+function runAudit(){
+  let running = parseFloat(document.getElementById('initialBalance').value) || 0;
+  let errors = 0, valid = 0;
+  let sumDebit = 0, sumCredit = 0;
+
+  state.rows.forEach(r=>{
+    const d = parseNum(r.rawDebit);
+    const c = parseNum(r.rawCredit);
+    const stated = parseNum(r.rawBalance);
+    const expected = running + c - d;
+    const diff = Math.abs(expected - stated);
+    const match = diff < 0.02;
+
+    r.debit = d; r.credit = c; r.statedBalance = stated;
+    r.expected = expected; r.diff = expected - stated;
+
+    if(!match && stated !== 0){ r.isError = true; errors++; }
+    else { r.isError = false; if(d||c||stated) valid++; }
+
+    sumDebit += d; sumCredit += c;
+    running = stated!==0 ? stated : expected;
+  });
+
+  document.getElementById('statTotal').textContent = state.rows.length;
+  document.getElementById('statOk').textContent = valid;
+  document.getElementById('statErr').textContent = errors;
+  document.getElementById('statDebit').textContent = fmt(sumDebit) || '—';
+  document.getElementById('statCredit').textContent = fmt(sumCredit) || '—';
+  document.getElementById('statFinal').textContent = fmt(running) || '—';
+
+  renderRows();
+}
+
+function passesFilter(r){
+  if(state.filter==='err' && !r.isError) return false;
+  if(state.filter==='debit' && !r.debit) return false;
+  if(state.filter==='credit' && !r.credit) return false;
+  if(state.search){
+    const hay = (r.desc+' '+r.referenceNo+' '+r.date).toLowerCase();
+    if(!hay.includes(state.search)) return false;
+  }
+  return true;
+}
+
+function renderRows(){
+  const tb = document.getElementById('tbody');
+  tb.innerHTML = '';
+  const frag = document.createDocumentFragment();
+
+  state.rows.forEach((r, idx)=>{
+    if(!passesFilter(r)) return;
+    const tr = document.createElement('tr');
+    if(r.isError) tr.className = 'err-row';
+
+    const status = r.isError
+      ? '<span class="status-badge err" title="خطأ رياضي"><i class="ph-fill ph-warning"></i></span>'
+      : '<span class="status-badge ok" title="مطابق"><i class="ph-fill ph-check"></i></span>';
+
+    tr.innerHTML = `
+      <td class="text-center">${status}</td>
+      <td class="mono text-xs" style="color:var(--ink-2)">${r.id}</td>
+      <td><span class="editable mono text-xs" contenteditable="true" data-field="date" data-i="${idx}">${escapeHtml(r.date)}</span></td>
+      <td><span class="editable mono text-xs" contenteditable="true" data-field="referenceNo" data-i="${idx}">${escapeHtml(r.referenceNo || '—')}</span></td>
+      <td><span class="editable" contenteditable="true" data-field="desc" data-i="${idx}">${escapeHtml(r.desc)}</span></td>
+      <td class="num-cell debit"><span class="editable" contenteditable="true" data-field="rawDebit" data-i="${idx}">${escapeHtml(r.rawDebit)}</span></td>
+      <td class="num-cell credit"><span class="editable" contenteditable="true" data-field="rawCredit" data-i="${idx}">${escapeHtml(r.rawCredit)}</span></td>
+      <td class="num-cell balance"><span class="editable" contenteditable="true" data-field="rawBalance" data-i="${idx}">${escapeHtml(r.rawBalance)}</span></td>
+      <td class="num-cell" style="color:var(--ink-2)">${fmt(r.expected)}</td>
+      <td class="num-cell ${r.isError?'diff':''}" style="${r.isError?'':'color:var(--line)'}">${r.isError?fmt(r.diff):'—'}</td>
+    `;
+    frag.appendChild(tr);
+  });
+  tb.appendChild(frag);
+  attachEditors();
+}
+
+function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function attachEditors(){
+  document.querySelectorAll('.editable').forEach(el=>{
+    el.addEventListener('blur', function(){
+      const i = +this.dataset.i, f = this.dataset.field;
+      state.rows[i][f] = this.innerText.trim();
+      if(f.startsWith('raw')) runAudit();
+      autoSave();
+    });
+    el.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ e.preventDefault(); this.blur(); }
+      if(e.key==='Escape'){ this.innerText = state.rows[+this.dataset.i][this.dataset.field] || ''; this.blur(); }
+    });
+  });
+}
+
+/* ---------- Re-verify errors ---------- */
+async function reverifyErrors(){
+  const errorRows = state.rows.filter(r=>r.isError);
+  if(errorRows.length===0){ showAlert('لا توجد أخطاء','كل الحركات مطابقة رياضياً.','success'); return; }
+  showAlert('إعادة تحقق','هذه الميزة تعتمد على الصور الأصلية. أعد رفع الكشف لاستخدامها، أو راجع الأسطر الحمراء يدوياً.','info');
+}
+
+/* ---------- Export ---------- */
+function exportExcel(){
+  if(state.rows.length===0) return;
+  const hasErr = state.rows.some(r=>r.isError);
+  if(hasErr){
+    showAlert('البيانات غير مطابقة','توجد أسطر بها فرق رياضي. يرجى مراجعتها وتعديلها قبل التصدير لضمان صحة البيانات.','error');
+    return;
+  }
+
+  const rows = [
+    ['م','التاريخ','الرقم المرجعي','البيان','مدين','دائن','الرصيد']
+  ];
+  state.rows.forEach(r=>{
+    rows.push([r.id, r.date, r.referenceNo, r.desc,
+      parseNum(r.rawDebit) || '',
+      parseNum(r.rawCredit) || '',
+      parseNum(r.rawBalance) || '']);
+  });
+
+  // Totals row
+  const totD = state.rows.reduce((s,r)=>s+parseNum(r.rawDebit),0);
+  const totC = state.rows.reduce((s,r)=>s+parseNum(r.rawCredit),0);
+  rows.push(['','','','المجموع', totD, totC, '']);
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!views'] = [{rightToLeft:true}];
+  ws['!cols'] = [{wch:5},{wch:14},{wch:18},{wch:50},{wch:14},{wch:14},{wch:18}];
+  // Bold header
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for(let c=range.s.c; c<=range.e.c; c++){
+    const addr = XLSX.utils.encode_cell({r:0, c});
+    if(ws[addr]) ws[addr].s = {font:{bold:true}};
+  }
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'كشف الحساب');
+  const bankSafe = (state.bank || 'كشف').replace(/[^a-zA-Z0-9\u0600-\u06FF_-]/g,'_');
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `كشف_${bankSafe}_${date}.xlsx`);
+  showAlert('تم التصدير','تم حفظ الملف بنجاح.','success');
+}
+
+/* ---------- Autosave ---------- */
+let saveTimer;
+function autoSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    STORE.set('lastSession',{
+      rows: state.rows, bank: state.bank,
+      initBal: parseFloat(document.getElementById('initialBalance').value)||0,
+      pageCount: state.pageCount, elapsedMs: state.elapsedMs,
+      ts: Date.now()
+    });
+    const d = new Date();
+    document.getElementById('lastSave').textContent = d.toLocaleTimeString('ar-LY',{hour:'2-digit',minute:'2-digit'});
+  }, 400);
+}
+
+/* ---------- Demo data ---------- */
+function loadDemo(){
+  state.bank = 'مصرف الجمهورية (بيانات تجريبية)';
+  state.pageCount = 1;
+  state.elapsedMs = 0;
+  const demo = [
+    {date:'01/03/2025', referenceNo:'TRX-10234', desc:'إيداع نقدي فرع طرابلس', debit:0, credit:50000, balance:50000},
+    {date:'03/03/2025', referenceNo:'TRX-10287', desc:'حوالة واردة من شركة الخليج', debit:0, credit:125750.500, balance:175750.500},
+    {date:'05/03/2025', referenceNo:'CHK-4521', desc:'شيك رقم 4521 لأمر المورد أحمد علي', debit:18500, credit:0, balance:157250.500},
+    {date:'08/03/2025', referenceNo:'POS-8832', desc:'دفعة POS — محطة وقود', debit:250.750, credit:0, balance:156999.750},
+    {date:'12/03/2025', referenceNo:'TRX-10912', desc:'رسوم خدمات مصرفية', debit:45, credit:0, balance:156954.750},
+    {date:'15/03/2025', referenceNo:'WIRE-2201', desc:'تحويل لحساب العميل رقم 4401', debit:35000, credit:0, balance:121954.750},
+    {date:'20/03/2025', referenceNo:'TRX-11156', desc:'إيداع مقابل فواتير مارس', debit:0, credit:82300.250, balance:204255},
+    {date:'25/03/2025', referenceNo:'FEE-0034', desc:'عمولة تحويل SWIFT', debit:125, credit:0, balance:204130},
+  ];
+  populateData(0, demo);
+}
+
+/* ---------- Init: restore last session? ---------- */
+(function restore(){
+  const last = STORE.get('lastSession', null);
+  if(last && last.rows && last.rows.length && (Date.now()-last.ts) < 7*24*3600*1000){
+    // ask user via a subtle toast — here just log
+    console.log('يوجد جلسة محفوظة. سيتم تجاهلها. استخدم زر "كشف جديد" بعد التحميل إذا أردت.');
+  }
+})();
+</script>
+
 </body>
 </html>
