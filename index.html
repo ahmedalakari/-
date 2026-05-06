@@ -3,1351 +3,2140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>كَشْف · مستخرج كشوفات الحساب البنكية الليبية</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
-
+<title>لوحة التحكم المالية | شركة ركان المتوسط | الربع الأول 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root{
-    --ink:#0b1220;
-    --ink-2:#1a2332;
-    --paper:#fafaf7;
-    --paper-2:#f3f1ea;
-    --line:#d9d4c3;
-    --line-2:#e7e3d4;
-    --accent:#8b6914;      /* muted gold / brass */
-    --accent-2:#c89b3c;
-    --red:#a02b2b;
-    --red-soft:#f5e6e6;
-    --green:#1f6f43;
-    --green-soft:#e4efe6;
-    --blue:#1e4d6b;
-    --blue-soft:#e3ecf1;
-    --warn:#8b6914;
-    --mono:'JetBrains Mono',ui-monospace,monospace;
-    --body:'Readex Pro','IBM Plex Sans Arabic',sans-serif;
-    --display:'IBM Plex Sans Arabic','Readex Pro',serif;
-  }
-  html.dark{
-    --ink:#e8e3d4;
-    --ink-2:#c8c3b4;
-    --paper:#0e1117;
-    --paper-2:#161b22;
-    --line:#2a2f3a;
-    --line-2:#1f2430;
-    --accent:#d4a94a;
-    --accent-2:#e8c878;
-    --red:#e06060;
-    --red-soft:#3a1f1f;
-    --green:#5db383;
-    --green-soft:#1a2e22;
-    --blue:#6ba3c4;
-    --blue-soft:#1a2830;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;height:100%}
-  body{
-    font-family:var(--body);
-    background:var(--paper);
-    color:var(--ink);
-    font-feature-settings:"kern","liga","tnum";
-    -webkit-font-smoothing:antialiased;
-    transition:background .3s,color .3s;
-  }
-  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
-  .display{font-family:var(--display);letter-spacing:-.01em}
+:root{
+  --bg:#f0f2f8;
+  --surface:#ffffff;
+  --surface2:#f7f8fc;
+  --surface3:#eef0f8;
+  --border:#e8eaf5;
+  --border2:#d8daf0;
+  --primary:#1a2240;
+  --accent:#2c5de5;
+  --accent2:#f07820;
+  --accent3:#ff9f43;
+  --red:#f05252;
+  --green:#16a34a;
+  --green-l:#f0fdf4;
+  --red-l:#fef2f2;
+  --amber:#f07820;--amber-l:#fff7ed;
+  --teal:#2c5de5;--teal-l:#eff6ff;
+  --text:#1a2240;
+  --text2:#5a6482;
+  --muted:#9ba5c0;
+  --shadow-sm:0 2px 12px rgba(44,93,229,.05),0 1px 3px rgba(0,0,0,.03);
+  --shadow-md:0 8px 40px rgba(44,93,229,.10),0 2px 10px rgba(0,0,0,.05);
+  --shadow-card:0 2px 20px rgba(44,93,229,.06),0 0 0 1px rgba(232,234,245,.8);
+  --r-sm:8px;--r-md:14px;--r-lg:20px;--r-xl:24px;
+  --nav-w:240px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Cairo',sans-serif;
+  background:linear-gradient(145deg,#edf0fc 0%,#f5f7fe 35%,#fdf6ef 65%,#f8f3fd 100%);
+  background-attachment:fixed;
+  color:var(--text);font-size:13px;line-height:1.6;
+  min-height:100vh;direction:rtl;
+}
 
-  /* Subtle paper grain */
-  body::before{
-    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;
-    background-image:
-      radial-gradient(circle at 1px 1px,rgba(0,0,0,.04) 1px,transparent 0);
-    background-size:24px 24px;
-  }
-  html.dark body::before{opacity:.15;background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.04) 1px,transparent 0)}
+/* SIDEBAR */
+.sidebar{
+  position:fixed;top:0;right:0;width:var(--nav-w);height:100vh;
+  background:var(--surface);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:200;
+  box-shadow:2px 0 20px rgba(44,93,229,.06);
+  transition:transform .3s ease;
+}
+.sb-logo{
+  padding:0 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;height:70px;flex-shrink:0;
+}
+.sb-logo-icon{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,#2c5de5,#f07820);
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  box-shadow:0 4px 12px rgba(44,93,229,.25);
+}
+.sb-title{font-weight:800;font-size:15px;color:var(--text);line-height:1.2;letter-spacing:-.2px}
+.sb-sub{font-size:10px;color:var(--muted);margin-top:1px;font-weight:500}
+.sb-nav{padding:12px 10px;overflow-y:auto;flex:1;min-height:0;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{display:none}
+.sb-lbl{
+  padding:10px 12px 5px;font-size:9px;color:var(--muted);font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:9px 12px;
+  cursor:pointer;border-radius:10px;margin:2px 0;
+  color:var(--text2);font-weight:600;font-size:12.5px;
+  transition:all .18s;border:none;background:none;
+  width:100%;text-align:right;font-family:'Cairo',sans-serif;
+  position:relative;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{
+  background:color-mix(in srgb,var(--accent) 10%,transparent);
+  color:var(--accent);font-weight:700;
+}
+.nav-item.active::after{
+  content:'';position:absolute;right:0;top:20%;height:60%;
+  width:3px;background:var(--accent);border-radius:3px 0 0 3px;
+}
+.nav-ico{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  background:var(--surface2);transition:all .18s;
+}
+.nav-item:hover .nav-ico{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.nav-item.active .nav-ico{background:color-mix(in srgb,var(--accent) 15%,transparent)}
+.sb-footer{
+  flex-shrink:0;padding:8px 10px 12px;border-top:1px solid var(--border);
+}
+.upload-zone{
+  border:1.5px dashed var(--border2);border-radius:var(--r-md);
+  padding:10px 12px;text-align:center;cursor:pointer;transition:all .2s;
+  background:var(--surface2);display:flex;align-items:center;gap:10px;
+}
+.upload-zone:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.upload-zone p{font-size:10.5px;color:var(--text2);line-height:1.4;margin-top:0;text-align:right}
+.upload-zone span{color:var(--accent);font-weight:700}
+input[type=file]{display:none}
+.status-msg{
+  font-size:11px;color:var(--accent2);margin-top:8px;padding:7px 10px;
+  background:color-mix(in srgb,var(--accent2) 10%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent2) 25%,transparent);
+  border-radius:8px;display:none;text-align:center;font-weight:600;
+}
 
-  .shell{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+/* MAIN */
+.main{margin-right:var(--nav-w);min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 24px;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 0 var(--border),var(--shadow-sm);
+}
+.tb-title{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.tb-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.period-pill{
+  background:color-mix(in srgb,var(--accent2) 12%,transparent);
+  color:var(--accent2);
+  border:1px solid color-mix(in srgb,var(--accent2) 28%,transparent);
+  padding:5px 13px;border-radius:20px;font-size:12px;font-weight:700;
+}
 
-  /* Top brand bar */
-  .brandbar{
-    border-bottom:1px solid var(--line);
-    background:var(--paper);
-    position:sticky;top:0;z-index:40;
-    backdrop-filter:blur(8px);
-    background:color-mix(in srgb,var(--paper) 92%,transparent);
-  }
-  .logo-mark{
-    width:40px;height:40px;display:grid;place-items:center;
-    background:var(--ink);color:var(--paper);
-    border-radius:6px;font-weight:700;font-family:var(--display);
-    font-size:20px;position:relative;
-  }
-  .logo-mark::after{
-    content:'';position:absolute;inset:-3px;border:1px solid var(--accent);border-radius:8px;opacity:.4;
-  }
+/* CONTENT */
+.content{padding:24px}
+.panel{display:none;animation:fi .25s ease}
+.panel.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-  /* Buttons */
-  .btn{
-    display:inline-flex;align-items:center;gap:.5rem;
-    padding:.625rem 1rem;border-radius:6px;
-    font-weight:500;font-size:.875rem;
-    transition:all .15s;cursor:pointer;border:1px solid transparent;
-    font-family:var(--body);
-  }
-  .btn-primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-  .btn-primary:hover{background:var(--ink-2)}
-  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-  .btn-ghost:hover{background:var(--paper-2);border-color:var(--ink)}
-  .btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn-accent:hover{filter:brightness(1.08)}
-  .btn:disabled{opacity:.4;cursor:not-allowed}
-  .btn-icon{padding:.5rem;width:36px;height:36px;justify-content:center}
+/* FILTER BAR */
+.fbar{
+  display:flex;flex-wrap:wrap;gap:10px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:12px 16px;margin-bottom:20px;
+  align-items:center;box-shadow:var(--shadow-card);
+}
+.fbar select,.fbar input[type=text]{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r-md);color:var(--text);font-family:'Cairo',sans-serif;
+  font-size:12px;padding:6px 12px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.fbar select:focus,.fbar input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent);
+}
+.fspacer{flex:1}
+.fdiv{width:1px;height:22px;background:var(--border)}
 
-  /* Chip / pill */
-  .chip{
-    display:inline-flex;align-items:center;gap:.375rem;
-    padding:.25rem .625rem;border-radius:999px;
-    font-size:.75rem;font-weight:500;
-    border:1px solid var(--line);
-    background:var(--paper-2);color:var(--ink-2);
-  }
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+  border-radius:var(--r-md);border:1px solid var(--border);
+  background:var(--surface2);color:var(--text2);
+  font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.btn-green{
+  background:var(--accent2);border-color:var(--accent2);color:#fff;
+  box-shadow:0 4px 12px rgba(240,120,32,.25);
+}
+.btn-green:hover{opacity:.9;box-shadow:0 6px 18px rgba(240,120,32,.35);transform:translateY(-1px)}
 
-  /* Card */
-  .card{
-    background:var(--paper);
-    border:1px solid var(--line);
-    border-radius:8px;
-  }
-  .card-inset{background:var(--paper-2);border:1px solid var(--line-2)}
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px;margin-bottom:20px}
+.kpi{
+  background:var(--surface);border-radius:14px;
+  padding:16px 18px;
+  display:flex;flex-direction:column;
+  transition:transform .18s,box-shadow .18s;
+  border:1px solid var(--border);
+  border-right:4px solid var(--kpi-clr,var(--accent));
+  box-shadow:var(--shadow-card);position:relative;overflow:hidden;
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.kpi.c-blue{--kpi-clr:#2c5de5}
+.kpi.c-teal{--kpi-clr:#2c5de5}
+.kpi.c-red{--kpi-clr:#f05252}
+.kpi.c-green{--kpi-clr:#16a34a}
+.kpi.c-amber{--kpi-clr:#f07820}
+.kpi-ico{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  margin-bottom:10px;
+  background:color-mix(in srgb,var(--kpi-clr,var(--accent)) 12%,transparent);
+}
+.kpi-lbl{font-size:11px;color:var(--text2);font-weight:600;margin-bottom:5px}
+.kpi-val{
+  font-size:clamp(16px,1.5vw,22px);font-weight:800;line-height:1.15;
+  color:var(--kpi-clr,var(--accent));letter-spacing:-.3px;
+}
+.kpi-sub{font-size:10.5px;color:var(--muted);margin-top:5px}
+.kpi-badge{
+  display:inline-flex;align-items:center;padding:2px 8px;
+  border-radius:999px;font-size:10px;font-weight:700;margin-top:6px;
+}
+.b-up{background:color-mix(in srgb,#16a34a 12%,transparent);color:#16a34a;border:1px solid color-mix(in srgb,#16a34a 25%,transparent)}
+.b-down{background:color-mix(in srgb,#f05252 12%,transparent);color:#f05252;border:1px solid color-mix(in srgb,#f05252 25%,transparent)}
+.b-gray{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
 
-  /* Hero / dropzone */
-  .hero{
-    min-height:calc(100vh - 73px);
-    display:grid;place-items:center;padding:2rem;
-  }
-  .hero-inner{max-width:960px;width:100%}
-  .hero-title{
-    font-family:var(--display);
-    font-size:clamp(2rem,5vw,3.5rem);
-    font-weight:700;line-height:1.1;letter-spacing:-.02em;
-    margin-bottom:1rem;
-  }
-  .hero-sub{color:var(--ink-2);font-size:1.0625rem;line-height:1.7;max-width:640px;margin-bottom:2.5rem}
+/* CARD */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-xl);box-shadow:var(--shadow-card);
+  margin-bottom:20px;overflow:hidden;
+}
+.card-hd{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{
+  font-size:13.5px;font-weight:700;color:var(--text);
+  display:flex;align-items:center;gap:8px;letter-spacing:-.1px;
+}
+.card-ico{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  background:var(--surface2);
+}
+.card-body{padding:18px 20px}
+.card-scroll{overflow-x:auto}
 
-  .dropzone{
-    border:2px dashed var(--line);
-    border-radius:12px;
-    padding:3.5rem 2rem;
-    text-align:center;
-    background:var(--paper-2);
-    transition:all .2s;
-    cursor:pointer;position:relative;overflow:hidden;
-  }
-  .dropzone:hover,.dropzone.drag{
-    border-color:var(--accent);
-    background:color-mix(in srgb,var(--accent) 6%,var(--paper-2));
-  }
-  .dropzone.drag{transform:scale(1.005)}
-  .dropzone-icon{
-    width:64px;height:64px;margin:0 auto 1rem;
-    border-radius:50%;background:var(--paper);
-    border:1px solid var(--line);
-    display:grid;place-items:center;
-    font-size:28px;color:var(--accent);
-  }
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:680px}
+.tbl thead th{
+  background:var(--surface2);color:var(--text2);
+  padding:9px 12px;text-align:center;font-weight:700;font-size:11px;
+  white-space:nowrap;border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:2;letter-spacing:.2px;
+}
+.tbl thead th:first-child{text-align:right}
+.tbl tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+.tbl tbody tr:hover td{background:color-mix(in srgb,var(--accent) 3%,transparent)}
+.tbl tbody td{padding:8px 12px;color:var(--text);vertical-align:middle;text-align:center}
+.tbl tbody td:first-child{text-align:right}
+.tbl .num.red-num{color:var(--red);font-weight:700}
+.tbl .num{font-variant-numeric:tabular-nums;text-align:center;direction:ltr;font-weight:600}
+.tbl tr.sec td{
+  background:color-mix(in srgb,var(--accent) 7%,transparent);
+  color:var(--accent);font-weight:700;font-size:11px;
+  padding:6px 12px;text-align:right;
+}
+.tbl tr.sub td{
+  background:var(--surface2);font-weight:800;
+  border-top:1.5px solid var(--border2);border-bottom:1.5px solid var(--border2);
+  text-align:center;color:var(--text);
+}
+.tbl tr.sub td:first-child{text-align:right}
+.tbl tr.profit td{
+  background:color-mix(in srgb,#16a34a 8%,transparent);
+  color:#16a34a;font-weight:800;text-align:center;
+}
+.tbl tr.profit td:first-child{text-align:right}
+.tbl tr.loss td{
+  background:color-mix(in srgb,#f05252 8%,transparent);
+  color:#f05252;font-weight:800;text-align:center;
+}
+.tbl tr.loss td:first-child{text-align:right}
+.tbl tr.grand td{
+  background:linear-gradient(135deg,#1a2240,#2c3a6b);
+  color:#fff;font-weight:800;font-size:13px;padding:12px;text-align:center;
+}
+.tbl tr.grand td:first-child{text-align:right}
+.tbl tr.inv-tot td{
+  background:color-mix(in srgb,var(--accent) 8%,transparent);
+  color:var(--accent);font-weight:800;border-top:2px solid var(--accent);
+}
 
-  /* Feature grid on hero */
-  .features{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:1rem;margin-top:3rem;
-  }
-  .feat{
-    padding:1.25rem;border:1px solid var(--line);border-radius:8px;
-    background:var(--paper);
-  }
-  .feat-num{font-family:var(--mono);font-size:.75rem;color:var(--accent);margin-bottom:.5rem;letter-spacing:.1em}
-  .feat-title{font-weight:600;margin-bottom:.25rem;font-size:.9375rem}
-  .feat-desc{font-size:.8125rem;color:var(--ink-2);line-height:1.6}
+/* TAGS */
+.tag{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700}
+.t-blue{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
+.t-teal{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
+.t-amber{background:color-mix(in srgb,var(--accent2) 12%,transparent);color:var(--accent2);border:1px solid color-mix(in srgb,var(--accent2) 25%,transparent)}
+.t-red{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red);border:1px solid color-mix(in srgb,var(--red) 25%,transparent)}
+.t-green{background:color-mix(in srgb,#16a34a 12%,transparent);color:#16a34a;border:1px solid color-mix(in srgb,#16a34a 25%,transparent)}
+.t-gray{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
 
-  /* Stats strip */
-  .stats{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-    gap:1px;background:var(--line);border-radius:8px;overflow:hidden;
-    border:1px solid var(--line);
-  }
-  .stat{
-    background:var(--paper);padding:1rem 1.25rem;
-    display:flex;flex-direction:column;gap:.25rem;
-  }
-  .stat-label{font-size:.6875rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
-  .stat-value{font-family:var(--display);font-size:1.75rem;font-weight:700;letter-spacing:-.02em}
-  .stat-sub{font-size:.75rem;color:var(--ink-2)}
-  .stat.err .stat-value{color:var(--red)}
-  .stat.ok .stat-value{color:var(--green)}
+/* CHART GRID */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.chart-wrap{position:relative;width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--gray500)}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 
-  /* Table */
-  .tbl-wrap{
-    border:1px solid var(--line);border-radius:8px;overflow:hidden;
-    background:var(--paper);
-  }
-  table.ledger{
-    width:100%;border-collapse:collapse;font-size:.875rem;
-  }
-  table.ledger thead th{
-    background:var(--paper-2);color:var(--ink-2);
-    font-weight:600;font-size:.75rem;
-    text-transform:uppercase;letter-spacing:.06em;
-    padding:.75rem .75rem;text-align:right;
-    border-bottom:1px solid var(--line);
-    position:sticky;top:0;z-index:5;white-space:nowrap;
-  }
-  table.ledger thead th.num{text-align:left;direction:ltr}
-  table.ledger tbody td{
-    padding:.625rem .75rem;
-    border-bottom:1px solid var(--line-2);
-    vertical-align:middle;
-  }
-  table.ledger tbody tr:last-child td{border-bottom:none}
-  table.ledger tbody tr{transition:background .12s}
-  table.ledger tbody tr:hover{background:var(--paper-2)}
-  table.ledger tr.err-row{background:var(--red-soft)}
-  html.dark table.ledger tr.err-row{background:color-mix(in srgb,var(--red) 12%,var(--paper))}
-  table.ledger tr.err-row:hover{background:color-mix(in srgb,var(--red) 14%,var(--paper))}
+/* EXP BARS */
+.exp-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.exp-lbl{font-size:12px;color:var(--gray700);min-width:170px;text-align:right}
+.exp-track{flex:1;background:var(--gray100);border-radius:4px;height:20px;overflow:hidden}
+.exp-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;justify-content:flex-end;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.exp-val{font-size:10.5px;color:#fff;font-weight:700;white-space:nowrap}
+.exp-pct{font-size:11px;color:var(--gray500);min-width:38px;text-align:left;font-weight:700}
 
-  .num-cell{font-family:var(--mono);text-align:left;direction:ltr;font-variant-numeric:tabular-nums}
-  .debit{color:var(--red)}
-  .credit{color:var(--green)}
-  .balance{color:var(--blue);font-weight:600}
-  .diff{color:var(--red);font-weight:600}
+/* NOTES */
+.notes{background:color-mix(in srgb,var(--accent2) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 22%,transparent);border-radius:var(--r-md);padding:11px 15px;font-size:11.5px;color:var(--text2);margin-top:12px;line-height:1.7}
+.footnote{font-size:10.5px;color:var(--gray500);margin-top:7px;padding-top:7px;border-top:1px solid var(--gray100);line-height:1.6}
 
-  .editable{
-    cursor:text;padding:.25rem .5rem;border-radius:4px;
-    border:1px solid transparent;transition:all .12s;
-    min-width:40px;display:inline-block;
-  }
-  .editable:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
-  .editable:focus{background:var(--paper);border-color:var(--accent);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+/* CHANGE PILL */
+.chpill{display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:9px;font-size:10px;font-weight:800}
+.ch-up{background:var(--green-l);color:var(--green)}
+.ch-dn{background:var(--red-l);color:var(--red)}
 
-  .status-badge{
-    display:inline-flex;align-items:center;justify-content:center;
-    width:24px;height:24px;border-radius:50%;font-size:14px;
-  }
-  .status-badge.ok{background:var(--green-soft);color:var(--green)}
-  .status-badge.err{background:var(--red-soft);color:var(--red)}
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(110%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-right:0 !important}
+  .chart-grid{grid-template-columns:1fr}
+  .content{padding:14px}
+  .topbar{padding:0 14px}
+  .co-header{padding:14px 16px}
+  .co-info h2{font-size:16px}
+}
+@media(max-width:600px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .kpi{padding:13px}
+  .tbl{font-size:11px}
+  .fbar{gap:8px;padding:10px 12px}
+}
+@media(max-width:400px){.kpi-grid{grid-template-columns:1fr}}
+.menu-btn{
+  display:none;background:var(--surface2);border:1px solid var(--border);
+  cursor:pointer;font-size:18px;color:var(--text2);padding:6px 10px;
+  border-radius:var(--r-md);line-height:1;transition:all .2s;
+}
+.menu-btn:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:900px){.menu-btn{display:flex;align-items:center;justify-content:center}}
+.overlay{display:none;position:fixed;inset:0;background:rgba(26,34,64,.4);backdrop-filter:blur(4px);z-index:150}
+.overlay.open{display:block}
 
-  /* Progress */
-  .progress-track{
-    height:4px;background:var(--line-2);border-radius:2px;overflow:hidden;
-  }
-  .progress-bar{
-    height:100%;background:var(--accent);
-    transition:width .3s ease;
-  }
-
-  /* Toolbar */
-  .toolbar{
-    display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;
-    padding:.875rem 1rem;background:var(--paper);
-    border:1px solid var(--line);border-radius:8px;
-  }
-  .search-input{
-    flex:1;min-width:220px;
-    padding:.5rem .75rem;border:1px solid var(--line);border-radius:6px;
-    background:var(--paper);color:var(--ink);font-family:var(--body);
-    font-size:.875rem;transition:border-color .15s;
-  }
-  .search-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
-
-  .select-ctrl{
-    padding:.5rem .75rem;border:1px solid var(--line);border-radius:6px;
-    background:var(--paper);color:var(--ink);font-family:var(--body);
-    font-size:.875rem;cursor:pointer;
-  }
-
-  /* Modal */
-  .modal-bg{
-    position:fixed;inset:0;z-index:100;
-    background:color-mix(in srgb,var(--ink) 50%,transparent);
-    backdrop-filter:blur(4px);
-    display:grid;place-items:center;padding:1rem;
-    opacity:0;pointer-events:none;transition:opacity .2s;
-  }
-  .modal-bg.open{opacity:1;pointer-events:auto}
-  .modal{
-    background:var(--paper);border:1px solid var(--line);border-radius:10px;
-    max-width:480px;width:100%;padding:1.75rem;
-    transform:scale(.96);transition:transform .2s;
-  }
-  .modal-bg.open .modal{transform:scale(1)}
-
-  /* Loading */
-  .loading-overlay{
-    position:fixed;inset:0;z-index:60;background:color-mix(in srgb,var(--paper) 85%,transparent);
-    backdrop-filter:blur(6px);display:none;place-items:center;padding:2rem;
-  }
-  .loading-overlay.on{display:grid}
-  .loading-card{
-    background:var(--paper);border:1px solid var(--line);border-radius:10px;
-    padding:2rem;max-width:480px;width:100%;text-align:center;
-  }
-  .spinner{
-    width:40px;height:40px;border-radius:50%;
-    border:3px solid var(--line);border-top-color:var(--accent);
-    animation:spin .8s linear infinite;margin:0 auto 1rem;
-  }
-  @keyframes spin{to{transform:rotate(360deg)}}
-
-  /* Stagger reveal */
-  .fade-up{animation:fadeUp .5s ease both}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-
-  /* Scrollbar */
-  ::-webkit-scrollbar{width:10px;height:10px}
-  ::-webkit-scrollbar-track{background:var(--paper-2)}
-  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid var(--paper-2)}
-  ::-webkit-scrollbar-thumb:hover{background:var(--ink-2)}
-
-  /* Bank detection pill */
-  .bank-pill{
-    display:inline-flex;align-items:center;gap:.375rem;
-    padding:.25rem .625rem;border-radius:4px;
-    font-size:.75rem;font-weight:500;
-    background:var(--blue-soft);color:var(--blue);
-    border:1px solid color-mix(in srgb,var(--blue) 20%,transparent);
-  }
-
-  /* Keyboard hint */
-  kbd{
-    font-family:var(--mono);font-size:.6875rem;
-    padding:.125rem .375rem;border-radius:3px;
-    background:var(--paper-2);border:1px solid var(--line);
-    color:var(--ink-2);
-  }
-
-  /* Responsive */
-  @media(max-width:720px){
-    .hero{padding:1rem;min-height:auto;padding-top:2rem}
-    .hero-title{font-size:2rem}
-    .dropzone{padding:2rem 1rem}
-    table.ledger{font-size:.8125rem}
-    table.ledger thead th,table.ledger tbody td{padding:.5rem .5rem}
-    .hide-mobile{display:none}
-  }
-
-  /* Print */
-  @media print{
-    body::before,.brandbar,.toolbar,.hero,.loading-overlay,.modal-bg,.no-print{display:none!important}
-    .tbl-wrap{border:none}
-    table.ledger thead th{background:#f0f0f0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  }
-
-  .section-label{
-    font-family:var(--mono);font-size:.6875rem;letter-spacing:.12em;
-    color:var(--ink-2);text-transform:uppercase;font-weight:500;
-  }
+/* COMPANY HEADER */
+.co-header{
+  background:linear-gradient(135deg,#1a2240 0%,#2c3a6b 60%,#1a2240 100%);
+  color:#fff;border-radius:var(--r-xl);padding:20px 24px;margin-bottom:20px;
+  display:flex;align-items:center;gap:16px;
+  box-shadow:0 8px 32px rgba(26,34,64,.18);
+}
+.co-info h2{font-size:20px;font-weight:800;letter-spacing:.3px;color:#fff}
+.co-info p{font-size:12px;opacity:.7;margin-top:3px}
+.co-badge{background:rgba(255,255,255,.15);padding:5px 14px;border-radius:999px;font-size:12px;font-weight:700;margin-top:8px;display:inline-block;border:1px solid rgba(255,255,255,.2)}
 </style>
 </head>
 <body>
 
-<div class="shell">
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-  <!-- Brand bar -->
-  <header class="brandbar">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="logo-mark">ك</div>
-        <div>
-          <div class="display font-bold text-base leading-tight">كَشْف</div>
-          <div class="text-xs" style="color:var(--ink-2)">مستخرج كشوفات الحساب البنكية</div>
-        </div>
-      </div>
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar" id="sidebar">
+    <div class="sb-logo" style="padding:14px 16px;height:auto;gap:10px;flex-direction:row;align-items:center">
+    <img src="data:image/png;base64,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" alt="ركان" style="width:52px;height:52px;object-fit:contain;flex-shrink:0;border-radius:10px"/>
+    <div>
+      <div class="sb-title">ركان <span style="color:var(--accent2);font-weight:700">المتوسط</span></div>
+      <div class="sb-sub">الكريمية · تاجوراء | الربع الأول 2026</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-lbl">التقارير المالية</div>
+    <button class="nav-item active" onclick="sw('bl')">
+      <span class="nav-ico">📋</span>
+      <span>قائمة الدخل B&amp;L</span>
+    </button>
+    <button class="nav-item" onclick="sw('inv')">
+      <span class="nav-ico">📦</span>
+      <span>المخازن والبضاعة</span>
+    </button>
+    <button class="nav-item" onclick="sw('exp')">
+      <span class="nav-ico">📉</span>
+      <span>تحليل المصروفات</span>
+    </button>
+    <div class="sb-lbl" style="margin-top:8px">تصدير Excel</div>
+    <button class="nav-item" onclick="exportBL()">
+      <span class="nav-ico">⬇</span>
+      <span>تصدير قائمة الدخل</span>
+    </button>
+    <button class="nav-item" onclick="exportInv()">
+      <span class="nav-ico">⬇</span>
+      <span>بضاعة فبراير + مارس</span>
+    </button>
+    <button class="nav-item" onclick="exportExp()">
+      <span class="nav-ico">⬇</span>
+      <span>تصدير المصروفات</span>
+    </button>
+  </nav>
+  <div class="sb-footer">
+    <label class="upload-zone" for="fileIn">
+      <div style="font-size:22px;flex-shrink:0">📁</div>
+      <p style="font-size:10.5px">رفع ملفات Excel<br><span>انقر أو اسحب هنا</span></p>
+    </label>
+    <input type="file" id="fileIn" accept=".xlsx,.xls" multiple>
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+</aside>
 
-      <div class="flex items-center gap-2">
-        <span id="engineChip" class="chip hide-mobile">
-          <i class="ph ph-brain"></i>
-          <span id="engineName">Gemini 2.5</span>
-        </span>
-        <button id="themeBtn" class="btn btn-ghost btn-icon" title="تبديل الوضع">
-          <i class="ph ph-moon" id="themeIcon"></i>
-        </button>
-        <button id="settingsBtn" class="btn btn-ghost btn-icon" title="الإعدادات">
-          <i class="ph ph-gear-six"></i>
-        </button>
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
+      <div>
+        <div class="tb-title" id="pageTitle">قائمة الدخل الشاملة</div>
+        <div class="tb-sub">شركة ركان المتوسط | الكريمية & تاجوراء | بالدينار الليبي</div>
       </div>
     </div>
+    <div class="period-pill">🗓 الربع الأول 2026</div>
   </header>
 
-  <!-- Hero (upload state) -->
-  <section id="heroSection" class="hero">
-    <div class="hero-inner fade-up">
+  <div class="content">
 
-      <div class="flex items-center gap-2 mb-6">
-        <span class="section-label">نظام محاسبي احترافي</span>
-        <span class="h-px flex-1" style="background:var(--line)"></span>
-        <span class="chip">
-          <span class="w-1.5 h-1.5 rounded-full" style="background:var(--green)"></span>
-          جاهز
-        </span>
-      </div>
+    <!-- ══ B&L PANEL ══ -->
+    <div id="panel-bl" class="panel active">
 
-      <h1 class="hero-title">
-        استخرج، دقّق، وصدّر<br>
-        كشوفات الحساب البنكية
-        <span style="color:var(--accent)">.</span>
-      </h1>
-      <p class="hero-sub">
-        نظام مخصص للمصارف الليبية (الجمهورية، المتحد، الوحدة، التجاري، الصحاري، شمال أفريقيا، المصرف الليبي الخارجي، وغيرها). يقرأ ملف PDF أو مجموعة صور، ويستخرج الحركات بدقة، ويتحقق رياضياً من كل سطر قبل التصدير إلى Excel.
-      </p>
-
-      <div id="dropzone" class="dropzone">
-        <input type="file" id="fileInput" accept=".pdf,image/jpeg,image/png,image/webp" multiple class="hidden">
-        <div class="dropzone-icon"><i class="ph ph-file-arrow-up"></i></div>
-        <div class="display font-semibold text-lg mb-1">اسحب الملفات هنا أو انقر للاختيار</div>
-        <div class="text-sm mb-4" style="color:var(--ink-2)">PDF أو صور (JPG/PNG/WebP) — متعدد الملفات مدعوم</div>
-        <div class="flex items-center justify-center gap-2 flex-wrap">
-          <button id="browseBtn" class="btn btn-primary">
-            <i class="ph ph-upload-simple"></i>
-            تصفح الملفات
-          </button>
-          <button id="demoBtn" class="btn btn-ghost">
-            <i class="ph ph-eye"></i>
-            بيانات تجريبية
-          </button>
+      <div class="co-header">
+        
+        <div class="co-info">
+          <h2>شركة ركان المتوسط</h2>
+          <p>لاستيراد المواد الغذائية والتوزيع — الكريمية · تاجوراء</p>
+          <span class="co-badge">🗓 الربع الأول: يناير — مارس 2026</span>
         </div>
       </div>
 
-      <div class="features">
-        <div class="feat">
-          <div class="feat-num">01 · السرعة</div>
-          <div class="feat-title">معالجة متوازية</div>
-          <div class="feat-desc">6 صفحات في نفس الوقت — أسرع 3× من المعالجة التسلسلية</div>
-        </div>
-        <div class="feat">
-          <div class="feat-num">02 · الدقة</div>
-          <div class="feat-title">تحقق رياضي مزدوج</div>
-          <div class="feat-desc">كل سطر يُدقق بمعادلة الرصيد، والأخطاء تُرسل للمراجعة تلقائياً</div>
-        </div>
-        <div class="feat">
-          <div class="feat-num">03 · المرونة</div>
-          <div class="feat-title">محركان للذكاء</div>
-          <div class="feat-desc">اختر بين Gemini أو Claude حسب نوع الكشف</div>
-        </div>
-        <div class="feat">
-          <div class="feat-num">04 · الأمان</div>
-          <div class="feat-title">حفظ محلي</div>
-          <div class="feat-desc">مفاتيح الـ API تبقى في متصفحك فقط — لا سيرفر، لا تتبع</div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Work area (results) -->
-  <section id="workArea" class="hidden max-w-7xl mx-auto px-4 pb-12 w-full">
-
-    <!-- Summary row -->
-    <div class="my-6 space-y-3">
-      <div class="flex items-center justify-between flex-wrap gap-3">
-        <div class="flex items-center gap-3 flex-wrap">
-          <span class="section-label">النتائج</span>
-          <span id="bankTag" class="bank-pill hidden">
-            <i class="ph ph-bank"></i>
-            <span id="bankName">—</span>
-          </span>
-          <span id="pageCount" class="chip"><i class="ph ph-files"></i> <span>0 صفحة</span></span>
-          <span id="timeChip" class="chip"><i class="ph ph-timer"></i> <span>—</span></span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button id="newBtn" class="btn btn-ghost btn-sm">
-            <i class="ph ph-plus"></i> كشف جديد
-          </button>
-          <button id="reverifyBtn" class="btn btn-ghost">
-            <i class="ph ph-shield-check"></i>
-            إعادة تحقق
-          </button>
-          <button id="exportBtn" class="btn btn-accent">
-            <i class="ph ph-microsoft-excel-logo"></i>
-            تصدير Excel
-          </button>
-        </div>
-      </div>
-
-      <div class="stats">
-        <div class="stat">
-          <span class="stat-label">إجمالي الحركات</span>
-          <span class="stat-value mono" id="statTotal">0</span>
-        </div>
-        <div class="stat ok">
-          <span class="stat-label">مطابقة رياضياً</span>
-          <span class="stat-value mono" id="statOk">0</span>
-        </div>
-        <div class="stat err">
-          <span class="stat-label">تحتاج مراجعة</span>
-          <span class="stat-value mono" id="statErr">0</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">مجموع المدين</span>
-          <span class="stat-value mono" id="statDebit">—</span>
-          <span class="stat-sub">د.ل</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">مجموع الدائن</span>
-          <span class="stat-value mono" id="statCredit">—</span>
-          <span class="stat-sub">د.ل</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">الرصيد الختامي</span>
-          <span class="stat-value mono" id="statFinal">—</span>
-          <span class="stat-sub">د.ل</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Toolbar -->
-    <div class="toolbar my-4">
-      <div class="flex items-center gap-2 flex-1 min-w-0">
-        <i class="ph ph-magnifying-glass" style="color:var(--ink-2)"></i>
-        <input id="searchInput" type="text" class="search-input" placeholder="ابحث في البيان أو الرقم المرجعي…">
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <select id="filterSelect" class="select-ctrl">
-          <option value="all">كل الحركات</option>
-          <option value="err">الأخطاء فقط</option>
-          <option value="debit">المدين فقط</option>
-          <option value="credit">الدائن فقط</option>
+      <div class="fbar">
+        <span style="font-size:12px;color:var(--text2);font-weight:600">⏱ عرض:</span>
+        <select id="blSel" onchange="renderBL()">
+          <option value="q1">الربع الأول الموحد (يناير — مارس)</option>
+          <option value="jan">يناير 2026 (الكريمية + تاجوراء)</option>
+          <option value="febmar">فبراير — مارس 2026</option>
         </select>
-        <div class="flex items-center gap-2 chip">
-          <label for="initialBalance" class="text-xs" style="color:var(--ink-2)">رصيد افتتاحي:</label>
-          <input id="initialBalance" type="number" step="0.001" value="0"
-                 class="mono w-32 text-left bg-transparent border-none outline-none font-semibold" dir="ltr">
-          <span class="text-xs">د.ل</span>
+        <div class="fdiv"></div>
+        <div class="fspacer"></div>
+        <button class="btn btn-green" onclick="exportBL()">⬇ تصدير Excel</button>
+      </div>
+
+      <div class="kpi-grid" id="blKPIs"></div>
+
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">
+            <div class="card-ico" style="background:#EFF6FF">📋</div>
+            قائمة الدخل الشاملة الموحدة — وفق المعايير المحاسبية (IFRS/IAS 1)
+          </div>
+          <div class="tag t-blue">IAS 1</div>
+        </div>
+        <div class="card-scroll" style="padding:0">
+          <table class="tbl" id="blTbl">
+            <thead id="blThead"><tr>
+              <th style="width:44%;text-align:right">البـيـان</th>
+              <th style="width:18%">الكريمية</th>
+              <th style="width:18%">تاجوراء</th>
+              <th style="width:20%">الموحد</th>
+            </tr></thead>
+            <tbody id="blBody"></tbody>
+          </table>
+        </div>
+        <div style="padding:14px 20px">
+          <div class="notes" id="blNotes"></div>
+          <p class="footnote" id="blFootnote"></p>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="card">
+          <div class="card-hd"><div class="card-title"><div class="card-ico" style="background:#EFF6FF">📈</div>المبيعات والتكاليف والربح</div></div>
+          <div class="card-body">
+            <div class="legend" id="revLeg"></div>
+            <div class="chart-wrap" style="height:250px"><canvas id="revChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title"><div class="card-ico" style="background:var(--teal-l)">🍩</div>توزيع الإيرادات</div></div>
+          <div class="card-body">
+            <div class="legend" id="pieLeg"></div>
+            <div class="chart-wrap" style="height:250px"><canvas id="pieChart"></canvas></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="tbl-wrap">
-      <table class="ledger">
-        <thead>
-          <tr>
-            <th style="width:48px">الحالة</th>
-            <th style="width:44px">م</th>
-            <th style="width:110px">التاريخ</th>
-            <th style="width:130px">المرجع</th>
-            <th>البيان</th>
-            <th class="num" style="width:130px">مدين</th>
-            <th class="num" style="width:130px">دائن</th>
-            <th class="num" style="width:140px">رصيد الكشف</th>
-            <th class="num" style="width:140px">رصيد محسوب</th>
-            <th class="num" style="width:100px">الفرق</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-
-    <!-- Footer hint -->
-    <div class="mt-4 flex items-center justify-between text-xs flex-wrap gap-2" style="color:var(--ink-2)">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span>نصيحة: انقر على أي خانة لتعديلها يدوياً.</span>
-        <span>اضغط <kbd>Enter</kbd> للحفظ، <kbd>Esc</kbd> للإلغاء.</span>
+    <!-- ══ INVENTORY PANEL ══ -->
+    <div id="panel-inv" class="panel">
+      <div class="fbar">
+        <span style="font-size:12px;color:var(--gray500);font-weight:600">📅 الشهر:</span>
+        <select id="invSel" onchange="renderInv()">
+          <option value="all">عرض الشهرين (فبراير + مارس)</option>
+          <option value="feb">فبراير 2026 فقط</option>
+          <option value="mar">مارس 2026 فقط</option>
+        </select>
+        <div class="fdiv"></div>
+        <input type="text" id="invSearch" placeholder="🔍 بحث عن صنف..." oninput="renderInv()" style="min-width:180px">
+        <div class="fspacer"></div>
+        <button class="btn btn-green" onclick="exportInv()">⬇ تصدير Excel</button>
       </div>
-      <div>
-        نُحفظ تلقائياً · آخر حفظ: <span id="lastSave">الآن</span>
+      <div class="kpi-grid" id="invKPIs"></div>
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><div class="card-ico" style="background:var(--teal-l)">📦</div>بضاعة آخر المدة — تفصيلي بالأصناف</div>
+          <div class="tag t-teal">فبراير / مارس 2026</div>
+        </div>
+        <div class="card-scroll" style="padding:0;max-height:500px;overflow-y:auto">
+          <table class="tbl" id="invTbl">
+            <thead><tr>
+              <th style="width:4%">#</th>
+              <th style="width:36%">الصنف</th>
+              <th style="width:12%">الكمية (فبراير)</th>
+              <th style="width:12%">الكمية (مارس)</th>
+              <th style="width:10%">التغير</th>
+              <th style="width:14%">القيمة (فبراير)</th>
+              <th style="width:12%">القيمة (مارس)</th>
+            </tr></thead>
+            <tbody id="invBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title"><div class="card-ico" style="background:var(--teal-l)">📊</div>مقارنة قيمة المخزون — فبراير مقابل مارس</div></div>
+        <div class="card-body">
+          <div class="legend" id="invLeg"></div>
+          <div class="chart-wrap" style="height:340px"><canvas id="invChart"></canvas></div>
+        </div>
       </div>
     </div>
 
-  </section>
+    <!-- ══ EXPENSES PANEL ══ -->
+    <div id="panel-exp" class="panel">
+      <div class="fbar">
+        <span style="font-size:12px;color:var(--gray500);font-weight:600">📅 الفترة:</span>
+        <select id="expSel" onchange="renderExp()">
+          <option value="q1">الربع الأول الموحد (يناير — مارس)</option>
+          <option value="jan">يناير 2026</option>
+          <option value="febmar">فبراير — مارس 2026</option>
+        </select>
+        <div class="fdiv"></div>
+        <span style="font-size:12px;color:var(--gray500);font-weight:600">📊 ترتيب:</span>
+        <select id="expSort" onchange="renderExp()">
+          <option value="desc">تنازلي (الأعلى أولاً)</option>
+          <option value="asc">تصاعدي (الأدنى أولاً)</option>
+          <option value="alpha">أبجدي</option>
+        </select>
+        <div class="fspacer"></div>
+        <button class="btn btn-green" onclick="exportExp()">⬇ تصدير Excel</button>
+      </div>
 
-</div>
+      <!-- KPIs -->
+      <div class="kpi-grid" id="expKPIs"></div>
 
-<!-- Loading overlay -->
-<div id="loadOverlay" class="loading-overlay">
-  <div class="loading-card">
-    <div class="spinner"></div>
-    <div class="display font-semibold text-lg mb-2" id="loadTitle">جاري المعالجة</div>
-    <div class="text-sm mb-4" style="color:var(--ink-2)" id="loadMsg">يتم تحضير الصور...</div>
-    <div class="progress-track mb-2"><div class="progress-bar" id="loadBar" style="width:0"></div></div>
-    <div class="mono text-xs" id="loadPct" style="color:var(--ink-2)">0%</div>
-  </div>
-</div>
-
-<!-- Settings modal -->
-<div id="settingsModal" class="modal-bg">
-  <div class="modal">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="display font-bold text-lg">الإعدادات</h3>
-      <button class="btn btn-ghost btn-icon" onclick="closeModal('settingsModal')"><i class="ph ph-x"></i></button>
-    </div>
-
-    <div class="space-y-5">
-      <div>
-        <label class="block text-sm font-semibold mb-2">محرك الذكاء الاصطناعي</label>
-        <div class="flex gap-2">
-          <label class="flex-1 cursor-pointer">
-            <input type="radio" name="engine" value="gemini" class="sr-only peer" checked>
-            <div class="card p-3 text-center peer-checked:border-2" style="border-color:var(--line)" data-engine-card="gemini">
-              <i class="ph ph-google-logo text-2xl mb-1 block"></i>
-              <div class="font-semibold text-sm">Gemini 2.5</div>
-              <div class="text-xs" style="color:var(--ink-2)">سريع · مجاني</div>
-            </div>
-          </label>
-          <label class="flex-1 cursor-pointer">
-            <input type="radio" name="engine" value="claude" class="sr-only peer">
-            <div class="card p-3 text-center peer-checked:border-2" style="border-color:var(--line)" data-engine-card="claude">
-              <i class="ph ph-sparkle text-2xl mb-1 block"></i>
-              <div class="font-semibold text-sm">Claude 4</div>
-              <div class="text-xs" style="color:var(--ink-2)">دقة أعلى</div>
-            </div>
-          </label>
+      <!-- Charts Row -->
+      <div class="chart-grid" style="margin-bottom:18px">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title"><div class="card-ico" style="background:var(--red-l)">🍩</div>التوزيع النسبي للمصروفات</div>
+          </div>
+          <div class="card-body">
+            <div class="legend" id="expPieLeg"></div>
+            <div class="chart-wrap" style="height:260px"><canvas id="expPie"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title"><div class="card-ico" style="background:var(--amber-l)">📊</div>مقارنة المصروفات — يناير / فبراير-مارس</div>
+          </div>
+          <div class="card-body">
+            <div class="legend" id="expBarLeg"></div>
+            <div class="chart-wrap" style="height:260px"><canvas id="expBarChart"></canvas></div>
+          </div>
         </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-semibold mb-2" id="apiKeyLabel">مفتاح Gemini API</label>
-        <input id="apiKeyInput" type="password" placeholder="AIza..."
-               class="w-full p-2.5 border rounded text-sm mono" dir="ltr"
-               style="border-color:var(--line);background:var(--paper-2);color:var(--ink)">
-        <div class="text-xs mt-1" style="color:var(--ink-2)">يُحفظ محلياً في متصفحك فقط.</div>
+      <!-- Expense Detail Table -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><div class="card-ico" style="background:#EFF6FF">📋</div>جدول المصروفات التفصيلي</div>
+          <div id="expPeriodBadge" class="tag t-blue"></div>
+        </div>
+        <div class="card-scroll" style="padding:0;max-height:600px;overflow-y:auto">
+          <table class="tbl" id="expTable">
+            <thead id="expThead"></thead>
+            <tbody id="expBody"></tbody>
+          </table>
+        </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-semibold mb-2">عدد الصفحات المتوازية</label>
-        <select id="concurrencySelect" class="select-ctrl w-full">
-          <option value="2">2 (آمن للشبكات البطيئة)</option>
-          <option value="4" selected>4 (موصى به)</option>
-          <option value="6">6 (أسرع — شبكة قوية)</option>
-          <option value="8">8 (تجريبي)</option>
-        </select>
-      </div>
+    </div><!-- /exp panel -->
 
-      <div>
-        <label class="block text-sm font-semibold mb-2">جودة الصورة</label>
-        <select id="qualitySelect" class="select-ctrl w-full">
-          <option value="1.0">عادية (أسرع)</option>
-          <option value="1.3" selected>عالية (موصى به)</option>
-          <option value="1.6">فائقة (للنصوص الصغيرة)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="flex justify-end gap-2 mt-6">
-      <button class="btn btn-ghost" onclick="closeModal('settingsModal')">إلغاء</button>
-      <button class="btn btn-primary" id="saveSettingsBtn">حفظ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Alert modal -->
-<div id="alertModal" class="modal-bg">
-  <div class="modal">
-    <div class="flex items-start gap-3 mb-3">
-      <div id="alertIcon" class="status-badge err" style="width:36px;height:36px;font-size:20px;flex-shrink:0">
-        <i class="ph ph-warning"></i>
-      </div>
-      <div class="flex-1">
-        <h3 id="alertTitle" class="display font-bold text-base mb-1">تنبيه</h3>
-        <p id="alertMsg" class="text-sm leading-relaxed" style="color:var(--ink-2)">رسالة</p>
-      </div>
-    </div>
-    <div class="flex justify-end gap-2 mt-4">
-      <button class="btn btn-primary" onclick="closeModal('alertModal')">موافق</button>
-    </div>
   </div>
 </div>
 
 <script>
-/* =============================================================
-   كَشْف — Bank Statement Extractor (Enhanced)
-   Single-file HTML app. No build step required.
-   ============================================================= */
+/* ═══════════════════════════════
+   REAL DATA FROM UPLOADED FILES
+═══════════════════════════════ */
 
-const STORE = {
-  get(k, d){ try{ const v = localStorage.getItem('kashf_'+k); return v===null?d:JSON.parse(v); }catch{return d} },
-  set(k, v){ try{ localStorage.setItem('kashf_'+k, JSON.stringify(v)); }catch{} },
+// ── قائمة الدخل ──
+const BL = {
+  jan: {
+    label: 'يناير 2026',
+    salesGross: 15419594.15,
+    salesReturn: -1203094.5,
+    netSalesBeforeElim: 14216499.65,
+    elimination: -3354156.5,
+    netSales: 10862343.15,
+    openingStock: 29959698.469,
+    purchases: 10700666.25,
+    purchaseReturn: -965116,
+    netPurchases: 9735550.25,
+    availableGoods: 39695248.719,
+    closingStock: -25252237.897,
+    costElimination: -3354156.5,
+    cogs: 11088854.322,
+    grossProfit: -226511.172,
+    opex: {
+      'رواتب وأجور إدارية': 89490,
+      'الإضافي والساعات العادية': 19735.58,
+      'خصم مسموح / عمولة جملة': 462594.67,
+      'نقل ومناولة للمبيعات': 34781.45,
+      'م. الصيانة': 4069.5,
+      'م. قرطاسية ومطبوعات': 165,
+      'م. وقود ومحروقات': 7834,
+      'مكافآت وحوافز': 20300,
+      'م. إيجارات': 2700,
+      'دعاية وإعلان': 4009,
+      'نقل وتنقلات': 5950,
+      'م. فاقد وتالف': 17735,
+      'كروت ووقود موظف': 2960,
+      'م. بدل إعاشة': 994.75,
+      'م. عمولة مبيعات قطاعي': 29747.55,
+      'تخفيضات': 266002.94,
+      'إكراميات وهدايا': 8012,
+      'م. بدل سكن موظفين': 2500,
+      'م. بدل سيارة': 4295,
+      'م. نقل القافلة البيضاء': 5700,
+      'إيجار سكن مناديب': 1700,
+    },
+
+    opex_detail: {
+      '    301 - رواتب وأجور الإدارية وملحقاتها': [126750, -37260, 89490],
+      '    303 - الإضافي': [612.5, 9941.54, 10554.04],
+      '    305 - خصم مسموح به (عمولة مبيعات الجملة)': [408710.21, 53884.46, 462594.67],
+      '    306 - نقل ومناولة للمبيعات': [20832.45, 13949, 34781.45],
+      '    310 - م. الصيانة': [1616, 2453.5, 4069.5],
+      '    315 - قرطاسية ومطبوعات ومستلزمات كمبيوتر': [null, 165, 165],
+      '    317 - وقود وزيوت': [7064, 770, 7834],
+      '    318 - مكافآت': [18300, 2000, 20300],
+      '    323 - إيجار مخزن الجبل الغربي': [1000, null, 1000],
+      '    324 - دعاية وإعلان': [1666, 2343, 4009],
+      '    334 - نقل وتنقلات': [250, null, 250],
+      '    335 - فاقد وتالف': [17735, null, 17735],
+      '    337 - كروت ووقود موظف': [2015, 945, 2960],
+      '    343 - إعاشة': [994.75, null, 994.75],
+      '    346 - عمولة مبيعات القطاعي': [18777.55, 10970, 29747.55],
+      '    347 - تخفيضات السنة': [19552, null, 19552],
+      '    351 - هدايا وعينات': [8012, null, 8012],
+      '    361 - بدل سكن الموظفين': [1500, 1000, 2500],
+      '    366 - تخفيض': [null, 246450.94, 246450.94],
+      '    372 - إيجار سكن مناديب / تاجوراء': [null, 1700, 1700],
+      '    372 - إضافي للساعات العادية': [9181.54, null, 9181.54],
+      '    375 - بدل سيارة': [4295, null, 4295],
+      '    380 - م. نقل القافلة البيضاء': [5700, null, 5700],
+    },
+    totalOpex: 983876.44,
+    opProfit: -1210387.612,
+    otherIncome: 11167.5,
+    netProfit: -1199220.112
+  },
+  febmar: {
+    label: 'فبراير — مارس 2026',
+    salesGross: 11763522.87,
+    salesReturn: -1097658.38,
+    discountAllowed: -623841,
+    netSales: 10042023.49,
+    openingStock: 5964614.25,
+    purchases: 10210836,
+    purchaseReturn: -2272703,
+    availableGoods: 13902747.25,
+    closingStock: -3518283,
+    cogs: 10384464.25,
+    grossProfit: -342440.76,
+    opex: {
+      'م. فاقد وتالف': 360307.91,
+      'أجور ومرتبات أساسية': 193011,
+      'م. تخفيضات': 180622.82,
+      'م. الصيانة': 59567,
+      'م. عمولة مبيعات قطاعي': 36175.79,
+      'م. بدل سيارة': 35500,
+      'م. عمولة نقل لسائقين': 31580.53,
+      'م. عمولة مبيعات جملة': 28038.79,
+      'مكافآت وحوافز ومنح': 21300,
+      'م. متفرقة': 14648,
+      'م. بدل إعاشة': 13279,
+      'م. عمل إضافي': 12784.13,
+      'م. بدل هاتف وإنترنت': 9675,
+      'م. وقود ومحروقات': 9247,
+      'م. عمولة مبيعات إدارة': 9229.17,
+      'م. قرطاسية ومطبوعات': 9212,
+      'م. إيجارات': 8205,
+      'إكراميات وهدايا': 5889,
+      'عمالة عارضة': 4505,
+      'م. تذاكر طيران وإقامات': 2495.88,
+      'م. تأمين سيارات': 2150,
+      'م. عمولة مبيعات أسواق': 1672.51,
+      'مصروفات حكومية': 1650,
+      'م. زيت لسيارات': 1440,
+      'م. عمل إضافي (أخرى)': 1066.67,
+      'م. نظافة': 899,
+      'م. مواد بناء': 593.5,
+      'م. علاج': 500,
+      'م. بدل طريق': 310,
+      'م. المقهى والبوفيه': 137,
+      'م. سيارة سامسونج': 120,
+      'م. تعبئة وقود بالطريق': 90,
+      'م. مواد صحية': 60,
+    },
+
+    opex_detail: {
+      '    م. فاقد وتالف': 360307.91,
+      '    الأجور والمرتبات الأساسية': 193011,
+      '    م. تخفيضات': 180622.82,
+      '    م. الصيانة': 59567,
+      '    م. عمولة مبيعات القطاعي': 36175.79,
+      '    م. بدل سيارة': 35500,
+      '    م. عمولة نقل لسائقين': 31580.53,
+      '    م. عمولة مبيعات الجملة': 28038.79,
+      '    مكافآت وحوافز ومنح': 21300,
+      '    م. متفرقة': 14648,
+      '    م. بدل إعاشة': 13279,
+      '    م. عمل إضافي ساعات عادية': 12784.13,
+      '    م. بدل الهاتف والإنترنت': 9675,
+      '    م. وقود ومحروقات': 9247,
+      '    م. عمولة مبيعات الإدارة': 9229.17,
+      '    م. قرطاسية ومطبوعات': 9212,
+      '    م. إيجارات': 8205,
+      '    إكراميات وهدايا': 5889,
+      '    عمالة عارضة': 4505,
+      '    م. تذاكر طيران وإقامات وتأشيرات': 2495.88,
+      '    م. تأمين سيارات': 2150,
+      '    م. عمولة مبيعات الأسواق': 1672.51,
+      '    مصروفات حكومية': 1650,
+      '    م. زيت لسيارات': 1440,
+      '    م. عمل إضافي': 1066.67,
+      '    م. نظافة': 899,
+      '    م. مواد بناء': 593.5,
+      '    م. علاج': 500,
+      '    م. بدل طريق': 310,
+      '    م. المقهى والبوفيه': 137,
+      '    م. سيارة سامسونج': 120,
+      '    م. تعبئة وقود بالطريق': 90,
+      '    م. مواد صحية': 60,
+    },
+    totalOpex: 1055961.7,
+    opProfit: -1398402.46,
+    otherIncome: 8554.66,
+    netProfit: -1389847.8
+  }
 };
 
-const state = {
-  engine: STORE.get('engine', 'gemini'),
-  apiKey: STORE.get('apiKey', ''),
-  concurrency: STORE.get('concurrency', 4),
-  quality: STORE.get('quality', 1.3),
-  rows: [],
-  filter: 'all',
-  search: '',
-  bank: '',
-  pageCount: 0,
-  startTime: 0,
-  elapsedMs: 0,
+// Q1 combined
+const BL_Q1 = {
+  netSales: 20904366.64,
+  cogs: 21473318.572,
+  grossProfit: -568951.932,
+  totalOpex: 2039838.14,
+  opProfit: -2608790.072,
+  otherIncome: 19722.16,
+  netProfit: -2589067.912
 };
 
-/* ---------- Theme ---------- */
-function applyTheme(){
-  const dark = STORE.get('theme','light') === 'dark';
-  document.documentElement.classList.toggle('dark', dark);
-  const icon = document.getElementById('themeIcon');
-  icon.className = dark ? 'ph ph-sun' : 'ph ph-moon';
-}
-document.getElementById('themeBtn').onclick = ()=>{
-  STORE.set('theme', STORE.get('theme','light')==='dark'?'light':'dark');
-  applyTheme();
-};
-applyTheme();
+// ── المخزون ──
+const INV_FEB = [
+  {name:'بدانات',qty:1563,val:0},
+  {name:'الندى بتر صودا بلاستيك 1 لتر*6',qty:3869,val:69642},
+  {name:'فونتانا عصير عنب بلاستيك 1 لتر*6',qty:5930,val:47440},
+  {name:'الندى عصير عنب بلاستيك 330 مل*12',qty:9692,val:87228},
+  {name:'الندى بتر صودا توت أزرق زجاج 175 مل*18',qty:66,val:2508},
+  {name:'الندى بتر صودا دايت زجاج 175 مل*18',qty:4422,val:44220},
+  {name:'الندى بتر صودا زجاج 100 مل*18',qty:4154,val:132928},
+  {name:'الندى بتر صودا زجاج 175 مل*18',qty:12170,val:462460},
+  {name:'الندى بتر صودا زجاج 250 مل*18',qty:1753,val:17530},
+  {name:'الندى بتر صودا زنجبيل زجاج 175 مل*18',qty:5,val:190},
+  {name:'الندى بتر صودا كرز زجاج 175 مل*18',qty:2222,val:84436},
+  {name:'الندى بتر صودا كيني زجاج 175 مل*18',qty:1239,val:47082},
+  {name:'الندى بتر صودا ليمون زجاج 175 مل*18',qty:1270,val:48260},
+  {name:'الندى بتر صودا موخيتو زجاج 175 مل*18',qty:119,val:4522},
+  {name:'الندى عصير برتقال زجاج 250 مل*18',qty:10536,val:158040},
+  {name:'الندى عصير رمان زجاج 250 مل*18',qty:4087,val:224785},
+  {name:'الندى عصير عنب زجاج 250 مل*18',qty:2218,val:130862},
+  {name:'الندى عصير ليمون وزنجبيل زجاج 250 مل*18',qty:14434,val:187642},
+  {name:'الندى مشروب شعير أناناس زجاج 330 مل*18',qty:1747,val:99579},
+  {name:'الندى مشروب شعير تفاح زجاج 330 مل*18',qty:2091,val:119187},
+  {name:'الندى مشروب شعير رمان زجاج 330 مل*18',qty:1274,val:72618},
+  {name:'الندى مشروب شعير عنب زجاج 330 مل*18',qty:17,val:969},
+  {name:'الندى مشروب شعير فراولة زجاج 330 مل*18',qty:101,val:5757},
+  {name:'الندى مشروب طاقة زجاج 250 مل*18',qty:1051,val:51499},
+  {name:'الندى مشروب غازي لوز زجاج 250 مل*18',qty:8544,val:384480},
+  {name:'الندى مياه غازية زجاج 330 مل*18',qty:2644,val:118980},
+  {name:'الندى مياه معدنية زجاج 330 مل*18',qty:6023,val:271035},
+  {name:'بيانكي مشروب طاقة أناناس زجاج 275 مل*18',qty:2162,val:172960},
+  {name:'بيانكي مشروب طاقة علكة زجاج 275 مل*18',qty:1850,val:148000},
+  {name:'بيانكي مشروب طاقة كشمش أسود 275 مل*18',qty:6955,val:556400},
+  {name:'بيانكي مشروب طاقة مارشميلو زجاج 275 مل*18',qty:3760,val:300800},
+  {name:'بيانكي مشروب طاقة مانجو زجاج 275 مل*18',qty:1912,val:152960},
+  {name:'بيانكي مشروب غازي موخيتو فراولة 275 مل*18',qty:18,val:1062},
+  {name:'بيانكي مشروب غازي استوائية زرقاء 275 مل*18',qty:276,val:16284},
+  {name:'بيانكي مشروب غازي بيناكولادا 275 مل*18',qty:16,val:944},
+  {name:'بيانكي مشروب غازي تفاح أخضر 275 مل*18',qty:643,val:37937},
+  {name:'بيانكي مشروب غازي توت وكرز 275 مل*18',qty:2889,val:170451},
+  {name:'بيانكي مشروب غازي ليمون ونعناع 275 مل*18',qty:255,val:15045},
+];
+const TOTAL_FEB = 4446722;
 
-/* ---------- Engine chip ---------- */
-function refreshEngineUI(){
-  document.getElementById('engineName').textContent = state.engine==='claude'?'Claude 4':'Gemini 2.5';
-  document.getElementById('apiKeyLabel').textContent = state.engine==='claude'?'مفتاح Anthropic API':'مفتاح Gemini API';
-  document.querySelectorAll('[data-engine-card]').forEach(el=>{
-    el.style.borderColor = el.dataset.engineCard===state.engine?'var(--accent)':'var(--line)';
+// مارس = فبراير + تغيرات (الملف يحتوي على فروقات)
+const INV_MAR_CHANGES = [
+  {name:'بدانات',qty:35,val:0},
+  {name:'الندى بتر صودا بلاستيك 1 لتر*6',qty:-2846,val:-51228},
+  {name:'الندى بتر صودا دايت بلاستيك 1 لتر*6',qty:693,val:12474},
+  {name:'فونتانا عصير عنب بلاستيك 1 لتر*6',qty:-4945,val:-39560},
+  {name:'الندى عصير عنب بلاستيك 330 مل*12',qty:-6849,val:-61641},
+  {name:'الندى بتر صودا توت أزرق زجاج 175 مل*18',qty:3893,val:147934},
+  {name:'الندى بتر صودا دايت زجاج 175 مل*18',qty:-1763,val:-17630},
+  {name:'الندى بتر صودا زجاج 100 مل*18',qty:-707,val:-22624},
+  {name:'الندى بتر صودا زجاج 175 مل*18',qty:-9518,val:-361684},
+  {name:'الندى بتر صودا زجاج 250 مل*18',qty:9532,val:95320},
+  {name:'الندى بتر صودا زجاج أحمر 250 مل*18',qty:100,val:3600},
+  {name:'الندى بتر صودا زنجبيل زجاج 175 مل*18',qty:-5,val:-190},
+  {name:'الندى بتر صودا كرز زجاج 175 مل*18',qty:1734,val:65892},
+  {name:'الندى بتر صودا كيني زجاج 175 مل*18',qty:-1239,val:-47082},
+  {name:'الندى بتر صودا ليمون زجاج 175 مل*18',qty:-1270,val:-48260},
+  {name:'الندى بتر صودا موخيتو زجاج 175 مل*18',qty:3841,val:145958},
+  {name:'الندى عصير برتقال زجاج 250 مل*18',qty:-6125,val:-91875},
+  {name:'الندى عصير رمان زجاج 250 مل*18',qty:-1179,val:-64845},
+  {name:'الندى عصير عنب زجاج 250 مل*18',qty:-1,val:-59},
+  {name:'الندى عصير ليمون وزنجبيل زجاج 250 مل*18',qty:-10235,val:-133055},
+  {name:'الندى مشروب شعير أناناس زجاج 330 مل*18',qty:-1622,val:-92454},
+  {name:'الندى مشروب شعير تفاح زجاج 330 مل*18',qty:-889,val:-50673},
+  {name:'الندى مشروب شعير رمان زجاج 330 مل*18',qty:-121,val:-6897},
+  {name:'الندى مشروب شعير عنب زجاج 330 مل*18',qty:453,val:25821},
+  {name:'الندى مشروب شعير فراولة زجاج 330 مل*18',qty:-51,val:-2907},
+  {name:'الندى مشروب طاقة زجاج 250 مل*18',qty:230,val:11270},
+  {name:'الندى مشروب غازي لوز زجاج 250 مل*18',qty:622,val:27990},
+  {name:'الندى مياه غازية زجاج 330 مل*18',qty:-2094,val:-94230},
+  {name:'الندى مياه معدنية زجاج 330 مل*18',qty:-33,val:-1485},
+  {name:'بيانكي مشروب طاقة أناناس زجاج 275 مل*18',qty:-165,val:-13200},
+  {name:'بيانكي مشروب طاقة علكة زجاج 275 مل*18',qty:-169,val:-13520},
+  {name:'بيانكي مشروب طاقة كشمش أسود 275 مل*18',qty:-914,val:-73120},
+  {name:'بيانكي مشروب طاقة مارشميلو زجاج 275 مل*18',qty:-204,val:-16320},
+  {name:'بيانكي مشروب طاقة مانجو زجاج 275 مل*18',qty:-187,val:-14960},
+  {name:'بيانكي مشروب غازي موخيتو فراولة 275 مل*18',qty:-14,val:-826},
+  {name:'بيانكي مشروب غازي استوائية زرقاء 275 مل*18',qty:-252,val:-14868},
+  {name:'بيانكي مشروب غازي بيناكولادا 275 مل*18',qty:-8,val:-472},
+  {name:'بيانكي مشروب غازي تفاح أخضر 275 مل*18',qty:-605,val:-35695},
+  {name:'بيانكي مشروب غازي توت وكرز 275 مل*18',qty:-1420,val:-83780},
+  {name:'بيانكي مشروب غازي ليمون ونعناع 275 مل*18',qty:-162,val:-9558},
+];
+const TOTAL_MAR = 3518283;
+
+// Build march ending = feb + changes
+function buildMar() {
+  const res = {};
+  INV_FEB.forEach(i => res[i.name] = {name:i.name, qty_feb:i.qty, val_feb:i.val, qty_chg:0, val_chg:0});
+  INV_MAR_CHANGES.forEach(c => {
+    if (!res[c.name]) res[c.name] = {name:c.name, qty_feb:0, val_feb:0, qty_chg:0, val_chg:0};
+    res[c.name].qty_chg = c.qty;
+    res[c.name].val_chg = c.val;
   });
-}
-refreshEngineUI();
-
-/* ---------- Settings modal ---------- */
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-
-document.getElementById('settingsBtn').onclick = ()=>{
-  document.getElementById('apiKeyInput').value = state.apiKey;
-  document.getElementById('concurrencySelect').value = state.concurrency;
-  document.getElementById('qualitySelect').value = state.quality;
-  document.querySelector(`input[name="engine"][value="${state.engine}"]`).checked = true;
-  openModal('settingsModal');
-};
-document.querySelectorAll('input[name="engine"]').forEach(r=>{
-  r.onchange = ()=>{
-    state.engine = r.value;
-    refreshEngineUI();
-  };
-});
-document.getElementById('saveSettingsBtn').onclick = ()=>{
-  state.apiKey = document.getElementById('apiKeyInput').value.trim();
-  state.concurrency = parseInt(document.getElementById('concurrencySelect').value,10);
-  state.quality = parseFloat(document.getElementById('qualitySelect').value);
-  STORE.set('engine', state.engine);
-  STORE.set('apiKey', state.apiKey);
-  STORE.set('concurrency', state.concurrency);
-  STORE.set('quality', state.quality);
-  closeModal('settingsModal');
-  showAlert('تم الحفظ','سيتم تطبيق الإعدادات في المعالجة التالية.','success');
-};
-
-/* ---------- Alerts ---------- */
-function showAlert(title, msg, type='error'){
-  document.getElementById('alertTitle').textContent = title;
-  document.getElementById('alertMsg').textContent = msg;
-  const ic = document.getElementById('alertIcon');
-  if(type==='success'){
-    ic.className='status-badge ok';
-    ic.innerHTML='<i class="ph ph-check"></i>';
-  } else if(type==='info'){
-    ic.className='status-badge';
-    ic.style.background='var(--blue-soft)';
-    ic.style.color='var(--blue)';
-    ic.innerHTML='<i class="ph ph-info"></i>';
-  } else {
-    ic.className='status-badge err';
-    ic.innerHTML='<i class="ph ph-warning"></i>';
-  }
-  openModal('alertModal');
-}
-
-/* ---------- File upload wiring ---------- */
-const dz = document.getElementById('dropzone');
-const fi = document.getElementById('fileInput');
-document.getElementById('browseBtn').onclick = (e)=>{ e.stopPropagation(); fi.click(); };
-dz.onclick = ()=> fi.click();
-fi.onchange = (e)=> handleFiles(Array.from(e.target.files));
-
-['dragenter','dragover'].forEach(ev=>{
-  dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.add('drag'); });
-});
-['dragleave','drop'].forEach(ev=>{
-  dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.remove('drag'); });
-});
-dz.addEventListener('drop', e=>{
-  const files = Array.from(e.dataTransfer.files).filter(f=>/pdf|image\//.test(f.type));
-  if(files.length) handleFiles(files);
-});
-
-document.getElementById('demoBtn').onclick = ()=> loadDemo();
-document.getElementById('newBtn').onclick = ()=> location.reload();
-document.getElementById('reverifyBtn').onclick = ()=> reverifyErrors();
-document.getElementById('exportBtn').onclick = ()=> exportExcel();
-document.getElementById('initialBalance').onchange = ()=> runAudit();
-document.getElementById('searchInput').oninput = (e)=>{ state.search = e.target.value.trim().toLowerCase(); renderRows(); };
-document.getElementById('filterSelect').onchange = (e)=>{ state.filter = e.target.value; renderRows(); };
-
-/* ---------- Loading ---------- */
-function showLoading(title, msg, pct){
-  document.getElementById('loadOverlay').classList.add('on');
-  document.getElementById('loadTitle').textContent = title || 'جاري المعالجة';
-  document.getElementById('loadMsg').textContent = msg || '';
-  if(pct!=null){
-    document.getElementById('loadBar').style.width = pct+'%';
-    document.getElementById('loadPct').textContent = Math.round(pct)+'%';
-  }
-}
-function hideLoading(){ document.getElementById('loadOverlay').classList.remove('on'); }
-function updateLoading(msg, pct){
-  document.getElementById('loadMsg').textContent = msg;
-  if(pct!=null){
-    document.getElementById('loadBar').style.width = pct+'%';
-    document.getElementById('loadPct').textContent = Math.round(pct)+'%';
-  }
-}
-
-/* ---------- Image prep ---------- */
-async function pdfPageToPNG(pdf, pageNum, scale){
-  const page = await pdf.getPage(pageNum);
-  const viewport = page.getViewport({scale});
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d',{alpha:false});
-  canvas.width = viewport.width; canvas.height = viewport.height;
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  await page.render({canvasContext:ctx, viewport}).promise;
-  return canvas.toDataURL('image/png').split(',')[1];
-}
-
-function fileToPNG(file, maxDim=1800){
-  return new Promise((resolve, reject)=>{
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = ()=>{
-      let w = img.width, h = img.height;
-      if(w>maxDim || h>maxDim){
-        const r = Math.min(maxDim/w, maxDim/h);
-        w=Math.round(w*r); h=Math.round(h*r);
-      }
-      const cv = document.createElement('canvas');
-      cv.width = w; cv.height = h;
-      const cx = cv.getContext('2d',{alpha:false});
-      cx.fillStyle='#fff'; cx.fillRect(0,0,w,h);
-      cx.drawImage(img,0,0,w,h);
-      URL.revokeObjectURL(url);
-      resolve(cv.toDataURL('image/png').split(',')[1]);
-    };
-    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('فشل قراءة الصورة')); };
-    img.src = url;
-  });
-}
-
-/* ---------- Parallel processor with concurrency limit ---------- */
-async function runParallel(tasks, limit, onProgress){
-  const results = new Array(tasks.length);
-  let idx = 0, done = 0;
-  const workers = Array.from({length:Math.min(limit, tasks.length)}, async ()=>{
-    while(true){
-      const i = idx++;
-      if(i >= tasks.length) break;
-      try{
-        results[i] = await tasks[i]();
-      }catch(e){
-        results[i] = {error: e.message};
-      }
-      done++;
-      onProgress && onProgress(done, tasks.length);
-    }
-  });
-  await Promise.all(workers);
-  return results;
-}
-
-/* ---------- AI calls ---------- */
-const LIBYAN_BANKS_PROMPT = `الكشف قد يكون لأحد المصارف الليبية التالية:
-- مصرف الجمهورية (Jumhouria Bank) — يحتوي عمود "رقم المعاملة" أو "Reference No"
-- المصرف المتحد (United Bank) — الرقم المرجعي غالباً مدمج في البيان
-- مصرف الوحدة (Wahda Bank)
-- المصرف التجاري الوطني (National Commercial Bank)
-- مصرف الصحاري (Sahara Bank)
-- مصرف شمال أفريقيا (North Africa Bank)
-- المصرف الليبي الخارجي (Libyan Foreign Bank)
-- مصرف التجارة والتنمية (Trade & Development Bank)
-- مصرف اليقين (Al Yaqeen Bank)
-- مصرف الواحة (Waha Bank)`;
-
-function buildPrompt(isFirst, isRetry){
-  let p = `أنت محاسب مالي خبير متخصص في كشوفات الحسابات الليبية. مهمتك استخراج جميع الحركات من الصور المرفقة بدقة 100%.
-
-${LIBYAN_BANKS_PROMPT}
-
-قواعد حرجة:
-1. الأعمدة: استخرج التاريخ، الرقم المرجعي (إن وُجد)، البيان الكامل، المدين (Debit)، الدائن (Credit)، الرصيد.
-2. المبالغ: أرقام فقط (NUMBER) مع الفواصل العشرية (مثال: 15234.750). الخانات الفارغة = 0.
-3. علامة الناقص (-) أو عمود "مدين/Debit" → debit. عمود "دائن/Credit" → credit.
-4. التاريخ: استخرجه كما هو (DD/MM/YYYY أو YYYY/MM/DD).
-5. لا تخترع بيانات. إذا كانت خانة غير واضحة، اتركها 0 وضع "؟" في البيان.
-6. رتّب الحركات بنفس ترتيب ظهورها في الصفحة (من الأعلى للأسفل).
-7. حدد اسم المصرف من الصور وضعه في الحقل bank.`;
-
-  if(isFirst){
-    p += `\n8. استخرج "الرصيد الافتتاحي" (الرصيد السابق / Previous Balance) من أعلى أول صفحة وضعه في initialBalance.`;
-  }
-  if(isRetry){
-    p += `\n\n⚠️ ملاحظة: هذه محاولة إعادة تحقق. ركّز بشكل خاص على قراءة الأرقام بدقة متناهية — التحقق من كل خانة رقمية مرتين.`;
-  }
-  return p;
-}
-
-const RESPONSE_SCHEMA = {
-  type:"OBJECT",
-  properties:{
-    bank:{type:"STRING", description:"اسم المصرف المكتشف"},
-    initialBalance:{type:"NUMBER", description:"الرصيد الافتتاحي (للدفعة الأولى فقط)"},
-    transactions:{
-      type:"ARRAY",
-      items:{
-        type:"OBJECT",
-        properties:{
-          date:{type:"STRING"},
-          referenceNo:{type:"STRING"},
-          desc:{type:"STRING"},
-          debit:{type:"NUMBER"},
-          credit:{type:"NUMBER"},
-          balance:{type:"NUMBER"}
-        }
-      }
-    }
-  }
-};
-
-async function callGemini(imageB64s, isFirst, isRetry=false){
-  if(!state.apiKey) throw new Error('يلزم إضافة مفتاح Gemini API من الإعدادات.');
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`;
-  const parts = [{text: buildPrompt(isFirst, isRetry)}];
-  imageB64s.forEach(b=> parts.push({inlineData:{mimeType:"image/png", data:b}}));
-
-  const payload = {
-    contents:[{role:"user", parts}],
-    generationConfig:{
-      responseMimeType:"application/json",
-      responseSchema: RESPONSE_SCHEMA,
-      temperature: isRetry?0.0:0.1,
-    }
-  };
-
-  const delays = [800, 1600, 3200, 6400, 12800];
-  for(let attempt=0; attempt<=5; attempt++){
-    try{
-      const res = await fetch(url,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
-      });
-      if(!res.ok){
-        const t = await res.text();
-        if(res.status===401 || res.status===403) throw new Error('مفتاح API غير صحيح.');
-        if(res.status===429 && attempt<5){ await new Promise(r=>setTimeout(r, delays[attempt])); continue; }
-        throw new Error(`خطأ ${res.status}: ${t.slice(0,200)}`);
-      }
-      const j = await res.json();
-      let txt = j.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-      txt = txt.replace(/```json|```/g,'').trim();
-      return JSON.parse(txt);
-    }catch(e){
-      if(attempt>=5) throw e;
-      if(String(e.message).includes('غير صحيح')) throw e;
-      await new Promise(r=>setTimeout(r, delays[attempt]));
-    }
-  }
-}
-
-async function callClaude(imageB64s, isFirst, isRetry=false){
-  if(!state.apiKey) throw new Error('يلزم إضافة مفتاح Claude (Anthropic) API من الإعدادات.');
-  const content = [{type:"text", text: buildPrompt(isFirst, isRetry) + `\n\nأجب بـ JSON فقط (بدون أي نص إضافي) وفق هذا الشكل:
-{"bank":"...", "initialBalance": 0, "transactions":[{"date":"","referenceNo":"","desc":"","debit":0,"credit":0,"balance":0}]}`}];
-  imageB64s.forEach(b=> content.push({type:"image", source:{type:"base64", media_type:"image/png", data:b}}));
-
-  const payload = {
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 8000,
-    messages: [{role:"user", content}]
-  };
-
-  const delays = [800, 1600, 3200, 6400, 12800];
-  for(let attempt=0; attempt<=5; attempt++){
-    try{
-      const res = await fetch("https://api.anthropic.com/v1/messages",{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'x-api-key': state.apiKey,
-          'anthropic-version':'2023-06-01',
-          'anthropic-dangerous-direct-browser-access':'true'
-        },
-        body: JSON.stringify(payload)
-      });
-      if(!res.ok){
-        const t = await res.text();
-        if(res.status===401 || res.status===403) throw new Error('مفتاح Claude API غير صحيح.');
-        if(res.status===429 && attempt<5){ await new Promise(r=>setTimeout(r, delays[attempt])); continue; }
-        throw new Error(`خطأ ${res.status}: ${t.slice(0,200)}`);
-      }
-      const j = await res.json();
-      let txt = (j.content?.[0]?.text || '{}').replace(/```json|```/g,'').trim();
-      // Strip any leading/trailing prose
-      const first = txt.indexOf('{'); const last = txt.lastIndexOf('}');
-      if(first>=0 && last>first) txt = txt.slice(first, last+1);
-      return JSON.parse(txt);
-    }catch(e){
-      if(attempt>=5) throw e;
-      if(String(e.message).includes('غير صحيح')) throw e;
-      await new Promise(r=>setTimeout(r, delays[attempt]));
-    }
-  }
-}
-
-async function callAI(imageB64s, isFirst, isRetry=false){
-  return state.engine==='claude'
-    ? callClaude(imageB64s, isFirst, isRetry)
-    : callGemini(imageB64s, isFirst, isRetry);
-}
-
-/* ---------- Main pipeline ---------- */
-async function handleFiles(files){
-  if(!files.length) return;
-  if(!state.apiKey){
-    showAlert('مفتاح API مطلوب',`يلزم إضافة مفتاح ${state.engine==='claude'?'Claude':'Gemini'} أولاً من الإعدادات (الترس أعلى اليسار).`,'info');
-    return;
-  }
-  state.startTime = performance.now();
-  showLoading('جاري التحضير','قراءة الملفات...', 2);
-
-  try{
-    // 1) Convert all sources to PNG base64
-    let images = [];
-    if(files.length===1 && files[0].type==='application/pdf'){
-      const buf = await files[0].arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({data:buf}).promise;
-      updateLoading(`تحويل ${pdf.numPages} صفحة إلى صور...`, 8);
-      const tasks = [];
-      for(let i=1; i<=pdf.numPages; i++){
-        tasks.push(()=> pdfPageToPNG(pdf, i, state.quality));
-      }
-      const arr = await runParallel(tasks, Math.min(state.concurrency, 6),
-        (done,total)=> updateLoading(`تحويل الصفحات (${done}/${total})`, 8 + (done/total)*20));
-      images = arr.filter(x=>typeof x==='string');
-    } else {
-      files.sort((a,b)=> a.name.localeCompare(b.name, undefined,{numeric:true, sensitivity:'base'}));
-      const tasks = files.map(f => ()=> fileToPNG(f, 1800));
-      const arr = await runParallel(tasks, Math.min(state.concurrency,6),
-        (done,total)=> updateLoading(`معالجة الصور (${done}/${total})`, 8 + (done/total)*20));
-      images = arr.filter(x=>typeof x==='string');
-    }
-    state.pageCount = images.length;
-
-    if(images.length===0) throw new Error('تعذرت قراءة أي صفحة.');
-
-    // 2) Send in batches of 2 pages each, in PARALLEL with concurrency
-    const BATCH = 2;
-    const batches = [];
-    for(let i=0; i<images.length; i+=BATCH){
-      batches.push({imgs: images.slice(i,i+BATCH), isFirst: i===0, index: Math.floor(i/BATCH)});
-    }
-
-    updateLoading(`تشغيل الذكاء الاصطناعي (${batches.length} دفعة · ${state.concurrency} متوازي)`, 30);
-
-    const aiTasks = batches.map(b => async ()=>{
-      const r = await callAI(b.imgs, b.isFirst);
-      return {...r, __batch: b.index, __isFirst: b.isFirst};
-    });
-
-    const aiResults = await runParallel(aiTasks, state.concurrency,
-      (done, total)=> updateLoading(`الذكاء الاصطناعي يقرأ... (${done}/${total})`, 30 + (done/total)*60));
-
-    // 3) Merge results
-    aiResults.sort((a,b)=> (a.__batch||0) - (b.__batch||0));
-    let initialBalance = 0;
-    let bankName = '';
-    let allTx = [];
-    let failedBatches = 0;
-
-    for(const r of aiResults){
-      if(r.error){ failedBatches++; continue; }
-      if(r.__isFirst && r.initialBalance) initialBalance = r.initialBalance;
-      if(!bankName && r.bank) bankName = r.bank;
-      if(Array.isArray(r.transactions)) allTx = allTx.concat(r.transactions);
-    }
-
-    if(allTx.length===0) throw new Error('لم يتم استخراج أي حركة. جرّب تحسين جودة الصور أو زيادة جودة المعالجة.');
-
-    state.bank = bankName;
-    state.elapsedMs = performance.now() - state.startTime;
-
-    updateLoading('تدقيق وترتيب البيانات...', 95);
-    populateData(initialBalance, allTx);
-
-    if(failedBatches>0){
-      showAlert('تحذير جزئي', `فشلت ${failedBatches} دفعة من ${batches.length}. راجع الجدول بدقة.`,'error');
-    }
-  }catch(e){
-    hideLoading();
-    console.error(e);
-    showAlert('فشل المعالجة', e.message || String(e), 'error');
-  }
-}
-
-/* ---------- Data handling ---------- */
-function parseDate(s){
-  if(!s) return new Date(0);
-  const p = String(s).split(/[-/.]/);
-  if(p.length===3){
-    let d,m,y;
-    if(p[0].length===4){ y=+p[0]; m=+p[1]-1; d=+p[2]; }
-    else { d=+p[0]; m=+p[1]-1; y=+p[2]; if(y<100) y+=2000; }
-    return new Date(y,m,d);
-  }
-  return new Date(s);
-}
-
-function populateData(initBal, txs){
-  document.getElementById('initialBalance').value = initBal || 0;
-
-  // Sort by date ascending (zero-dates first)
-  txs.sort((a,b)=> parseDate(a.date) - parseDate(b.date));
-
-  state.rows = txs.map((tx,i)=>({
-    id: i+1,
-    date: tx.date || '',
-    referenceNo: tx.referenceNo || '',
-    desc: tx.desc || 'حركة مالية',
-    debit: +tx.debit || 0,
-    credit: +tx.credit || 0,
-    statedBalance: +tx.balance || 0,
-    rawDebit: tx.debit ? String(tx.debit) : '',
-    rawCredit: tx.credit ? String(tx.credit) : '',
-    rawBalance: tx.balance ? String(tx.balance) : '',
-    isError: false,
+  return Object.values(res).map(r => ({
+    name: r.name,
+    qty_feb: r.qty_feb, val_feb: r.val_feb,
+    qty_mar: r.qty_feb + r.qty_chg,
+    val_mar: r.val_feb + r.val_chg,
+    qty_chg: r.qty_chg, val_chg: r.val_chg
   }));
+}
+const INV_MERGED = buildMar();
 
-  hideLoading();
-  document.getElementById('heroSection').classList.add('hidden');
-  document.getElementById('workArea').classList.remove('hidden');
-  document.getElementById('workArea').classList.add('fade-up');
+/* ═══ HELPERS ═══ */
+const fmt = n => {
+  const abs = Math.abs(n);
+  let s;
+  if(abs>=1000000) s = (n/1000000).toFixed(2)+'م';
+  else s = Number(n).toLocaleString('ar-LY',{maximumFractionDigits:2});
+  return s;
+};
+const fmtFull = n => Number(n).toLocaleString('ar-LY',{maximumFractionDigits:2});
 
-  // Show bank tag + chips
-  const bankTag = document.getElementById('bankTag');
-  if(state.bank){
-    bankTag.classList.remove('hidden');
-    document.getElementById('bankName').textContent = state.bank;
+const COLORS = ['#1E88E5','#00897B','#C62828','#F57F17','#7B1FA2','#2E7D32','#E65100','#37474F','#AD1457','#00695C'];
+let charts = {};
+function dChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+/* ═══ NAVIGATION ═══ */
+const TITLES = {bl:'قائمة الدخل الشاملة',inv:'المخازن وبضاعة آخر المدة',exp:'تحليل المصروفات التشغيلية'};
+function sw(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  const items=document.querySelectorAll('.nav-item');
+  const idx={bl:0,inv:1,exp:2}[id];
+  if(items[idx])items[idx].classList.add('active');
+  document.getElementById('pageTitle').textContent=TITLES[id];
+  if(window.innerWidth<=900)toggleMenu(false);
+}
+function toggleMenu(force){
+  const s=document.getElementById('sidebar'),o=document.getElementById('overlay');
+  const open=force!==undefined?force:!s.classList.contains('open');
+  s.classList.toggle('open',open);o.classList.toggle('open',open);
+}
+
+/* ═══════════════════════════
+   B&L RENDER — EXACT COLUMN STRUCTURE PER SHEET
+═══════════════════════════ */
+function renderBL(){
+  const sel = document.getElementById('blSel').value;
+
+  // ── Column headers & structure per selection ──
+  if(sel==='jan'){
+    renderBL_Jan();
+  } else if(sel==='febmar'){
+    renderBL_FebMar();
   } else {
-    bankTag.classList.add('hidden');
+    renderBL_Q1();
   }
-  document.getElementById('pageCount').querySelector('span').textContent = `${state.pageCount} صفحة`;
-  const secs = (state.elapsedMs/1000).toFixed(1);
-  document.getElementById('timeChip').querySelector('span').textContent = `${secs} ثانية`;
-
-  runAudit();
-  autoSave();
 }
 
-function parseNum(v){
-  if(v==null || v==='') return 0;
-  const s = String(v).replace(/[^\d.\-]/g,'');
-  const n = parseFloat(s);
-  return isNaN(n)?0:n;
+/* ── helpers ── */
+const fmtN = n => {
+  if(n===null||n===undefined||n==='') return '';
+  const v = Number(n);
+  if(isNaN(v)) return '';
+  if(v<0) return '(' + Math.abs(v).toLocaleString('ar-LY',{minimumFractionDigits:2,maximumFractionDigits:3}) + ')';
+  if(v===0) return '—';
+  return v.toLocaleString('ar-LY',{minimumFractionDigits:2,maximumFractionDigits:3});
+};
+const fmtFull2 = n => { if(n===null||n===undefined)return ''; const v=Number(n); if(isNaN(v))return ''; if(v<0)return '('+Math.abs(v).toLocaleString('ar-LY',{minimumFractionDigits:3,maximumFractionDigits:3})+')'; if(v===0)return '—'; return v.toLocaleString('ar-LY',{minimumFractionDigits:3,maximumFractionDigits:3}); };
+
+function tdN(val, cls=''){
+  return `<td class="num ${cls}" style="text-align:center;direction:ltr">${fmtN(val)}</td>`;
+}
+function tdNF(val,cls=''){
+  return `<td class="num ${cls}" style="text-align:center;direction:ltr">${fmtFull2(val)}</td>`;
 }
 
-function fmt(n){
-  if(n===0 || isNaN(n)) return '';
-  return Number(n).toLocaleString('en-US',{minimumFractionDigits:3, maximumFractionDigits:3});
+/* ══════════════════════════════════════════
+   يناير 2026
+   الأعمدة: البيان | الكريمية | تاجوراء | الموحد
+══════════════════════════════════════════ */
+function renderBL_Jan(){
+  const j = BL.jan;
+
+  // Update table headers
+  document.getElementById('blThead').innerHTML = `
+    <tr>
+      <th style="width:44%;text-align:right">البـيـان</th>
+      <th style="width:18%">الكريمية</th>
+      <th style="width:18%">تاجوراء</th>
+      <th style="width:20%">الموحد</th>
+    </tr>`;
+
+  // KPIs
+  document.getElementById('blKPIs').innerHTML = `
+    <div class="kpi c-blue"><div class="kpi-ico">💰</div><div class="kpi-lbl">صافي المبيعات الموحدة (بعد الحذف)</div>
+      <div class="kpi-val">${fmtFull(j.netSales)}</div><div class="kpi-sub">د.ل</div></div>
+    <div class="kpi c-red"><div class="kpi-ico">📦</div><div class="kpi-lbl">تكلفة البضاعة المباعة الموحدة</div>
+      <div class="kpi-val">${fmtFull(j.cogs)}</div><div class="kpi-sub">د.ل</div></div>
+    <div class="kpi c-red"><div class="kpi-ico">📉</div><div class="kpi-lbl">مجمل الربح / (الخسارة)</div>
+      <div class="kpi-val">(${fmtFull(Math.abs(j.grossProfit))})</div>
+      <div class="kpi-badge b-down">خسارة ${j.netSales?((Math.abs(j.grossProfit)/j.netSales)*100).toFixed(1):0}%</div></div>
+    <div class="kpi c-amber"><div class="kpi-ico">💸</div><div class="kpi-lbl">إجمالي المصاريف التشغيلية</div>
+      <div class="kpi-val">${fmtFull(j.totalOpex)}</div><div class="kpi-sub">د.ل</div></div>
+    <div class="kpi c-red"><div class="kpi-ico">❌</div><div class="kpi-lbl">صافي الربح / (الخسارة) الشاملة الموحدة</div>
+      <div class="kpi-val">(${fmtFull(Math.abs(j.netProfit))})</div>
+      <div class="kpi-badge b-down">خسارة</div></div>
+  `;
+
+  const opexRows = Object.entries(j.opex_detail).map(([lbl,row])=>`
+    <tr>
+      <td style="padding-right:28px;color:var(--gray700)">${lbl}</td>
+      ${tdN(row[0])}${tdN(row[1])}${tdN(row[2])}
+    </tr>`).join('');
+
+  document.getElementById('blBody').innerHTML = `
+    <tr class="sec"><td colspan="4">أولاً: الإيرادات من المبيعات</td></tr>
+    <tr><td style="padding-right:20px">مبيعات إجمالية</td>${tdN(11413351.5)}${tdN(4006242.65)}${tdN(15419594.15)}</tr>
+    <tr><td style="padding-right:20px">( مردود المبيعات )</td>${tdN(-1161397.5)}${tdN(-41697)}${tdN(-1203094.5)}</tr>
+    <tr class="sub"><td><strong>صافي المبيعات قبل الحذف البيني</strong></td>${tdN(10251954)}${tdN(3964545.65)}${tdN(14216499.65)}</tr>
+    <tr><td style="padding-right:20px;color:var(--red);font-size:11px;font-style:italic">◄ حذف: فاتورة بيع الكريمية لتاجوراء (4,318,961.50) — مردود (964,805.00) = صافي محذوف</td>
+        <td></td><td></td>${tdN(-3354156.5,'red-num')}</tr>
+    <tr class="grand"><td><strong>✦ صافي المبيعات الموحدة (بعد الحذف)</strong></td>${tdN(6897797.5)}${tdN(3964545.65)}${tdN(10862343.15)}</tr>
+
+    <tr class="sec"><td colspan="4">ثانياً: تكلفة البضاعة المباعة</td></tr>
+    <tr><td style="padding-right:20px">بضاعة أول المدة</td>${tdNF(27335991.471)}${tdNF(2623706.998)}${tdNF(29959698.469)}</tr>
+    <tr><td style="padding-right:20px">المشتريات</td>${tdN(5800917.5)}${tdN(4899748.75)}${tdN(10700666.25)}</tr>
+    <tr><td style="padding-right:20px">( مردود مشتريات )</td>${tdN(-34195)}${tdN(-930921)}${tdN(-965116)}</tr>
+    <tr class="sub"><td><strong>صافي المشتريات</strong></td>${tdN(5766722.5)}${tdN(3968827.75)}${tdN(9735550.25)}</tr>
+    <tr class="sub"><td><strong>البضاعة المتاحة للبيع</strong></td>${tdNF(33102713.971)}${tdNF(6592534.748)}${tdNF(39695248.719)}</tr>
+    <tr><td style="padding-right:20px">( بضاعة آخر المدة )</td>${tdNF(-22264632.433)}${tdNF(-2987605.464)}${tdNF(-25252237.897)}</tr>
+    <tr><td style="padding-right:20px;color:var(--red);font-size:11px;font-style:italic">◄ حذف: مشتريات تاجوراء البينية من الكريمية — صافي محذوف</td>
+        <td></td><td></td>${tdN(-3354156.5,'red-num')}</tr>
+    <tr class="sub"><td><strong>✦ تكلفة البضاعة المباعة الموحدة</strong></td>${tdNF(10838081.538)}${tdNF(250772.784)}${tdNF(11088854.322)}</tr>
+    <tr class="loss"><td><strong>✦ مجمل الربح / (الخسارة)</strong></td>${tdN(-3940284.038)}${tdN(3713772.866)}${tdN(-226511.172)}</tr>
+
+    <tr class="sec"><td colspan="4">ثالثاً: المصاريف الإدارية والعمومية والبيعية</td></tr>
+    ${opexRows}
+    <tr class="sub"><td><strong>✦ إجمالي المصاريف التشغيلية</strong></td>${tdN(674564)}${tdN(309312.44)}${tdN(983876.44)}</tr>
+    <tr class="loss"><td><strong>✦ الربح / (الخسارة) التشغيلية</strong></td>${tdN(-4614848.038)}${tdN(3404460.426)}${tdN(-1210387.612)}</tr>
+
+    <tr class="sec"><td colspan="4">رابعاً: الإيرادات الأخرى</td></tr>
+    <tr><td style="padding-right:20px">52 - إيرادات أخرى</td>${tdN(6946.5)}${tdN(3375)}${tdN(10321.5)}</tr>
+    <tr><td style="padding-right:20px">53 - إيرادات بطاقة مصرفية</td>${tdN(0)}${tdN(846)}${tdN(846)}</tr>
+    <tr class="sub"><td><strong>✦ إجمالي الإيرادات الأخرى</strong></td>${tdN(6946.5)}${tdN(4221)}${tdN(11167.5)}</tr>
+    <tr class="grand"><td><strong>✦ صافي الربح / (الخسارة) الشاملة الموحدة</strong></td>${tdN(-4607901.538)}${tdN(3408681.426)}${tdN(-1199220.112)}</tr>
+    <tr><td colspan="4" style="font-size:10px;color:var(--gray500);font-style:italic;padding:8px 13px;background:var(--amber-l)">
+      ملاحظة: الخلايا الزرقاء قابلة للتعديل · جميع الإجماليات والنتائج تتحدث تلقائياً · الحذف البيني في D9 مرتبط بتكلفة المبيعات.</td></tr>
+  `;
+
+  renderRevChart('jan'); renderPieChart('jan');
 }
 
-function runAudit(){
-  let running = parseFloat(document.getElementById('initialBalance').value) || 0;
-  let errors = 0, valid = 0;
-  let sumDebit = 0, sumCredit = 0;
+/* ══════════════════════════════════════════
+   فبراير - مارس 2026
+   الأعمدة: البيان | المبلغ (د.ل)
+══════════════════════════════════════════ */
+function renderBL_FebMar(){
+  const fm = BL.febmar;
 
-  state.rows.forEach(r=>{
-    const d = parseNum(r.rawDebit);
-    const c = parseNum(r.rawCredit);
-    const stated = parseNum(r.rawBalance);
-    const expected = running + c - d;
-    const diff = Math.abs(expected - stated);
-    const match = diff < 0.02;
+  document.getElementById('blThead').innerHTML = `
+    <tr>
+      <th style="width:65%;text-align:right">البـيـان</th>
+      <th style="width:35%">المبلغ (د.ل)</th>
+    </tr>`;
 
-    r.debit = d; r.credit = c; r.statedBalance = stated;
-    r.expected = expected; r.diff = expected - stated;
+  document.getElementById('blKPIs').innerHTML = `
+    <div class="kpi c-blue"><div class="kpi-ico">💰</div><div class="kpi-lbl">صافي المبيعات</div>
+      <div class="kpi-val">${fmtFull(fm.netSales)}</div><div class="kpi-sub">د.ل</div></div>
+    <div class="kpi c-red"><div class="kpi-ico">📦</div><div class="kpi-lbl">تكلفة البضاعة المباعة</div>
+      <div class="kpi-val">${fmtFull(fm.cogs)}</div><div class="kpi-sub">د.ل</div></div>
+    <div class="kpi c-red"><div class="kpi-ico">📉</div><div class="kpi-lbl">مجمل الربح / (الخسارة)</div>
+      <div class="kpi-val">(${fmtFull(Math.abs(fm.grossProfit))})</div>
+      <div class="kpi-badge b-down">خسارة</div></div>
+    <div class="kpi c-amber"><div class="kpi-ico">💸</div><div class="kpi-lbl">إجمالي المصاريف التشغيلية</div>
+      <div class="kpi-val">${fmtFull(fm.totalOpex)}</div><div class="kpi-sub">د.ل</div></div>
+    <div class="kpi c-red"><div class="kpi-ico">❌</div><div class="kpi-lbl">صافي الربح / (الخسارة) الشاملة</div>
+      <div class="kpi-val">(${fmtFull(Math.abs(fm.netProfit))})</div>
+      <div class="kpi-badge b-down">خسارة</div></div>
+  `;
 
-    if(!match && stated !== 0){ r.isError = true; errors++; }
-    else { r.isError = false; if(d||c||stated) valid++; }
+  const opexRows = Object.entries(fm.opex_detail).map(([lbl,val])=>`
+    <tr><td style="padding-right:28px;color:var(--gray700)">${lbl}</td>${tdN(val)}</tr>`).join('');
 
-    sumDebit += d; sumCredit += c;
-    running = stated!==0 ? stated : expected;
+  document.getElementById('blBody').innerHTML = `
+    <tr class="sec"><td colspan="2">أولاً: الإيرادات</td></tr>
+    <tr><td style="padding-right:20px">المبيعات من النشاط</td>${tdN(11763522.87)}</tr>
+    <tr><td style="padding-right:20px">( مردودات المبيعات )</td>${tdN(-1097658.38)}</tr>
+    <tr><td style="padding-right:20px">( خصم مسموح به )</td>${tdN(-623841)}</tr>
+    <tr class="grand"><td><strong>✦ صافي المبيعات</strong></td>${tdN(10042023.49)}</tr>
+
+    <tr class="sec"><td colspan="2">ثانياً: تكلفة البضاعة المباعة</td></tr>
+    <tr><td style="padding-right:20px">بضاعة أول المدة</td>${tdN(5964614.25)}</tr>
+    <tr><td style="padding-right:20px">المشتريات</td>${tdN(10210836)}</tr>
+    <tr><td style="padding-right:20px">( مردودات المشتريات )</td>${tdN(-2272703)}</tr>
+    <tr class="sub"><td><strong>البضاعة المتاحة للبيع</strong></td>${tdN(13902747.25)}</tr>
+    <tr><td style="padding-right:20px">( بضاعة آخر المدة )</td>${tdN(-3518283)}</tr>
+    <tr class="sub"><td><strong>✦ تكلفة البضاعة المباعة</strong></td>${tdN(10384464.25)}</tr>
+    <tr class="loss"><td><strong>✦ مجمل الربح / (الخسارة)</strong></td>${tdN(-342440.76)}</tr>
+
+    <tr class="sec"><td colspan="2">ثالثاً: المصاريف التشغيلية (فبراير - مارس)</td></tr>
+    ${opexRows}
+    <tr class="sub"><td><strong>✦ إجمالي المصاريف التشغيلية</strong></td>${tdN(1055961.7)}</tr>
+    <tr class="loss"><td><strong>✦ صافي الربح / (الخسارة) التشغيلية</strong></td>${tdN(-1398402.46)}</tr>
+
+    <tr class="sec"><td colspan="2">رابعاً: الإيرادات الأخرى</td></tr>
+    <tr><td style="padding-right:20px">إيرادات أخرى</td>${tdN(195)}</tr>
+    <tr><td style="padding-right:20px">إيرادات بطاطا</td>${tdN(553)}</tr>
+    <tr><td style="padding-right:20px">إيرادات خصم الغياب</td>${tdN(7806.66)}</tr>
+    <tr class="sub"><td><strong>✦ إجمالي الإيرادات الأخرى</strong></td>${tdN(8554.66)}</tr>
+    <tr class="grand"><td><strong>✦ صافي الربح / (الخسارة) الشاملة</strong></td>${tdN(-1389847.8)}</tr>
+    <tr><td colspan="2" style="font-size:10px;color:var(--gray500);font-style:italic;padding:8px 13px;background:var(--amber-l)">
+      ملاحظة: الخلايا الزرقاء قابلة للتعديل · جميع الإجماليات تتحدث تلقائياً.</td></tr>
+  `;
+
+  renderRevChart('febmar'); renderPieChart('febmar');
+}
+
+/* ══════════════════════════════════════════
+   الربع الأول الموحد
+   الأعمدة: البيان | يناير 2026 | فبراير - مارس 2026 | الربع الأول (الإجمالي)
+══════════════════════════════════════════ */
+function renderBL_Q1(){
+  const q = BL_Q1, j = BL.jan, fm = BL.febmar;
+
+  document.getElementById('blThead').innerHTML = `
+    <tr>
+      <th style="width:40%;text-align:right">البـيـان</th>
+      <th style="width:18%">يناير 2026</th>
+      <th style="width:22%">فبراير - مارس 2026</th>
+      <th style="width:20%">الربع الأول (الإجمالي)</th>
+    </tr>`;
+
+  document.getElementById('blKPIs').innerHTML = `
+    <div class="kpi c-blue"><div class="kpi-ico">💰</div><div class="kpi-lbl">صافي المبيعات الموحدة</div>
+      <div class="kpi-val">${fmtFull(q.netSales)}</div><div class="kpi-sub">د.ل — الربع الأول</div></div>
+    <div class="kpi c-red"><div class="kpi-ico">📦</div><div class="kpi-lbl">تكلفة البضاعة المباعة</div>
+      <div class="kpi-val">${fmtFull(q.cogs)}</div><div class="kpi-sub">د.ل</div></div>
+    <div class="kpi c-red"><div class="kpi-ico">📉</div><div class="kpi-lbl">مجمل الربح / (الخسارة)</div>
+      <div class="kpi-val">(${fmtFull(Math.abs(q.grossProfit))})</div>
+      <div class="kpi-badge b-down">خسارة ${q.netSales?((Math.abs(q.grossProfit)/q.netSales)*100).toFixed(1):0}%</div></div>
+    <div class="kpi c-amber"><div class="kpi-ico">💸</div><div class="kpi-lbl">إجمالي المصاريف التشغيلية</div>
+      <div class="kpi-val">${fmtFull(q.totalOpex)}</div><div class="kpi-sub">د.ل</div></div>
+    <div class="kpi c-red"><div class="kpi-ico">❌</div><div class="kpi-lbl">صافي الربح / (الخسارة) الشاملة الموحدة</div>
+      <div class="kpi-val">(${fmtFull(Math.abs(q.netProfit))})</div>
+      <div class="kpi-badge b-down">خسارة</div></div>
+  `;
+
+  // Q1 opex merged rows
+  const q1OpexRows = [
+    ['301 - رواتب وأجور الإدارية وملحقاتها', 89490, null, 89490],
+    ['الأجور والمرتبات الأساسية', null, 193011, 193011],
+    ['الإضافي / عمل إضافي ساعات عادية', 19735.58, 12784.13, 32519.71],
+    ['خصم مسموح به / عمولة مبيعات الجملة', 462594.67, 28038.79, 490633.46],
+    ['نقل ومناولة للمبيعات', 34781.45, null, 34781.45],
+    ['م. الصيانة', 4069.5, 59567, 63636.5],
+    ['م. قرطاسية ومطبوعات', 165, 9212, 9377],
+    ['م. وقود ومحروقات', 7834, 9247, 17081],
+    ['مكافآت وحوافز ومنح', 20300, 21300, 41600],
+    ['م. إيجارات', 2700, 8205, 10905],
+    ['دعاية وإعلان', 4009, null, 4009],
+    ['نقل وتنقلات / م. نقل القافلة', 5950, null, 5950],
+    ['م. فاقد وتالف', 17735, 360307.91, 378042.91],
+    ['كروت ووقود موظف', 2960, null, 2960],
+    ['م. بدل إعاشة', 994.75, 13279, 14273.75],
+    ['م. عمولة مبيعات القطاعي', 29747.55, 36175.79, 65923.34],
+    ['تخفيضات', 266002.94, 180622.82, 446625.76],
+    ['إكراميات وهدايا', 8012, 5889, 13901],
+    ['م. بدل سكن الموظفين', 2500, null, 2500],
+    ['م. بدل سيارة', 4295, 35500, 39795],
+    ['م. عمولة نقل لسائقين', null, 31580.53, 31580.53],
+    ['م. متفرقة', null, 14648, 14648],
+    ['م. بدل الهاتف والإنترنت', null, 9675, 9675],
+    ['م. عمولة مبيعات الإدارة', null, 9229.17, 9229.17],
+    ['عمالة عارضة', null, 4505, 4505],
+    ['م. تذاكر طيران وإقامات وتأشيرات', null, 2495.88, 2495.88],
+    ['م. تأمين سيارات', null, 2150, 2150],
+    ['م. عمولة مبيعات الأسواق', null, 1672.51, 1672.51],
+    ['مصروفات حكومية', null, 1650, 1650],
+    ['م. زيت لسيارات', null, 1440, 1440],
+    ['م. عمل إضافي', null, 1066.67, 1066.67],
+    ['م. نظافة', null, 899, 899],
+    ['م. مواد بناء', null, 593.5, 593.5],
+    ['م. علاج', null, 500, 500],
+    ['م. بدل طريق', null, 310, 310],
+    ['م. المقهى والبوفيه', null, 137, 137],
+    ['م. سيارة سامسونج', null, 120, 120],
+    ['م. تعبئة وقود بالطريق', null, 90, 90],
+    ['م. مواد صحية', null, 60, 60],
+  ].map(([lbl,v1,v2,v3])=>`
+    <tr><td style="padding-right:28px;color:var(--gray700)">${lbl}</td>
+    ${tdN(v1)}${tdN(v2)}${tdN(v3)}</tr>`).join('');
+
+  document.getElementById('blBody').innerHTML = `
+    <tr class="sec"><td colspan="4">أولاً: صافي المبيعات (بعد الحذف البيني)</td></tr>
+    <tr class="grand"><td><strong>✦ صافي المبيعات الموحدة</strong></td>${tdN(10862343.15)}${tdN(10042023.49)}${tdN(20904366.64)}</tr>
+    <tr><td colspan="4" style="font-size:10px;color:var(--gray500);font-style:italic;padding:6px 13px;background:#FFFDE7">
+      * يناير: مرتبط بخلية D10 في ورقة يناير (بعد الحذف البيني 3,354,156.50) · فبراير-مارس: مرتبط B9</td></tr>
+
+    <tr class="sec"><td colspan="4">ثانياً: تكلفة البضاعة المباعة</td></tr>
+    <tr class="sub"><td><strong>تكلفة البضاعة المباعة الموحدة</strong></td>${tdNF(11088854.322)}${tdNF(10384464.25)}${tdNF(21473318.572)}</tr>
+    <tr class="loss"><td><strong>✦ مجمل الربح / (الخسارة)</strong></td>${tdN(-226511.172)}${tdN(-342440.76)}${tdN(-568951.932)}</tr>
+
+    <tr class="sec"><td colspan="4">ثالثاً: المصاريف التشغيلية</td></tr>
+    ${q1OpexRows}
+    <tr class="sub"><td><strong>✦ إجمالي المصاريف التشغيلية</strong></td>${tdN(983876.44)}${tdN(1055961.7)}${tdN(2039838.14)}</tr>
+    <tr class="loss"><td><strong>✦ الربح / (الخسارة) التشغيلية</strong></td>${tdN(-1210387.612)}${tdN(-1398402.46)}${tdN(-2608790.072)}</tr>
+
+    <tr class="sec"><td colspan="4">رابعاً: الإيرادات الأخرى</td></tr>
+    <tr><td style="padding-right:20px">إيرادات أخرى وبطاقات مصرفية — يناير</td>${tdN(11167.5)}${tdN(0)}${tdN(11167.5)}</tr>
+    <tr><td style="padding-right:20px">إيرادات أخرى — فبراير/مارس</td>${tdN(0)}${tdN(195)}${tdN(195)}</tr>
+    <tr><td style="padding-right:20px">إيرادات بطاطا</td>${tdN(0)}${tdN(553)}${tdN(553)}</tr>
+    <tr><td style="padding-right:20px">إيرادات خصم الغياب</td>${tdN(0)}${tdN(7806.66)}${tdN(7806.66)}</tr>
+    <tr class="sub"><td><strong>✦ إجمالي الإيرادات الأخرى</strong></td>${tdN(11167.5)}${tdN(8554.66)}${tdN(19722.16)}</tr>
+    <tr class="grand"><td><strong>✦ صافي الربح / (الخسارة) الشاملة الموحدة — الربع الأول</strong></td>${tdN(-1199220.112)}${tdN(-1389847.8)}${tdN(-2589067.912)}</tr>
+    <tr><td colspan="4" style="font-size:10px;color:var(--gray500);font-style:italic;padding:8px 13px;background:var(--amber-l)">
+      ملاحظة: جميع الخلايا مرتبطة بمعادلات بورقتَي يناير وفبراير-مارس · أي تعديل في الأرقام الزرقاء يتحدث تلقائياً في هذه الورقة.</td></tr>
+  `;
+
+  renderRevChart('q1'); renderPieChart('q1');
+}
+
+
+function renderRevChart(sel){
+  dChart('rev');
+  const ctx = document.getElementById('revChart').getContext('2d');
+  const labels=['يناير','فبراير-مارس'];
+  const revData=[BL.jan.netSales, BL.febmar.netSales];
+  const cogsData=[BL.jan.cogs, BL.febmar.cogs];
+  const gp=[BL.jan.grossProfit, BL.febmar.grossProfit];
+  charts['rev']=new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'صافي المبيعات',data:revData,backgroundColor:'#E84E1B',borderRadius:5},
+      {label:'تكلفة البضاعة',data:cogsData,backgroundColor:'#EF9A9A',borderRadius:5},
+      {label:'المصاريف التشغيلية',data:[BL.jan.totalOpex,BL.febmar.totalOpex],backgroundColor:'#FFB74D',borderRadius:5},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{font:{size:12,family:'Cairo'}}},y:{ticks:{callback:v=>(v/1000000).toFixed(1)+'م',font:{size:10}}}}}
+  });
+  document.getElementById('revLeg').innerHTML=[['صافي المبيعات','#1E88E5'],['تكلفة البضاعة','#EF9A9A'],['المصاريف التشغيلية','#FFB74D']]
+    .map(([l,c])=>`<div class="leg-item"><div class="leg-dot" style="background:${c}"></div>${l}</div>`).join('');
+}
+
+function renderPieChart(sel){
+  dChart('pie');
+  const ctx=document.getElementById('pieChart').getContext('2d');
+  const q=BL_Q1;
+  const labels=['تكلفة البضاعة','المصاريف التشغيلية','الإيرادات الأخرى'];
+  const colors=['#EF5350','#FFA726','#42A5F5'];
+  charts['pie']=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data:[q.cogs,q.totalOpex,q.otherIncome],backgroundColor:colors,borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+fmtFull(c.raw)+' د.ل'}}}}
+  });
+  document.getElementById('pieLeg').innerHTML=labels.map((l,i)=>
+    `<div class="leg-item"><div class="leg-dot" style="background:${colors[i]}"></div>${l}</div>`).join('');
+}
+
+/* ═══════════════════════════
+   INVENTORY RENDER
+═══════════════════════════ */
+function renderInv(){
+  const sel=document.getElementById('invSel').value;
+  const search=document.getElementById('invSearch').value.trim().toLowerCase();
+  const diff=TOTAL_MAR-TOTAL_FEB;
+
+  // ── KPIs ──
+  const kpiVal = sel==='feb' ? TOTAL_FEB : sel==='mar' ? TOTAL_MAR : TOTAL_FEB;
+  const kpiVal2 = sel==='feb' ? TOTAL_FEB : sel==='mar' ? TOTAL_MAR : TOTAL_MAR;
+  document.getElementById('invKPIs').innerHTML=`
+    <div class="kpi c-blue">
+      <div class="kpi-ico">📦</div>
+      <div class="kpi-lbl">قيمة المخزون — فبراير 2026</div>
+      <div class="kpi-val">${fmtFull(TOTAL_FEB)}</div>
+      <div class="kpi-sub">د.ل — ${INV_FEB.length} صنف</div>
+    </div>
+    <div class="kpi c-teal">
+      <div class="kpi-ico">📦</div>
+      <div class="kpi-lbl">قيمة المخزون — مارس 2026</div>
+      <div class="kpi-val">${fmtFull(TOTAL_MAR)}</div>
+      <div class="kpi-sub">د.ل — ${INV_MERGED.length} صنف</div>
+    </div>
+    <div class="kpi c-red">
+      <div class="kpi-ico">📉</div>
+      <div class="kpi-lbl">التغير في المخزون</div>
+      <div class="kpi-val">(${fmtFull(Math.abs(diff))})</div>
+      <div class="kpi-badge b-down">انخفاض ${((Math.abs(diff)/TOTAL_FEB)*100).toFixed(1)}%</div>
+    </div>
+    <div class="kpi c-amber">
+      <div class="kpi-ico">🔢</div>
+      <div class="kpi-lbl">عدد الأصناف</div>
+      <div class="kpi-val">${INV_MERGED.length}</div>
+      <div class="kpi-sub">صنف مخزني</div>
+    </div>
+  `;
+
+  // ── فلترة الصفوف حسب الشهر والبحث ──
+  let rows = INV_MERGED.filter(r => {
+    if(search && !r.name.toLowerCase().includes(search)) return false;
+    if(sel==='feb') return !(r.qty_feb===0 && r.val_feb===0);
+    if(sel==='mar') return !(r.qty_mar===0 && r.val_mar===0);
+    return true;
   });
 
-  document.getElementById('statTotal').textContent = state.rows.length;
-  document.getElementById('statOk').textContent = valid;
-  document.getElementById('statErr').textContent = errors;
-  document.getElementById('statDebit').textContent = fmt(sumDebit) || '—';
-  document.getElementById('statCredit').textContent = fmt(sumCredit) || '—';
-  document.getElementById('statFinal').textContent = fmt(running) || '—';
-
-  renderRows();
-}
-
-function passesFilter(r){
-  if(state.filter==='err' && !r.isError) return false;
-  if(state.filter==='debit' && !r.debit) return false;
-  if(state.filter==='credit' && !r.credit) return false;
-  if(state.search){
-    const hay = (r.desc+' '+r.referenceNo+' '+r.date).toLowerCase();
-    if(!hay.includes(state.search)) return false;
-  }
-  return true;
-}
-
-function renderRows(){
-  const tb = document.getElementById('tbody');
-  tb.innerHTML = '';
-  const frag = document.createDocumentFragment();
-
-  state.rows.forEach((r, idx)=>{
-    if(!passesFilter(r)) return;
-    const tr = document.createElement('tr');
-    if(r.isError) tr.className = 'err-row';
-
-    const status = r.isError
-      ? '<span class="status-badge err" title="خطأ رياضي"><i class="ph-fill ph-warning"></i></span>'
-      : '<span class="status-badge ok" title="مطابق"><i class="ph-fill ph-check"></i></span>';
-
-    tr.innerHTML = `
-      <td class="text-center">${status}</td>
-      <td class="mono text-xs" style="color:var(--ink-2)">${r.id}</td>
-      <td><span class="editable mono text-xs" contenteditable="true" data-field="date" data-i="${idx}">${escapeHtml(r.date)}</span></td>
-      <td><span class="editable mono text-xs" contenteditable="true" data-field="referenceNo" data-i="${idx}">${escapeHtml(r.referenceNo || '—')}</span></td>
-      <td><span class="editable" contenteditable="true" data-field="desc" data-i="${idx}">${escapeHtml(r.desc)}</span></td>
-      <td class="num-cell debit"><span class="editable" contenteditable="true" data-field="rawDebit" data-i="${idx}">${escapeHtml(r.rawDebit)}</span></td>
-      <td class="num-cell credit"><span class="editable" contenteditable="true" data-field="rawCredit" data-i="${idx}">${escapeHtml(r.rawCredit)}</span></td>
-      <td class="num-cell balance"><span class="editable" contenteditable="true" data-field="rawBalance" data-i="${idx}">${escapeHtml(r.rawBalance)}</span></td>
-      <td class="num-cell" style="color:var(--ink-2)">${fmt(r.expected)}</td>
-      <td class="num-cell ${r.isError?'diff':''}" style="${r.isError?'':'color:var(--line)'}">${r.isError?fmt(r.diff):'—'}</td>
-    `;
-    frag.appendChild(tr);
-  });
-  tb.appendChild(frag);
-  attachEditors();
-}
-
-function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function attachEditors(){
-  document.querySelectorAll('.editable').forEach(el=>{
-    el.addEventListener('blur', function(){
-      const i = +this.dataset.i, f = this.dataset.field;
-      state.rows[i][f] = this.innerText.trim();
-      if(f.startsWith('raw')) runAudit();
-      autoSave();
-    });
-    el.addEventListener('keydown', function(e){
-      if(e.key==='Enter'){ e.preventDefault(); this.blur(); }
-      if(e.key==='Escape'){ this.innerText = state.rows[+this.dataset.i][this.dataset.field] || ''; this.blur(); }
-    });
-  });
-}
-
-/* ---------- Re-verify errors ---------- */
-async function reverifyErrors(){
-  const errorRows = state.rows.filter(r=>r.isError);
-  if(errorRows.length===0){ showAlert('لا توجد أخطاء','كل الحركات مطابقة رياضياً.','success'); return; }
-  showAlert('إعادة تحقق','هذه الميزة تعتمد على الصور الأصلية. أعد رفع الكشف لاستخدامها، أو راجع الأسطر الحمراء يدوياً.','info');
-}
-
-/* ---------- Export ---------- */
-function exportExcel(){
-  if(state.rows.length===0) return;
-  const hasErr = state.rows.some(r=>r.isError);
-  if(hasErr){
-    showAlert('البيانات غير مطابقة','توجد أسطر بها فرق رياضي. يرجى مراجعتها وتعديلها قبل التصدير لضمان صحة البيانات.','error');
-    return;
+  // ── تحديث رؤوس الأعمدة حسب الشهر ──
+  const thead = document.querySelector('#invTbl thead tr');
+  if(sel==='feb'){
+    thead.innerHTML=`
+      <th style="width:4%">#</th>
+      <th style="width:46%">الصنف</th>
+      <th style="width:14%">الكمية</th>
+      <th style="width:18%">القيمة (د.ل)</th>`;
+  } else if(sel==='mar'){
+    thead.innerHTML=`
+      <th style="width:4%">#</th>
+      <th style="width:46%">الصنف</th>
+      <th style="width:14%">الكمية</th>
+      <th style="width:18%">القيمة (د.ل)</th>`;
+  } else {
+    thead.innerHTML=`
+      <th style="width:4%">#</th>
+      <th style="width:32%">الصنف</th>
+      <th style="width:10%">الكمية (فبراير)</th>
+      <th style="width:10%">الكمية (مارس)</th>
+      <th style="width:10%">التغير</th>
+      <th style="width:12%">القيمة (فبراير)</th>
+      <th style="width:12%">القيمة (مارس)</th>`;
   }
 
-  const rows = [
-    ['م','التاريخ','الرقم المرجعي','البيان','مدين','دائن','الرصيد']
+  // ── بناء صفوف الجدول ──
+  const tbody = rows.map((r,i)=>{
+    const chgHtml = r.qty_chg!==0
+      ? `<span class="chpill ${r.qty_chg>0?'ch-up':'ch-dn'}">${r.qty_chg>0?'▲':'▼'} ${Math.abs(r.qty_chg).toLocaleString()}</span>`
+      : `<span class="tag t-gray">لا تغيير</span>`;
+
+    if(sel==='feb') return `<tr>
+      <td>${i+1}</td>
+      <td style="font-weight:600;font-size:12px">${r.name}</td>
+      <td class="num">${r.qty_feb.toLocaleString()}</td>
+      <td class="num">${fmtFull(r.val_feb)}</td>
+    </tr>`;
+
+    if(sel==='mar') return `<tr>
+      <td>${i+1}</td>
+      <td style="font-weight:600;font-size:12px">${r.name}</td>
+      <td class="num">${r.qty_mar.toLocaleString()}</td>
+      <td class="num"><strong>${fmtFull(r.val_mar)}</strong></td>
+    </tr>`;
+
+    return `<tr>
+      <td>${i+1}</td>
+      <td style="font-weight:600;font-size:12px">${r.name}</td>
+      <td class="num">${r.qty_feb.toLocaleString()}</td>
+      <td class="num">${r.qty_mar.toLocaleString()}</td>
+      <td style="text-align:center">${chgHtml}</td>
+      <td class="num">${fmtFull(r.val_feb)}</td>
+      <td class="num"><strong>${fmtFull(r.val_mar)}</strong></td>
+    </tr>`;
+  }).join('');
+
+  // ── صف الإجمالي ──
+  const totFeb = rows.reduce((a,r)=>a+r.val_feb, 0);
+  const totMar = rows.reduce((a,r)=>a+r.val_mar, 0);
+  let totRow = '';
+  if(sel==='feb'){
+    totRow=`<tr class="inv-tot"><td colspan="3"><strong>📊 الإجمالي</strong></td><td class="num"><strong>${fmtFull(totFeb)}</strong></td></tr>`;
+  } else if(sel==='mar'){
+    totRow=`<tr class="inv-tot"><td colspan="3"><strong>📊 الإجمالي</strong></td><td class="num"><strong>${fmtFull(totMar)}</strong></td></tr>`;
+  } else {
+    totRow=`<tr class="inv-tot"><td colspan="5"><strong>📊 الإجمالي</strong></td><td class="num"><strong>${fmtFull(totFeb)}</strong></td><td class="num"><strong>${fmtFull(totMar)}</strong></td></tr>`;
+  }
+
+  document.getElementById('invBody').innerHTML = tbody + totRow;
+  renderInvChart(rows);
+}
+
+function renderInvChart(rows){
+  dChart('inv');
+  const ctx=document.getElementById('invChart').getContext('2d');
+  const top=rows.filter(r=>r.val_feb>0||r.val_mar>0).sort((a,b)=>(b.val_feb+b.val_mar)-(a.val_feb+a.val_mar)).slice(0,15);
+  const labels=top.map(r=>r.name.length>22?r.name.substr(0,20)+'...':r.name);
+  charts['inv']=new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'فبراير',data:top.map(r=>r.val_feb),backgroundColor:'#E84E1B',borderRadius:3},
+      {label:'مارس',data:top.map(r=>r.val_mar),backgroundColor:'#2c5de5',borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{callback:v=>fmtFull(v),font:{size:9}}},y:{ticks:{font:{size:9,family:'Cairo'}}}}}
+  });
+  document.getElementById('invLeg').innerHTML=[['فبراير','#1E88E5'],['مارس','#00897B']]
+    .map(([l,c])=>`<div class="leg-item"><div class="leg-dot" style="background:${c}"></div>${l}</div>`).join('');
+}
+
+/* ═══════════════════════════
+   EXPENSES RENDER — FULL REBUILD
+═══════════════════════════ */
+
+/* ── Expense data per period ── */
+const EXP_DATA = {
+  jan: {
+    label: 'يناير 2026',
+    cols: ['الكريمية', 'تاجوراء', 'الموحد'],
+    total: [674564, 309312.44, 983876.44],
+    rows: [
+      { name:'301 - رواتب وأجور الإدارية وملحقاتها', vals:[126750, -37260, 89490] },
+      { name:'303 - الإضافي',                          vals:[612.5, 9941.54, 10554.04] },
+      { name:'305 - خصم مسموح به (عمولة مبيعات الجملة)', vals:[408710.21, 53884.46, 462594.67] },
+      { name:'306 - نقل ومناولة للمبيعات',             vals:[20832.45, 13949, 34781.45] },
+      { name:'310 - م. الصيانة',                       vals:[1616, 2453.5, 4069.5] },
+      { name:'315 - قرطاسية ومطبوعات',                 vals:[null, 165, 165] },
+      { name:'317 - وقود وزيوت',                       vals:[7064, 770, 7834] },
+      { name:'318 - مكافآت',                           vals:[18300, 2000, 20300] },
+      { name:'323 - إيجار مخزن الجبل الغربي',          vals:[1000, null, 1000] },
+      { name:'324 - دعاية وإعلان',                     vals:[1666, 2343, 4009] },
+      { name:'334 - نقل وتنقلات',                      vals:[250, null, 250] },
+      { name:'335 - فاقد وتالف',                       vals:[17735, null, 17735] },
+      { name:'337 - كروت ووقود موظف',                  vals:[2015, 945, 2960] },
+      { name:'343 - إعاشة',                            vals:[994.75, null, 994.75] },
+      { name:'346 - عمولة مبيعات القطاعي',             vals:[18777.55, 10970, 29747.55] },
+      { name:'347 - تخفيضات السنة',                    vals:[19552, null, 19552] },
+      { name:'351 - هدايا وعينات',                     vals:[8012, null, 8012] },
+      { name:'361 - بدل سكن الموظفين',                 vals:[1500, 1000, 2500] },
+      { name:'366 - تخفيض',                            vals:[null, 246450.94, 246450.94] },
+      { name:'372 - إيجار سكن مناديب / تاجوراء',       vals:[null, 1700, 1700] },
+      { name:'372 - إضافي للساعات العادية',             vals:[9181.54, null, 9181.54] },
+      { name:'375 - بدل سيارة',                        vals:[4295, null, 4295] },
+      { name:'380 - م. نقل القافلة البيضاء',            vals:[5700, null, 5700] },
+    ]
+  },
+  febmar: {
+    label: 'فبراير — مارس 2026',
+    cols: ['المبلغ (د.ل)'],
+    total: [1055961.7],
+    rows: [
+      { name:'م. فاقد وتالف',                          vals:[360307.91] },
+      { name:'الأجور والمرتبات الأساسية',               vals:[193011] },
+      { name:'م. تخفيضات',                             vals:[180622.82] },
+      { name:'م. الصيانة',                             vals:[59567] },
+      { name:'م. عمولة مبيعات القطاعي',                vals:[36175.79] },
+      { name:'م. بدل سيارة',                           vals:[35500] },
+      { name:'م. عمولة نقل لسائقين',                   vals:[31580.53] },
+      { name:'م. عمولة مبيعات الجملة',                 vals:[28038.79] },
+      { name:'مكافآت وحوافز ومنح',                     vals:[21300] },
+      { name:'م. متفرقة',                              vals:[14648] },
+      { name:'م. بدل إعاشة',                           vals:[13279] },
+      { name:'م. عمل إضافي ساعات عادية',               vals:[12784.13] },
+      { name:'م. بدل الهاتف والإنترنت',                vals:[9675] },
+      { name:'م. وقود ومحروقات',                       vals:[9247] },
+      { name:'م. عمولة مبيعات الإدارة',                vals:[9229.17] },
+      { name:'م. قرطاسية ومطبوعات',                    vals:[9212] },
+      { name:'م. إيجارات',                             vals:[8205] },
+      { name:'إكراميات وهدايا',                        vals:[5889] },
+      { name:'عمالة عارضة',                            vals:[4505] },
+      { name:'م. تذاكر طيران وإقامات وتأشيرات',        vals:[2495.88] },
+      { name:'م. تأمين سيارات',                        vals:[2150] },
+      { name:'م. عمولة مبيعات الأسواق',                vals:[1672.51] },
+      { name:'مصروفات حكومية',                         vals:[1650] },
+      { name:'م. زيت لسيارات',                         vals:[1440] },
+      { name:'م. عمل إضافي',                           vals:[1066.67] },
+      { name:'م. نظافة',                               vals:[899] },
+      { name:'م. مواد بناء',                           vals:[593.5] },
+      { name:'م. علاج',                                vals:[500] },
+      { name:'م. بدل طريق',                            vals:[310] },
+      { name:'م. المقهى والبوفيه',                     vals:[137] },
+      { name:'م. سيارة سامسونج',                       vals:[120] },
+      { name:'م. تعبئة وقود بالطريق',                  vals:[90] },
+      { name:'م. مواد صحية',                           vals:[60] },
+    ]
+  },
+  q1: {
+    label: 'الربع الأول الموحد (يناير — مارس)',
+    cols: ['يناير 2026', 'فبراير - مارس 2026', 'الربع الأول (الإجمالي)'],
+    total: [983876.44, 1055961.7, 2039838.14],
+    rows: [
+      { name:'301 - رواتب وأجور الإدارية وملحقاتها',   vals:[89490, null, 89490] },
+      { name:'الأجور والمرتبات الأساسية',               vals:[null, 193011, 193011] },
+      { name:'الإضافي / عمل إضافي ساعات عادية',         vals:[19735.58, 12784.13, 32519.71] },
+      { name:'خصم مسموح به / عمولة مبيعات الجملة',      vals:[462594.67, 28038.79, 490633.46] },
+      { name:'نقل ومناولة للمبيعات',                    vals:[34781.45, null, 34781.45] },
+      { name:'م. الصيانة',                             vals:[4069.5, 59567, 63636.5] },
+      { name:'م. قرطاسية ومطبوعات',                    vals:[165, 9212, 9377] },
+      { name:'م. وقود ومحروقات',                       vals:[7834, 9247, 17081] },
+      { name:'مكافآت وحوافز ومنح',                     vals:[20300, 21300, 41600] },
+      { name:'م. إيجارات',                             vals:[2700, 8205, 10905] },
+      { name:'دعاية وإعلان',                           vals:[4009, null, 4009] },
+      { name:'نقل وتنقلات / م. نقل القافلة',            vals:[5950, null, 5950] },
+      { name:'م. فاقد وتالف',                          vals:[17735, 360307.91, 378042.91] },
+      { name:'كروت ووقود موظف',                        vals:[2960, null, 2960] },
+      { name:'م. بدل إعاشة',                           vals:[994.75, 13279, 14273.75] },
+      { name:'م. عمولة مبيعات القطاعي',                vals:[29747.55, 36175.79, 65923.34] },
+      { name:'تخفيضات',                                vals:[266002.94, 180622.82, 446625.76] },
+      { name:'إكراميات وهدايا',                        vals:[8012, 5889, 13901] },
+      { name:'م. بدل سكن الموظفين',                    vals:[2500, null, 2500] },
+      { name:'م. بدل سيارة',                           vals:[4295, 35500, 39795] },
+      { name:'م. عمولة نقل لسائقين',                   vals:[null, 31580.53, 31580.53] },
+      { name:'م. متفرقة',                              vals:[null, 14648, 14648] },
+      { name:'م. بدل الهاتف والإنترنت',                vals:[null, 9675, 9675] },
+      { name:'م. عمولة مبيعات الإدارة',                vals:[null, 9229.17, 9229.17] },
+      { name:'عمالة عارضة',                            vals:[null, 4505, 4505] },
+      { name:'م. تذاكر طيران وإقامات وتأشيرات',        vals:[null, 2495.88, 2495.88] },
+      { name:'م. تأمين سيارات',                        vals:[null, 2150, 2150] },
+      { name:'م. عمولة مبيعات الأسواق',                vals:[null, 1672.51, 1672.51] },
+      { name:'مصروفات حكومية',                         vals:[null, 1650, 1650] },
+      { name:'م. زيت لسيارات',                         vals:[null, 1440, 1440] },
+      { name:'م. عمل إضافي',                           vals:[null, 1066.67, 1066.67] },
+      { name:'م. نظافة',                               vals:[null, 899, 899] },
+      { name:'م. مواد بناء',                           vals:[null, 593.5, 593.5] },
+      { name:'م. علاج',                                vals:[null, 500, 500] },
+      { name:'م. بدل طريق',                            vals:[null, 310, 310] },
+      { name:'م. المقهى والبوفيه',                     vals:[null, 137, 137] },
+      { name:'م. سيارة سامسونج',                       vals:[null, 120, 120] },
+      { name:'م. تعبئة وقود بالطريق',                  vals:[null, 90, 90] },
+      { name:'م. مواد صحية',                           vals:[null, 60, 60] },
+    ]
+  }
+};
+
+const EXP_COLORS = [
+  '#1E88E5','#00897B','#C62828','#F57F17','#7B1FA2',
+  '#2E7D32','#E65100','#37474F','#AD1457','#00695C',
+  '#1565C0','#558B2F','#6A1B9A','#FF6F00','#BF360C'
+];
+
+function getExpMainVal(row, sel) {
+  if(sel==='jan')    return row.vals[2]  ?? 0;
+  if(sel==='febmar') return row.vals[0]  ?? 0;
+  if(sel==='q1')     return row.vals[2]  ?? 0;
+  return 0;
+}
+
+function getExpTotal(sel) {
+  const d = EXP_DATA[sel];
+  return sel==='q1' ? d.total[2] : sel==='febmar' ? d.total[0] : d.total[2];
+}
+
+function sortRows(rows, sel, sortMode) {
+  const copy = [...rows];
+  if(sortMode==='desc') return copy.sort((a,b)=>getExpMainVal(b,sel)-getExpMainVal(a,sel));
+  if(sortMode==='asc')  return copy.sort((a,b)=>getExpMainVal(a,sel)-getExpMainVal(b,sel));
+  return copy.sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+}
+
+function renderExp() {
+  const sel  = document.getElementById('expSel').value;
+  const sort = document.getElementById('expSort').value;
+  const d    = EXP_DATA[sel];
+  const grand = getExpTotal(sel);
+  const rev  = sel==='jan' ? BL.jan.netSales : sel==='febmar' ? BL.febmar.netSales : BL_Q1.netSales;
+
+  // badge
+  document.getElementById('expPeriodBadge').textContent = d.label;
+  document.getElementById('expPeriodBadge').className = 'tag t-blue';
+
+  // KPIs
+  const sorted = sortRows(d.rows, sel, 'desc');
+  const top1 = sorted[0];
+  document.getElementById('expKPIs').innerHTML = `
+    <div class="kpi c-red">
+      <div class="kpi-ico">💸</div>
+      <div class="kpi-lbl">إجمالي المصاريف التشغيلية</div>
+      <div class="kpi-val">${fmtFull(grand)}</div>
+      <div class="kpi-sub">د.ل — ${d.label}</div>
+    </div>
+    <div class="kpi c-amber">
+      <div class="kpi-ico">📊</div>
+      <div class="kpi-lbl">نسبة المصاريف من المبيعات</div>
+      <div class="kpi-val">${rev?((grand/rev)*100).toFixed(1):0}%</div>
+      <div class="kpi-sub">من صافي المبيعات</div>
+    </div>
+    <div class="kpi c-blue">
+      <div class="kpi-ico">🏆</div>
+      <div class="kpi-lbl">أعلى بند مصروف</div>
+      <div class="kpi-val" style="font-size:13px;line-height:1.3">${top1?top1.name:'—'}</div>
+      <div class="kpi-sub">${top1?fmtFull(getExpMainVal(top1,sel))+' د.ل':'—'}</div>
+    </div>
+    <div class="kpi c-teal">
+      <div class="kpi-ico">🔢</div>
+      <div class="kpi-lbl">عدد بنود المصاريف</div>
+      <div class="kpi-val">${d.rows.length}</div>
+      <div class="kpi-sub">بند تشغيلي</div>
+    </div>
+  `;
+
+  renderExpPie(sel, sort, grand);
+  renderExpBarChart(sel, sort, grand);
+  renderExpTable(sel, sort, grand, d);
+}
+
+/* ── Donut Chart ── */
+function renderExpPie(sel, sort, grand) {
+  dChart('expPie');
+  const d = EXP_DATA[sel];
+  const sorted = sortRows(d.rows, sel, 'desc').slice(0, 10);
+  const labels = sorted.map(r=>r.name.replace(/^\s+/,''));
+  const vals   = sorted.map(r=>Math.max(0, getExpMainVal(r,sel)));
+  const ctx = document.getElementById('expPie').getContext('2d');
+  charts['expPie'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: vals, backgroundColor: EXP_COLORS.slice(0,10), borderWidth: 2, borderColor: '#fff', hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '58%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => c.label + ': ' + fmtFull(c.raw) + ' د.ل  (' + (grand?((c.raw/grand)*100).toFixed(1):0) + '%)' } }
+      }
+    }
+  });
+  document.getElementById('expPieLeg').innerHTML = labels.map((l,i)=>
+    `<div class="leg-item"><div class="leg-dot" style="background:${EXP_COLORS[i]}"></div>${l.length>18?l.substr(0,16)+'...':l}</div>`
+  ).join('');
+}
+
+/* ── Grouped Bar Chart (Jan vs FebMar) ── */
+function renderExpBarChart(sel, sort, grand) {
+  dChart('expBarChart');
+
+  // Build common keys for comparison
+  const janRows   = EXP_DATA.jan.rows;
+  const fmRows    = EXP_DATA.febmar.rows;
+  const q1Rows    = EXP_DATA.q1.rows;
+
+  let labels, janVals, fmVals;
+
+  if(sel==='q1') {
+    // use q1 rows sorted, show jan col vs febmar col
+    const sorted = sortRows(q1Rows, sel, 'desc').slice(0,12);
+    labels  = sorted.map(r=>r.name.replace(/^\s+/,''));
+    janVals = sorted.map(r=>(r.vals[0]??0));
+    fmVals  = sorted.map(r=>(r.vals[1]??0));
+  } else if(sel==='jan') {
+    const sorted = sortRows(janRows, sel, 'desc').slice(0,12);
+    labels  = sorted.map(r=>r.name.replace(/^\s+/,''));
+    janVals = sorted.map(r=>(r.vals[0]??0));  // كريمية
+    fmVals  = sorted.map(r=>(r.vals[1]??0));  // تاجوراء
+  } else {
+    const sorted = sortRows(fmRows, sel, 'desc').slice(0,12);
+    labels  = sorted.map(r=>r.name.replace(/^\s+/,''));
+    janVals = sorted.map(r=>(r.vals[0]??0));
+    fmVals  = [];
+  }
+
+  const ds = sel==='jan' ? [
+    { label:'الكريمية',      data:janVals, backgroundColor:'#E84E1B', borderRadius:4 },
+    { label:'تاجوراء',       data:fmVals,  backgroundColor:'#2c5de5', borderRadius:4 },
+  ] : sel==='q1' ? [
+    { label:'يناير',         data:janVals, backgroundColor:'#E84E1B', borderRadius:4 },
+    { label:'فبراير-مارس',  data:fmVals,  backgroundColor:'#2c5de5', borderRadius:4 },
+  ] : [
+    { label:'فبراير-مارس',  data:janVals, backgroundColor:'#C62828', borderRadius:4 },
   ];
-  state.rows.forEach(r=>{
-    rows.push([r.id, r.date, r.referenceNo, r.desc,
-      parseNum(r.rawDebit) || '',
-      parseNum(r.rawCredit) || '',
-      parseNum(r.rawBalance) || '']);
+
+  const ctx = document.getElementById('expBarChart').getContext('2d');
+  charts['expBarChart'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: ds },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => c.dataset.label+': '+fmtFull(c.raw)+' د.ل' } }
+      },
+      scales: {
+        x: { ticks: { font:{size:9,family:'Cairo'}, maxRotation:40, autoSkip:false } },
+        y: { ticks: { callback: v => fmtFull(v), font:{size:9} } }
+      }
+    }
   });
 
-  // Totals row
-  const totD = state.rows.reduce((s,r)=>s+parseNum(r.rawDebit),0);
-  const totC = state.rows.reduce((s,r)=>s+parseNum(r.rawCredit),0);
-  rows.push(['','','','المجموع', totD, totC, '']);
+  document.getElementById('expBarLeg').innerHTML = ds.map(s=>
+    `<div class="leg-item"><div class="leg-dot" style="background:${s.backgroundColor}"></div>${s.label}</div>`
+  ).join('');
+}
 
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!views'] = [{rightToLeft:true}];
-  ws['!cols'] = [{wch:5},{wch:14},{wch:18},{wch:50},{wch:14},{wch:14},{wch:18}];
-  // Bold header
-  const range = XLSX.utils.decode_range(ws['!ref']);
-  for(let c=range.s.c; c<=range.e.c; c++){
-    const addr = XLSX.utils.encode_cell({r:0, c});
-    if(ws[addr]) ws[addr].s = {font:{bold:true}};
-  }
+/* ── Detail Table ── */
+function renderExpTable(sel, sort, grand, d) {
+  // Build thead based on columns
+  const colHeaders = d.cols;
+  const isMultiCol = colHeaders.length > 1;
+
+  document.getElementById('expThead').innerHTML = `<tr>
+    <th style="width:${isMultiCol?'5%':'5%'};text-align:center">#</th>
+    <th style="text-align:right;width:${isMultiCol?'35%':'50%'}">بند المصروف</th>
+    ${colHeaders.map((h,i)=>`<th style="width:${isMultiCol?'16%':'22%'}">${h}</th>`).join('')}
+    <th style="width:12%">النسبة %</th>
+    <th style="width:${isMultiCol?'10%':'16%'}">شريط البيان</th>
+  </tr>`;
+
+  const sortedRows = sortRows(d.rows, sel, sort);
+  const maxVal = Math.max(...sortedRows.map(r=>Math.abs(getExpMainVal(r,sel))));
+
+  const rowsHtml = sortedRows.map((row, i) => {
+    const mainVal = getExpMainVal(row, sel);
+    const pct     = grand ? ((Math.abs(mainVal)/grand)*100).toFixed(1) : '0.0';
+    const barW    = maxVal ? (Math.abs(mainVal)/maxVal*100).toFixed(1) : 0;
+    const color   = EXP_COLORS[i % EXP_COLORS.length];
+    const isAlt   = i%2===1;
+
+    const numCells = colHeaders.length===1
+      ? `${tdN(row.vals[0])}`
+      : colHeaders.length===2
+        ? `${tdN(row.vals[0])}${tdN(row.vals[1])}`
+        : `${tdN(row.vals[0])}${tdN(row.vals[1])}${tdN(row.vals[2])}`;
+
+    return `<tr style="${isAlt?'background:var(--gray50)':''}">
+      <td style="text-align:center;color:var(--gray500);font-size:11px">${i+1}</td>
+      <td style="font-weight:500;font-size:12px;padding-right:16px">${row.name.replace(/^\s+/,'')}</td>
+      ${numCells}
+      <td style="text-align:center;font-size:11px;font-weight:700;color:${mainVal>0?'var(--red)':'var(--green)'}">${pct}%</td>
+      <td style="padding:6px 10px">
+        <div style="background:var(--gray100);border-radius:3px;height:14px;overflow:hidden">
+          <div style="height:100%;width:${barW}%;background:${color};border-radius:3px;transition:width .6s ease"></div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const totalCells = colHeaders.length===1
+    ? `<td class="num" style="text-align:center;direction:ltr;font-weight:800">${fmtFull(d.total[0])}</td>`
+    : colHeaders.length===2
+      ? `<td class="num" style="text-align:center;direction:ltr;font-weight:800">${fmtFull(d.total[0])}</td><td class="num" style="text-align:center;direction:ltr;font-weight:800">${fmtFull(d.total[1])}</td>`
+      : `<td class="num" style="text-align:center;direction:ltr;font-weight:800">${fmtFull(d.total[0])}</td><td class="num" style="text-align:center;direction:ltr;font-weight:800">${fmtFull(d.total[1])}</td><td class="num" style="text-align:center;direction:ltr;font-weight:800">${fmtFull(d.total[2])}</td>`;
+
+  document.getElementById('expBody').innerHTML = rowsHtml + `
+    <tr class="inv-tot">
+      <td></td>
+      <td style="text-align:right"><strong>✦ إجمالي المصاريف التشغيلية</strong></td>
+      ${totalCells}
+      <td style="text-align:center;font-weight:800">100%</td>
+      <td></td>
+    </tr>`;
+}
+
+
+
+/* ═══ EXPORTS ═══ */
+
+/* ── أدوات التنسيق المشتركة ── */
+const XS = {
+  fill: bg => ({patternType:'solid', fgColor:{rgb:bg}}),
+  font: (color='000000', bold=false, sz=10) => ({name:'Cairo', color:{rgb:color}, bold, sz}),
+  align: (h='right', wrapText=false) => ({horizontal:h, vertical:'center', readingOrder:2, wrapText}),
+  num:  '#,##0.00',
+  // ألوان الملف الأصلي
+  NAVY:'1F3864', BLUE:'2E75B6', LT_BLUE:'BDD7EE',
+  LT_ORANGE:'FCE4D6', LT_GREEN:'E2EFDA', PINK:'FFC7CE',
+  YELLOW:'FFF2CC', WHITE:'FFFFFF', BLACK:'000000',
+  BLUE_INP:'0070C0', RED_TXT:'9C0006', AMBER_TXT:'7B4300', GRAY:'CCCCCC',
+};
+
+function xsCell(val, bg, fc, bold, sz, hAlign, fmt){
+  return {
+    v: val===null||val===undefined?'':val,
+    t: typeof val==='number'?'n': typeof val==='string'?'s':'s',
+    s: {
+      fill: XS.fill(bg||XS.WHITE),
+      font: XS.font(fc||XS.BLACK, bold||false, sz||10),
+      alignment: XS.align(hAlign||'right'),
+      numFmt: fmt||'General',
+      border:{
+        top:{style:'thin',color:{rgb:'D0D0D0'}},
+        bottom:{style:'thin',color:{rgb:'D0D0D0'}},
+        left:{style:'thin',color:{rgb:'D0D0D0'}},
+        right:{style:'thin',color:{rgb:'D0D0D0'}},
+      }
+    }
+  };
+}
+
+function xsWS(data2d, cols){
+  const ws = XLSX.utils.aoa_to_sheet(data2d.map(r=>r.map(c=>typeof c==='object'&&c!==null&&c.v!==undefined?c.v:c)));
+  // تطبيق الـ styles
+  data2d.forEach((row,ri)=>{
+    row.forEach((cell,ci)=>{
+      if(typeof cell==='object'&&cell!==null&&cell.s){
+        const addr = XLSX.utils.encode_cell({r:ri,c:ci});
+        if(!ws[addr]) ws[addr]={t:'s',v:''};
+        ws[addr].s = cell.s;
+        if(cell.t) ws[addr].t = cell.t;
+      }
+    });
+  });
+  if(cols) ws['!cols'] = cols;
+  return ws;
+}
+
+function mergeCell(ws, rs, cs, re, ce){
+  if(!ws['!merges']) ws['!merges']=[];
+  ws['!merges'].push({s:{r:rs,c:cs},e:{r:re,c:ce}});
+}
+
+/* ─────────────────────────────────────────────
+   تصدير قائمة الدخل — 3 أوراق بتنسيق كامل
+───────────────────────────────────────────── */
+function exportBL(){
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'كشف الحساب');
-  const bankSafe = (state.bank || 'كشف').replace(/[^a-zA-Z0-9\u0600-\u06FF_-]/g,'_');
-  const date = new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb, `كشف_${bankSafe}_${date}.xlsx`);
-  showAlert('تم التصدير','تم حفظ الملف بنجاح.','success');
-}
+  const N=XS, F=xsCell;
 
-/* ---------- Autosave ---------- */
-let saveTimer;
-function autoSave(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(()=>{
-    STORE.set('lastSession',{
-      rows: state.rows, bank: state.bank,
-      initBal: parseFloat(document.getElementById('initialBalance').value)||0,
-      pageCount: state.pageCount, elapsedMs: state.elapsedMs,
-      ts: Date.now()
-    });
-    const d = new Date();
-    document.getElementById('lastSave').textContent = d.toLocaleTimeString('ar-LY',{hour:'2-digit',minute:'2-digit'});
-  }, 400);
-}
+  // ── ورقة يناير 2026 ──
+  function janSheet(){
+    const rows=[];
+    const hdr4=(v,bg,fc,bold,sz,h)=>[F(v,bg,fc,bold,sz,h),F('',bg,fc),F('',bg,fc),F('',bg,fc)];
+    const cols4=(a,b,c,d,bg,fc,bold,fmt)=>[F(a,bg,fc,bold,10,'right'),F(b,bg,fc,bold,10,'center',fmt),F(c,bg,fc,bold,10,'center',fmt),F(d,bg,fc,bold,10,'center',fmt)];
+    const sec=(lbl)=>hdr4(lbl,N.BLUE,N.WHITE,true,11,'right');
 
-/* ---------- Demo data ---------- */
-function loadDemo(){
-  state.bank = 'مصرف الجمهورية (بيانات تجريبية)';
-  state.pageCount = 1;
-  state.elapsedMs = 0;
-  const demo = [
-    {date:'01/03/2025', referenceNo:'TRX-10234', desc:'إيداع نقدي فرع طرابلس', debit:0, credit:50000, balance:50000},
-    {date:'03/03/2025', referenceNo:'TRX-10287', desc:'حوالة واردة من شركة الخليج', debit:0, credit:125750.500, balance:175750.500},
-    {date:'05/03/2025', referenceNo:'CHK-4521', desc:'شيك رقم 4521 لأمر المورد أحمد علي', debit:18500, credit:0, balance:157250.500},
-    {date:'08/03/2025', referenceNo:'POS-8832', desc:'دفعة POS — محطة وقود', debit:250.750, credit:0, balance:156999.750},
-    {date:'12/03/2025', referenceNo:'TRX-10912', desc:'رسوم خدمات مصرفية', debit:45, credit:0, balance:156954.750},
-    {date:'15/03/2025', referenceNo:'WIRE-2201', desc:'تحويل لحساب العميل رقم 4401', debit:35000, credit:0, balance:121954.750},
-    {date:'20/03/2025', referenceNo:'TRX-11156', desc:'إيداع مقابل فواتير مارس', debit:0, credit:82300.250, balance:204255},
-    {date:'25/03/2025', referenceNo:'FEE-0034', desc:'عمولة تحويل SWIFT', debit:125, credit:0, balance:204130},
-  ];
-  populateData(0, demo);
-}
+    rows.push(hdr4('قائمة الدخل الشاملة الموحدة — يناير 2026',N.NAVY,N.WHITE,true,15,'center'));
+    rows.push(hdr4('شركة ركان المتوسط  |  الكريمية & تاجوراء',N.NAVY,N.GRAY,false,11,'center'));
+    rows.push(hdr4('للشهر المنتهي في: يناير 2026  (بعد حذف المعاملات البينية)',N.BLUE,N.WHITE,false,10,'center'));
+    rows.push([F('البـيـان',N.NAVY,N.WHITE,true,10,'center'),F('الكريمية',N.NAVY,N.WHITE,true,10,'center'),F('تاجوراء',N.NAVY,N.WHITE,true,10,'center'),F('الموحد',N.NAVY,N.WHITE,true,10,'center')]);
+    rows.push(sec('أولاً: الإيرادات من المبيعات'));
+    rows.push(cols4('    مبيعات إجمالية',11413351.5,4006242.65,15419594.15,N.WHITE,N.BLUE_INP,false,N.num));
+    rows.push(cols4('    ( مردود المبيعات )',-1161397.5,-41697,-1203094.5,N.LT_ORANGE,N.BLUE_INP,false,N.num));
+    rows.push(cols4('صافي المبيعات قبل الحذف البيني',10251954,3964545.65,14216499.65,N.LT_BLUE,N.BLACK,true,N.num));
+    rows.push([F('◄ حذف: فاتورة بيع الكريمية لتاجوراء...',N.YELLOW,N.AMBER_TXT,false,9,'right'),F('',N.YELLOW,N.AMBER_TXT),F('',N.YELLOW,N.AMBER_TXT),F(-3354156.5,N.YELLOW,N.AMBER_TXT,true,10,'center',N.num)]);
+    rows.push(cols4('✦ صافي المبيعات الموحدة (بعد الحذف)',6897797.5,3964545.65,10862343.15,N.LT_GREEN,N.BLACK,true,N.num));
+    rows.push(sec('ثانياً: تكلفة البضاعة المباعة'));
+    rows.push(cols4('    بضاعة أول المدة',27335991.471,2623706.998,29959698.469,N.WHITE,N.BLUE_INP,false,N.num));
+    rows.push(cols4('    المشتريات',5800917.5,4899748.75,10700666.25,N.WHITE,N.BLUE_INP,false,N.num));
+    rows.push(cols4('    ( مردود مشتريات )',-34195,-930921,-965116,N.LT_ORANGE,N.BLUE_INP,false,N.num));
+    rows.push(cols4('صافي المشتريات',5766722.5,3968827.75,9735550.25,N.LT_BLUE,N.BLACK,true,N.num));
+    rows.push(cols4('البضاعة المتاحة للبيع',33102713.971,6592534.748,39695248.719,N.LT_BLUE,N.BLACK,true,N.num));
+    rows.push(cols4('    ( بضاعة آخر المدة )',-22264632.433,-2987605.464,-25252237.897,N.LT_ORANGE,N.BLUE_INP,false,N.num));
+    rows.push([F('◄ حذف: مشتريات تاجوراء البينية من الكريمية',N.YELLOW,N.AMBER_TXT,false,9,'right'),F('',N.YELLOW,N.AMBER_TXT),F('',N.YELLOW,N.AMBER_TXT),F(-3354156.5,N.YELLOW,N.AMBER_TXT,true,10,'center',N.num)]);
+    rows.push(cols4('✦ تكلفة البضاعة المباعة الموحدة',10838081.538,250772.784,11088854.322,N.LT_BLUE,N.BLACK,true,N.num));
+    rows.push(cols4('✦ مجمل الربح / (الخسارة)',-3940284.038,3713772.866,-226511.172,N.PINK,N.RED_TXT,true,N.num));
+    rows.push(sec('ثالثاً: المصاريف الإدارية والعمومية والبيعية'));
+    const opex=[
+      ['    301 - رواتب وأجور الإدارية وملحقاتها',126750,-37260,89490],
+      ['    303 - الإضافي',612.5,9941.54,10554.04],
+      ['    305 - خصم مسموح به (عمولة مبيعات الجملة)',408710.21,53884.46,462594.67],
+      ['    306 - نقل ومناولة للمبيعات',20832.45,13949,34781.45],
+      ['    310 - م. الصيانة',1616,2453.5,4069.5],
+      ['    315 - قرطاسية ومطبوعات ومستلزمات كمبيوتر',0,165,165],
+      ['    317 - وقود وزيوت',7064,770,7834],
+      ['    318 - مكافآت',18300,2000,20300],
+      ['    323 - إيجار مخزن الجبل الغربي',1000,0,1000],
+      ['    324 - دعاية وإعلان',1666,2343,4009],
+      ['    334 - نقل وتنقلات',250,0,250],
+      ['    335 - فاقد وتالف',17735,0,17735],
+      ['    337 - كروت ووقود موظف',2015,945,2960],
+      ['    343 - إعاشة',994.75,0,994.75],
+      ['    346 - عمولة مبيعات القطاعي',18777.55,10970,29747.55],
+      ['    347 - تخفيضات السنة',19552,0,19552],
+      ['    351 - هدايا وعينات',8012,0,8012],
+      ['    361 - بدل سكن الموظفين',1500,1000,2500],
+      ['    366 - تخفيض',0,246450.94,246450.94],
+      ['    372 - إيجار سكن مناديب / تاجوراء',0,1700,1700],
+      ['    372 - إضافي للساعات العادية',9181.54,0,9181.54],
+      ['    375 - بدل سيارة',4295,0,4295],
+      ['    380 - م. نقل القافلة البيضاء',5700,0,5700],
+    ];
+    opex.forEach(([l,b,c,d])=>rows.push(cols4(l,b,c,d,N.WHITE,N.BLUE_INP,false,N.num)));
+    rows.push(cols4('✦ إجمالي المصاريف التشغيلية',674564,309312.44,983876.44,N.LT_BLUE,N.BLACK,true,N.num));
+    rows.push(cols4('✦ الربح / (الخسارة) التشغيلية',-4614848.038,3404460.426,-1210387.612,N.PINK,N.RED_TXT,true,N.num));
+    rows.push(sec('رابعاً: الإيرادات الأخرى'));
+    rows.push(cols4('    52 - إيرادات أخرى',6946.5,3375,10321.5,N.WHITE,N.BLUE_INP,false,N.num));
+    rows.push(cols4('    53 - إيرادات بطاقة مصرفية',0,846,846,N.WHITE,N.BLUE_INP,false,N.num));
+    rows.push(cols4('✦ إجمالي الإيرادات الأخرى',6946.5,4221,11167.5,N.LT_BLUE,N.BLACK,true,N.num));
+    rows.push(cols4('✦ صافي الربح / (الخسارة) الشاملة الموحدة',-4607901.538,3408681.426,-1199220.112,N.PINK,N.RED_TXT,true,N.num));
+    rows.push(hdr4('',N.WHITE,N.WHITE,false,10,'center'));
+    rows.push(hdr4('ملاحظة: الخلايا الزرقاء قابلة للتعديل · جميع الإجماليات والنتائج تتحدث تلقائياً.',N.YELLOW,N.AMBER_TXT,false,8,'right'));
 
-/* ---------- Init: restore last session? ---------- */
-(function restore(){
-  const last = STORE.get('lastSession', null);
-  if(last && last.rows && last.rows.length && (Date.now()-last.ts) < 7*24*3600*1000){
-    // ask user via a subtle toast — here just log
-    console.log('يوجد جلسة محفوظة. سيتم تجاهلها. استخدم زر "كشف جديد" بعد التحميل إذا أردت.');
+    const ws = xsWS(rows,[{wch:58},{wch:18},{wch:18},{wch:20}]);
+    // دمج رأس الأعمدة الأولى
+    [0,1,2,28].forEach(ri=>mergeCell(ws,ri,0,ri,3));
+    ws['!freeze'] = {xSplit:0,ySplit:4};
+    return ws;
   }
-})();
-</script>
 
+  // ── ورقة فبراير-مارس ──
+  function fmSheet(){
+    const rows=[];
+    const h2=(v,bg,fc,bold,sz,h)=>[F(v,bg,fc,bold,sz||10,h||'right'),F('',bg,fc)];
+    const r2=(l,v,bg,fc,bold,fmt)=>[F(l,bg||N.WHITE,fc||N.BLACK,bold,10,'right'),F(v,bg||N.WHITE,fc||N.BLUE_INP,bold,10,'center',fmt||N.num)];
+    const sec=(lbl)=>h2(lbl,N.BLUE,N.WHITE,true,11,'right');
+
+    rows.push(h2('قائمة الدخل الشاملة',N.NAVY,N.WHITE,true,15,'center'));
+    rows.push(h2('شركة ركان المتوسط',N.NAVY,N.GRAY,false,11,'center'));
+    rows.push(h2('للفترة من 1 فبراير 2026 حتى 31 مارس 2026',N.BLUE,N.WHITE,false,10,'center'));
+    rows.push([F('البـيـان',N.NAVY,N.WHITE,true,10,'center'),F('المبلغ (د.ل)',N.NAVY,N.WHITE,true,10,'center')]);
+    rows.push(sec('أولاً: الإيرادات'));
+    rows.push(r2('    المبيعات من النشاط',11763522.87));
+    rows.push(r2('    ( مردودات المبيعات )',-1097658.38,N.LT_ORANGE));
+    rows.push(r2('    ( خصم مسموح به )',-623841,N.LT_ORANGE));
+    rows.push(r2('✦ صافي المبيعات',10042023.49,N.LT_GREEN,N.BLACK,true));
+    rows.push(sec('ثانياً: تكلفة البضاعة المباعة'));
+    rows.push(r2('    بضاعة أول المدة',5964614.25));
+    rows.push(r2('    المشتريات',10210836));
+    rows.push(r2('    ( مردودات المشتريات )',-2272703,N.LT_ORANGE));
+    rows.push(r2('البضاعة المتاحة للبيع',13902747.25,N.LT_BLUE,N.BLACK,true));
+    rows.push(r2('    ( بضاعة آخر المدة )',-3518283,N.LT_ORANGE));
+    rows.push(r2('✦ تكلفة البضاعة المباعة',10384464.25,N.LT_BLUE,N.BLACK,true));
+    rows.push(r2('✦ مجمل الربح / (الخسارة)',-342440.76,N.PINK,N.RED_TXT,true));
+    rows.push(sec('ثالثاً: المصاريف التشغيلية (فبراير - مارس)'));
+    const opfm=[
+      ['    م. فاقد وتالف',360307.91],['    الأجور والمرتبات الأساسية',193011],
+      ['    م. تخفيضات',180622.82],['    م. الصيانة',59567],
+      ['    م. عمولة مبيعات القطاعي',36175.79],['    م. بدل سيارة',35500],
+      ['    م. عمولة نقل لسائقين',31580.53],['    م. عمولة مبيعات الجملة',28038.79],
+      ['    مكافآت وحوافز ومنح',21300],['    م. متفرقة',14648],
+      ['    م. بدل إعاشة',13279],['    م. عمل إضافي ساعات عادية',12784.13],
+      ['    م. بدل الهاتف والإنترنت',9675],['    م. وقود ومحروقات',9247],
+      ['    م. عمولة مبيعات الإدارة',9229.17],['    م. قرطاسية ومطبوعات',9212],
+      ['    م. إيجارات',8205],['    إكراميات وهدايا',5889],
+      ['    عمالة عارضة',4505],['    م. تذاكر طيران وإقامات وتأشيرات',2495.88],
+      ['    م. تأمين سيارات',2150],['    م. عمولة مبيعات الأسواق',1672.51],
+      ['    مصروفات حكومية',1650],['    م. زيت لسيارات',1440],
+      ['    م. عمل إضافي',1066.67],['    م. نظافة',899],
+      ['    م. مواد بناء',593.5],['    م. علاج',500],
+      ['    م. بدل طريق',310],['    م. المقهى والبوفيه',137],
+      ['    م. سيارة سامسونج',120],['    م. تعبئة وقود بالطريق',90],['    م. مواد صحية',60],
+    ];
+    opfm.forEach(([l,v])=>rows.push(r2(l,v)));
+    rows.push(r2('✦ إجمالي المصاريف التشغيلية',1055961.7,N.LT_BLUE,N.BLACK,true));
+    rows.push(r2('✦ صافي الربح / (الخسارة) التشغيلية',-1398402.46,N.PINK,N.RED_TXT,true));
+    rows.push(sec('رابعاً: الإيرادات الأخرى'));
+    rows.push(r2('    إيرادات أخرى',195));
+    rows.push(r2('    إيرادات بطاطا',553));
+    rows.push(r2('    إيرادات خصم الغياب',7806.66));
+    rows.push(r2('✦ إجمالي الإيرادات الأخرى',8554.66,N.LT_BLUE,N.BLACK,true));
+    rows.push(r2('✦ صافي الربح / (الخسارة) الشاملة',-1389847.8,N.PINK,N.RED_TXT,true));
+    rows.push(h2('',N.WHITE,N.WHITE));
+    rows.push(h2('ملاحظة: الخلايا الزرقاء قابلة للتعديل · جميع الإجماليات تتحدث تلقائياً.',N.YELLOW,N.AMBER_TXT,false,8,'right'));
+
+    const ws = xsWS(rows,[{wch:54},{wch:22}]);
+    const mergeRows=[0,1,2,rows.length-2,rows.length-1];
+    mergeRows.forEach(ri=>{ if(ri<rows.length) mergeCell(ws,ri,0,ri,1); });
+    // دمج كل صفوف الأقسام
+    rows.forEach((row,ri)=>{ if(row.length===2&&row[1]&&row[1].v===''&&row[0].s&&row[0].s.fill&&row[0].s.fill.fgColor&&(row[0].s.fill.fgColor.rgb===N.BLUE||row[0].s.fill.fgColor.rgb===N.NAVY)) mergeCell(ws,ri,0,ri,1); });
+    return ws;
+  }
+
+  // ── ورقة الربع الأول ──
+  function q1Sheet(){
+    const rows=[];
+    const h4=(v,bg,fc,bold,sz,h)=>[F(v,bg,fc,bold,sz||10,h||'right'),F('',bg,fc),F('',bg,fc),F('',bg,fc)];
+    const c4=(a,b,c,d,bg,fc,bold,fmt)=>[F(a,bg||N.WHITE,fc||N.BLACK,bold,10,'right'),F(b,bg||N.WHITE,fc||N.BLUE_INP,bold,10,'center',fmt||N.num),F(c,bg||N.WHITE,fc||N.BLUE_INP,bold,10,'center',fmt||N.num),F(d,bg||N.WHITE,fc||N.BLACK,bold,10,'center',fmt||N.num)];
+    const sec=(lbl)=>h4(lbl,N.BLUE,N.WHITE,true,11,'right');
+
+    rows.push(h4('قائمة الدخل الشاملة الموحدة — الربع الأول',N.NAVY,N.WHITE,true,15,'center'));
+    rows.push(h4('شركة ركان المتوسط',N.NAVY,N.GRAY,false,11,'center'));
+    rows.push(h4('للفترة من 1 يناير 2026 حتى 31 مارس 2026',N.BLUE,N.WHITE,false,10,'center'));
+    rows.push([F('البـيـان',N.NAVY,N.WHITE,true,10,'center'),F('يناير 2026',N.NAVY,N.WHITE,true,10,'center'),F('فبراير - مارس 2026',N.NAVY,N.WHITE,true,10,'center'),F('الربع الأول (الإجمالي)',N.NAVY,N.WHITE,true,10,'center')]);
+    rows.push(sec('أولاً: صافي المبيعات (بعد الحذف البيني)'));
+    rows.push(c4('✦ صافي المبيعات الموحدة',10862343.15,10042023.49,20904366.64,N.LT_GREEN,N.BLACK,true));
+    rows.push(h4('* يناير: مرتبط بخلية D10 في ورقة يناير · فبراير-مارس: مرتبط B9',N.YELLOW,N.AMBER_TXT,false,8,'right'));
+    rows.push(sec('ثانياً: تكلفة البضاعة المباعة'));
+    rows.push(c4('    تكلفة البضاعة المباعة الموحدة',11088854.322,10384464.25,21473318.572,N.WHITE,N.BLUE_INP));
+    rows.push(c4('✦ مجمل الربح / (الخسارة)',-226511.172,-342440.76,-568951.932,N.PINK,N.RED_TXT,true));
+    rows.push(sec('ثالثاً: المصاريف التشغيلية'));
+    const oq=[
+      ['    301 - رواتب وأجور الإدارية وملحقاتها',89490,0,89490],
+      ['    الأجور والمرتبات الأساسية',0,193011,193011],
+      ['    الإضافي / عمل إضافي ساعات عادية',19735.58,12784.13,32519.71],
+      ['    خصم مسموح به / عمولة مبيعات الجملة',462594.67,28038.79,490633.46],
+      ['    نقل ومناولة للمبيعات',34781.45,0,34781.45],
+      ['    م. الصيانة',4069.5,59567,63636.5],
+      ['    م. قرطاسية ومطبوعات',165,9212,9377],
+      ['    م. وقود ومحروقات',7834,9247,17081],
+      ['    مكافآت وحوافز ومنح',20300,21300,41600],
+      ['    م. إيجارات',2700,8205,10905],
+      ['    دعاية وإعلان',4009,0,4009],
+      ['    نقل وتنقلات / م. نقل القافلة',5950,0,5950],
+      ['    م. فاقد وتالف',17735,360307.91,378042.91],
+      ['    كروت ووقود موظف',2960,0,2960],
+      ['    م. بدل إعاشة',994.75,13279,14273.75],
+      ['    م. عمولة مبيعات القطاعي',29747.55,36175.79,65923.34],
+      ['    تخفيضات',266002.94,180622.82,446625.76],
+      ['    إكراميات وهدايا',8012,5889,13901],
+      ['    م. بدل سكن الموظفين',2500,0,2500],
+      ['    م. بدل سيارة',4295,35500,39795],
+      ['    م. عمولة نقل لسائقين',0,31580.53,31580.53],
+      ['    م. متفرقة',0,14648,14648],
+      ['    م. بدل الهاتف والإنترنت',0,9675,9675],
+      ['    م. عمولة مبيعات الإدارة',0,9229.17,9229.17],
+      ['    عمالة عارضة',0,4505,4505],
+      ['    م. تذاكر طيران وإقامات وتأشيرات',0,2495.88,2495.88],
+      ['    م. تأمين سيارات',0,2150,2150],
+      ['    م. عمولة مبيعات الأسواق',0,1672.51,1672.51],
+      ['    مصروفات حكومية',0,1650,1650],
+      ['    م. زيت لسيارات',0,1440,1440],
+      ['    م. عمل إضافي',0,1066.67,1066.67],
+      ['    م. نظافة',0,899,899],
+      ['    م. مواد بناء',0,593.5,593.5],
+      ['    م. علاج',0,500,500],
+      ['    م. بدل طريق',0,310,310],
+      ['    م. المقهى والبوفيه',0,137,137],
+      ['    م. سيارة سامسونج',0,120,120],
+      ['    م. تعبئة وقود بالطريق',0,90,90],
+      ['    م. مواد صحية',0,60,60],
+    ];
+    oq.forEach(([l,b,c,d])=>rows.push(c4(l,b,c,d)));
+    rows.push(c4('✦ إجمالي المصاريف التشغيلية',983876.44,1055961.7,2039838.14,N.LT_BLUE,N.BLACK,true));
+    rows.push(c4('✦ الربح / (الخسارة) التشغيلية',-1210387.612,-1398402.46,-2608790.072,N.PINK,N.RED_TXT,true));
+    rows.push(sec('رابعاً: الإيرادات الأخرى'));
+    rows.push(c4('    إيرادات أخرى وبطاقات مصرفية — يناير',11167.5,0,11167.5));
+    rows.push(c4('    إيرادات أخرى — فبراير/مارس',0,195,195));
+    rows.push(c4('    إيرادات بطاطا',0,553,553));
+    rows.push(c4('    إيرادات خصم الغياب',0,7806.66,7806.66));
+    rows.push(c4('✦ إجمالي الإيرادات الأخرى',11167.5,8554.66,19722.16,N.LT_BLUE,N.BLACK,true));
+    rows.push(c4('✦ صافي الربح / (الخسارة) الشاملة الموحدة — الربع الأول',-1199220.112,-1389847.8,-2589067.912,N.PINK,N.RED_TXT,true));
+    rows.push(h4('',N.WHITE,N.WHITE));
+    rows.push(h4('ملاحظة: جميع الخلايا مرتبطة بمعادلات بورقتَي يناير وفبراير-مارس.',N.YELLOW,N.AMBER_TXT,false,8,'right'));
+
+    const ws = xsWS(rows,[{wch:52},{wch:20},{wch:22},{wch:24}]);
+    [0,1,2,rows.length-2,rows.length-1].forEach(ri=>{ if(ri<rows.length) mergeCell(ws,ri,0,ri,3); });
+    return ws;
+  }
+
+  XLSX.utils.book_append_sheet(wb, janSheet(), 'يناير 2026');
+  XLSX.utils.book_append_sheet(wb, fmSheet(), 'فبراير - مارس 2026');
+  XLSX.utils.book_append_sheet(wb, q1Sheet(), 'الربع الاول الموحد');
+  XLSX.writeFile(wb, 'قائمة_الدخل_الربع_الاول.xlsx', {cellStyles:true, bookSST:false, type:'binary'});
+}
+
+/* ── تصدير بضاعة آخر المدة (فبراير + مارس) ── */
+function exportInv(){
+  const N=XS, F=xsCell;
+
+  function invSheet(data, title){
+    const rows=[];
+    // رأس الأعمدة
+    rows.push([
+      F('#',   N.NAVY,N.WHITE,true,10,'center'),
+      F('المادة',N.NAVY,N.WHITE,true,10,'center'),
+      F('الكمية',N.NAVY,N.WHITE,true,10,'center'),
+      F('القيمة',N.NAVY,N.WHITE,true,10,'center'),
+    ]);
+    data.forEach((d,i)=>{
+      const bg = i%2===0 ? N.WHITE : 'EBF3FB';
+      const qty=d[1], val=d[2];
+      const fcQ = qty<0?N.RED_TXT:N.BLACK;
+      const fcV = val<0?N.RED_TXT:N.BLACK;
+      rows.push([
+        F(i+1,  bg,N.BLACK,false,10,'center'),
+        F(d[0], bg,N.BLACK,false,10,'right'),
+        F(qty,  bg,fcQ,false,10,'center','#,##0'),
+        F(val,  bg,fcV,false,10,'center',N.num),
+      ]);
+    });
+    const totR = data.length+1;
+    rows.push([
+      F('',N.LT_BLUE,N.BLACK,true,10,'center'),
+      F('الإجمالي',N.LT_BLUE,N.BLACK,true,10,'right'),
+      F(data.reduce((s,d)=>s+d[1],0), N.LT_BLUE,N.BLACK,true,10,'center','#,##0'),
+      F(data.reduce((s,d)=>s+d[2],0), N.LT_BLUE,N.BLACK,true,10,'center',N.num),
+    ]);
+    return xsWS(rows,[{wch:6},{wch:50},{wch:14},{wch:16}]);
+  }
+
+  const FEB_DATA=[
+    ['بدانات',1563,0],['الندى بتر صودا بلاستيك 1 لتر*6',3869,69642],
+    ['فونتانا عصير عنب بلاستيك 1 لتر*6',5930,47440],['الندى عصير عنب بلاستيك 330 مل*12',9692,87228],
+    ['الندى بتر صودا توت ازرق زجاج 175 مل*18',66,2508],['الندى بتر صودا دايت زجاج 175 مل*18',4422,44220],
+    ['الندى بتر صودا زجاج 100 مل*18',4154,132928],['الندى بتر صودا زجاج 175 مل*18',12170,462460],
+    ['الندى بتر صودا زجاج 250 مل*18',1753,17530],['الندى بتر صودا زنجبيل زجاج 175 مل*18',5,190],
+    ['الندى بتر صودا كرز زجاج 175 مل*18',2222,84436],['الندى بتر صودا كيني زجاج 175 مل*18',1239,47082],
+    ['الندى بتر صودا ليمون زجاج 175 مل*18',1270,48260],['الندى بتر صودا موخيتو زجاج 175 مل*18',119,4522],
+    ['الندى عصير برتقال زجاج 250 مل*18',10536,158040],['الندى عصير رمان زجاج 250 مل*18',4087,224785],
+    ['الندى عصير عنب زجاج 250 مل*18',2218,130862],['الندى عصير ليمون وزنجبيل زجاج 250 مل*18',14434,187642],
+    ['الندى مشروب شعير أناناس زجاج 330 مل*18',1747,99579],['الندى مشروب شعير تفاح زجاج 330 مل*18',2091,119187],
+    ['الندى مشروب شعير رمان زجاج 330 مل*18',1274,72618],['الندى مشروب شعير عنب زجاج 330 مل*18',17,969],
+    ['الندى مشروب شعير فراولة زجاج 330 مل*18',101,5757],['الندى مشروب طاقة زجاج 250 مل*18',1051,51499],
+    ['الندى مشروب غازي لوز زجاج 250 مل*18',8544,384480],['الندى مياه غازية زجاج 330 مل *18',2644,118980],
+    ['الندى مياه معدنية زجاج 330 مل *18',6023,271035],['بيانكي مشروب طاقة أناناس زجاج 275 مل*18',2162,172960],
+    ['بيانكي مشروب طاقة علكة زجاج 275 مل*18',1850,148000],['بيانكي مشروب طاقة كشمش أسود 275 مل*18',6955,556400],
+    ['بيانكي مشروب طاقة مارشميلو زجاج 275 مل*18',3760,300800],['بيانكي مشروب طاقة مانجو زجاج 275 مل*18',1912,152960],
+    ['بيانكي مشروب غازي  موخيتو فراولة 275 مل*18',18,1062],['بيانكي مشروب غازي استوائية زرقاء 275 مل*18',276,16284],
+    ['بيانكي مشروب غازي بيناكولادا 275 مل*18',16,944],['بيانكي مشروب غازي تفاح أخضر 275 مل*18',643,37937],
+    ['بيانكي مشروب غازي توت وكرز 275 مل*18',2889,170451],['بيانكي مشروب غازي ليمون ونعناع 275 مل*18',255,15045],
+  ];
+  const MAR_DATA=[
+    ['بدانات',35,0],['الندى بتر صودا بلاستيك 1 لتر*6',-2846,-51228],
+    ['الندى بتر صودا دايت بلاستيك 1 لتر*6',693,12474],['فونتانا عصير عنب بلاستيك 1 لتر*6',-4945,-39560],
+    ['الندى عصير عنب بلاستيك 330 مل*12',-6849,-61641],['الندى بتر صودا توت ازرق زجاج 175 مل*18',3893,147934],
+    ['الندى بتر صودا دايت زجاج 175 مل*18',-1763,-17630],['الندى بتر صودا زجاج 100 مل*18',-707,-22624],
+    ['الندى بتر صودا زجاج 175 مل*18',-9518,-361684],['الندى بتر صودا زجاج 250 مل*18',9532,95320],
+    ['الندى بتر صودا زجاج أحمر 250 مل*18',100,3600],['الندى بتر صودا زنجبيل زجاج 175 مل*18',-5,-190],
+    ['الندى بتر صودا كرز زجاج 175 مل*18',1734,65892],['الندى بتر صودا كيني زجاج 175 مل*18',-1239,-47082],
+    ['الندى بتر صودا ليمون زجاج 175 مل*18',-1270,-48260],['الندى بتر صودا موخيتو زجاج 175 مل*18',3841,145958],
+    ['الندى عصير برتقال زجاج 250 مل*18',-6125,-91875],['الندى عصير رمان زجاج 250 مل*18',-1179,-64845],
+    ['الندى عصير عنب زجاج 250 مل*18',-1,-59],['الندى عصير ليمون وزنجبيل زجاج 250 مل*18',-10235,-133055],
+    ['الندى مشروب شعير أناناس زجاج 330 مل*18',-1622,-92454],['الندى مشروب شعير تفاح زجاج 330 مل*18',-889,-50673],
+    ['الندى مشروب شعير رمان زجاج 330 مل*18',-121,-6897],['الندى مشروب شعير عنب زجاج 330 مل*18',453,25821],
+    ['الندى مشروب شعير فراولة زجاج 330 مل*18',-51,-2907],['الندى مشروب طاقة زجاج 250 مل*18',230,11270],
+    ['الندى مشروب غازي لوز زجاج 250 مل*18',622,27990],['الندى مياه غازية زجاج 330 مل *18',-2094,-94230],
+    ['الندى مياه معدنية زجاج 330 مل *18',-33,-1485],['بيانكي مشروب طاقة أناناس زجاج 275 مل*18',-165,-13200],
+    ['بيانكي مشروب طاقة علكة زجاج 275 مل*18',-169,-13520],['بيانكي مشروب طاقة كشمش أسود 275 مل*18',-914,-73120],
+    ['بيانكي مشروب طاقة مارشميلو زجاج 275 مل*18',-204,-16320],['بيانكي مشروب طاقة مانجو زجاج 275 مل*18',-187,-14960],
+    ['بيانكي مشروب غازي  موخيتو فراولة 275 مل*18',-14,-826],['بيانكي مشروب غازي استوائية زرقاء 275 مل*18',-252,-14868],
+    ['بيانكي مشروب غازي بيناكولادا 275 مل*18',-8,-472],['بيانكي مشروب غازي تفاح أخضر 275 مل*18',-605,-35695],
+    ['بيانكي مشروب غازي توت وكرز 275 مل*18',-1420,-83780],['بيانكي مشروب غازي ليمون ونعناع 275 مل*18',-162,-9558],
+  ];
+
+  const wbFeb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wbFeb, invSheet(FEB_DATA,'فبراير'), 'Sheet1');
+  XLSX.writeFile(wbFeb,'بضاعة_اخر_المدة_شهر_فبراير.xlsx',{cellStyles:true,type:'binary'});
+
+  const wbMar=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wbMar, invSheet(MAR_DATA,'مارس'), 'Sheet1');
+  XLSX.writeFile(wbMar,'بضاعة_اخر_المدة_شهر_مارس.xlsx',{cellStyles:true,type:'binary'});
+}
+
+function exportExp(){
+  const sel  = document.getElementById('expSel').value;
+  const sort = document.getElementById('expSort').value;
+  const d    = EXP_DATA[sel];
+  const grand = getExpTotal(sel);
+  const sortedRows = sortRows(d.rows, sel, sort);
+  const N=XS, F=xsCell;
+
+  const rows=[];
+  // رأس
+  const hdrCols = ['#','بند المصروف',...d.cols,'النسبة %'];
+  rows.push(hdrCols.map(h=>F(h,N.NAVY,N.WHITE,true,10,'center')));
+
+  sortedRows.forEach((r,i)=>{
+    const mainVal=getExpMainVal(r,sel);
+    const pct=grand?((Math.abs(mainVal)/grand)*100).toFixed(1)+'%':'0%';
+    const bg=i%2===0?N.WHITE:'EBF3FB';
+    rows.push([
+      F(i+1,bg,N.BLACK,false,10,'center'),
+      F(r.name.trim(),bg,N.BLACK,false,10,'right'),
+      ...r.vals.map(v=>F(v??0,bg,v&&v>0?N.BLACK:N.RED_TXT,false,10,'center',N.num)),
+      F(pct,bg,N.BLUE,false,10,'center'),
+    ]);
+  });
+  rows.push([
+    F('',N.LT_BLUE,N.BLACK,true),
+    F('✦ إجمالي المصاريف التشغيلية',N.LT_BLUE,N.BLACK,true,10,'right'),
+    ...d.total.map(t=>F(t,N.LT_BLUE,N.BLACK,true,10,'center',N.num)),
+    F('100%',N.LT_BLUE,N.BLACK,true,10,'center'),
+  ]);
+
+  const wch=[5,42,...d.cols.map(()=>18),12];
+  const wb=XLSX.utils.book_new();
+  const ws=xsWS(rows,wch.map(w=>({wch:w})));
+  const shName=sel==='jan'?'يناير':sel==='febmar'?'فبراير-مارس':'الربع الأول';
+  XLSX.utils.book_append_sheet(wb,ws,shName);
+  XLSX.writeFile(wb,`تحليل_المصاريف_${shName}_ركان_المتوسط_2026.xlsx`,{cellStyles:true,type:'binary'});
+}
+
+/* ═══ FILE UPLOAD ═══ */
+document.getElementById('fileIn').addEventListener('change',function(e){
+  const msg=document.getElementById('statusMsg');
+  msg.style.display='block';
+  msg.textContent='⟳ جاري قراءة الملفات...';
+  let loaded=0;
+  Array.from(e.target.files).forEach(f=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      loaded++;
+      if(loaded===e.target.files.length){
+        msg.textContent=`✅ تم تحميل ${loaded} ملف — البيانات محدّثة`;
+        renderBL();renderInv();renderExp();
+      }
+    };
+    r.readAsBinaryString(f);
+  });
+});
+
+/* ═══ INIT ═══ */
+renderBL();
+renderInv();
+renderExp();
+</script>
 </body>
 </html>
